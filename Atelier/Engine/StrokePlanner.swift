@@ -24,7 +24,7 @@ struct GPUStamp {
 }
 
 enum StrokePlanner {
-    static func stamps(for stroke: PaintStroke, finished: Bool = true) -> [GPUStamp] {
+    static func stamps(for stroke: PaintStroke, finished: Bool = true) throws -> [GPUStamp] {
         guard !stroke.samples.isEmpty else { return [] }
         let brush = stroke.brush
         func p(_ key: String, _ fallback: Double = 0) -> Float {
@@ -126,6 +126,7 @@ enum StrokePlanner {
             nextDistance += max(0.15, radius * 2 * max(0.01, p("spacing", 0.08)) * jitter * (1 + p("speedSpacing") * speed))
             if samples.count == 1 { break }
         }
+        guard nextDistance > total || samples.count == 1 else { throw DocumentError.strokeBudget }
         return stamps
     }
 

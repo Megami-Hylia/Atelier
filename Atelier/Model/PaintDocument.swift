@@ -82,7 +82,7 @@ struct DocumentContents: Codable, Equatable {
 }
 
 enum DocumentError: LocalizedError {
-    case unsupportedVersion, invalidData, lockedLayer, memoryBudget, tooLarge
+    case unsupportedVersion, invalidData, lockedLayer, memoryBudget, tooLarge, strokeBudget
     var errorDescription: String? {
         switch self {
         case .unsupportedVersion: return "Versione del documento non supportata."
@@ -90,6 +90,7 @@ enum DocumentError: LocalizedError {
         case .lockedLayer: return "Il livello selezionato è bloccato."
         case .memoryBudget: return "Memoria grafica insufficiente. Riduci le dimensioni del canvas."
         case .tooLarge: return "Il file supera il limite di sicurezza di 128 MB."
+        case .strokeBudget: return "Il tratto supera il budget di rendering. Annullalo o riduci dimensione, conteggio o densità delle impronte."
         }
     }
 }

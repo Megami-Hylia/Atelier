@@ -54,15 +54,16 @@ private struct TileInfo {
     private func allocate(width: Int, height: Int) throws {
         guard width > 0, height > 0, width <= 4096, height <= 4096,
               width * height * 8 * 4 <= Self.workingMemoryLimit else { throw DocumentError.memoryBudget }
-        if textures.first?.width == width && textures.first?.height == height { return }
-        textures.removeAll()
+        if textures.count == 4, textures.first?.width == width && textures.first?.height == height { return }
+        var allocated: [MTLTexture] = []
         let descriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: .rgba16Float, width: width, height: height, mipmapped: false)
         descriptor.usage = [.shaderRead, .shaderWrite, .renderTarget]
         descriptor.storageMode = .shared
         for _ in 0..<4 {
             guard let texture = device.makeTexture(descriptor: descriptor) else { throw DocumentError.memoryBudget }
-            textures.append(texture)
+            allocated.append(texture)
         }
+        textures = allocated
     }
 
     private func dispatch(_ encoder: MTLComputeCommandEncoder, pipeline: MTLComputePipelineState, width: Int, height: Int) {
@@ -100,11 +101,12 @@ private struct TileInfo {
     // The CPU bins stamps into 256-pixel tiles; pixels remain in global canvas coordinates.
     // No texture coordinate restarts at tile borders, including pickup and grain.
     private func encode(_ stroke: PaintStroke, finished: Bool, source: MTLTexture, target: MTLTexture, command: MTLCommandBuffer) throws {
-        let stamps = StrokePlanner.stamps(for: stroke, finished: finished)
+        let stamps = try StrokePlanner.stamps(for: stroke, finished: finished)
         lastStampCount += stamps.count
         guard !stamps.isEmpty else { return }
         let tileSize = 256, columns = (source.width + tileSize - 1) / tileSize
         var bins: [Int: [GPUStamp]] = [:]
+        var entryCount = 0
         for stamp in stamps {
             let extent = stamp.geometry.z * 1.5
             let x0 = max(0, Int(floor((stamp.geometry.x - extent) / Float(tileSize))))
@@ -112,6 +114,8 @@ private struct TileInfo {
             let x1 = min(columns - 1, Int(floor((stamp.geometry.x + extent) / Float(tileSize))))
             let y1 = min((source.height - 1) / tileSize, Int(floor((stamp.geometry.y + extent) / Float(tileSize))))
             guard x1 >= x0, y1 >= y0 else { continue }
+            entryCount += (x1 - x0 + 1) * (y1 - y0 + 1)
+            guard entryCount <= 262_144 else { throw DocumentError.strokeBudget }
             for y in y0...y1 { for x in x0...x1 { bins[y * columns + x, default: []].append(stamp) } }
         }
         let shape = try asset(stroke.brush, shape: true), grain = try asset(stroke.brush, shape: false)

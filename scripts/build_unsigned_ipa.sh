@@ -44,7 +44,9 @@ expected = {'CODE_SIGNING_ALLOWED':'NO', 'CODE_SIGNING_REQUIRED':'NO',
 for target in targets:
     settings = target['buildSettings']
     for key, value in expected.items():
-        assert settings.get(key) == value, (target['target'], key, settings.get(key))
+        # Xcode omits explicitly empty settings from its JSON representation.
+        actual = settings.get(key, '' if value == '' else None)
+        assert actual == value, (target['target'], key, actual)
     assert settings.get('ARCHS') == 'arm64', settings.get('ARCHS')
 PY
 xcodebuild "${BUILD_ARGS[@]}" build
