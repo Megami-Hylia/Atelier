@@ -70,19 +70,28 @@ struct AtelierRoot: View {
             }.frame(minWidth: 450, minHeight: 400)
         }
         .fileImporter(isPresented: $importing, allowedContentTypes: [UTType(importedAs: "org.atelier.document"), .json]) { result in
-            do {
-                let url = try result.get(); let access = url.startAccessingSecurityScopedResource(); defer { if access { url.stopAccessingSecurityScopedResource() } }
-                let imported = PaintDocument(); try imported.load(from: url)
-                let destination = gallery.folder.appendingPathComponent(UUID().uuidString).appendingPathExtension("atelier")
-                try imported.save(to: destination); document = imported; gallery.refresh()
-            } catch { self.error = error.localizedDescription }
+            switch result {
+            case .success(let url): importDocument(url)
+            case .failure(let failure): error = failure.localizedDescription
+            }
         }
+        .onOpenURL { importDocument($0) }
         .alert("Atelier", isPresented: Binding(get: { error != nil || gallery.errorMessage != nil }, set: { if !$0 { error = nil; gallery.errorMessage = nil } })) {
             Button("OK") { error = nil; gallery.errorMessage = nil }
         } message: { Text(error ?? gallery.errorMessage ?? "") }
     }
     private func open(_ url: URL) {
         do { let d = PaintDocument(); try d.load(from: url); document = d } catch { self.error = error.localizedDescription }
+    }
+    private func importDocument(_ url: URL) {
+        do {
+            let access = url.startAccessingSecurityScopedResource()
+            defer { if access { url.stopAccessingSecurityScopedResource() } }
+            let imported = PaintDocument(); try imported.load(from: url)
+            if let current = document, let currentURL = current.storageURL { try current.save(to: currentURL) }
+            let destination = gallery.folder.appendingPathComponent(UUID().uuidString).appendingPathExtension("atelier")
+            try imported.save(to: destination); document = imported; gallery.refresh()
+        } catch { self.error = error.localizedDescription }
     }
     private func duplicate(_ url: URL) {
         do {

@@ -61,7 +61,7 @@ struct DocumentContents: Codable, Equatable {
     func validate() throws {
         guard formatVersion == 1 else { throw DocumentError.unsupportedVersion }
         guard width >= 64, height >= 64, width <= 4096, height <= 4096,
-              width * height <= 16_777_216, !layers.isEmpty, layers.count <= 32,
+              width * height * 32 <= 384 * 1024 * 1024, !layers.isEmpty, layers.count <= 32,
               colorSpace == "sRGB", (36...1200).contains(dpi),
               [background.x, background.y, background.z, background.w].allSatisfy({ $0.isFinite && (0...1).contains($0) }),
               Set(layers.map(\.id)).count == layers.count else { throw DocumentError.invalidData }

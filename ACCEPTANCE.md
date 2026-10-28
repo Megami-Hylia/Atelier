@@ -5,19 +5,23 @@ Stato al **28 ottobre 2026**: incremento di sorgenti in lavorazione; la parità 
 | Criterio | Stato | Evidenza / passaggio necessario |
 |---|---|---|
 | A — Sorgenti e progetto completati | **incompleto** | sorgenti dell’incremento e progetto presenti; molte voci della matrice assenti o parziali |
-| B — Build nativa device riuscita | **in attesa di esito** | primo tentativo fermato prima di Xcode dalla capacità del runner ospitato; [secondo tentativo](https://github.com/Megami-Hylia/Atelier/actions/runs/40759656717) avviato su macOS Intel; nessun rapporto di successo acquisito |
-| C — IPA unsigned confezionata e verificata | **non generata** | verrà prodotta solo dopo B e controlli Mach-O/plist/firma riusciti |
+| B — Build nativa device riuscita | **riuscita** | Release `iphoneos` arm64 nel [run #4](https://github.com/Megami-Hylia/Atelier/actions/runs/40760299865), commit `f10dfb4b05c82b17bbef5a9bbeb1fa4d4d80a558`; Swift e Metal compilati con Xcode 26.2/17C52, SDK 26.2 |
+| C — IPA unsigned confezionata e verificata | **riuscita per il commit indicato** | `Atelier-unsigned.ipa` scaricata e ricontrollata su Windows: Mach-O device arm64, family `[2]`, shader/risorse presenti, nessuna firma/provisioning |
 | D — Firma/installazione Windows | **non eseguita** | passo separato, credenziali inserite dall’utente nel programma locale |
 | E — Test iPad reale e prestazioni | **non eseguiti** | nessun iPad o Apple Pencil collegato per questa consegna |
 | F — Parità complessiva dimostrata | **non raggiunta** | [FEATURE_PARITY.md](FEATURE_PARITY.md) contiene lacune e confronti non svolti |
 
-Non esiste un `Atelier-unsigned.ipa` valido finché la CI non lo costruisce e verifica. Un archivio di sorgenti non è un IPA. La mancanza di credenziali per firmare non impedisce B/C; l’attivazione di un repository/runner autorizzato è una dipendenza diversa.
+L’IPA verificata del run #4 misura **700.285 byte** e ha SHA-256 `05628391edc69b247e88922c53a88135ee5225b69eddf57d9b9e0c9c496f3563`. Il `BUILD_REPORT.json` effettivo dichiara `BUILT_AND_STRUCTURALLY_VERIFIED`; il validatore rafforzato eseguito sul file scaricato conferma anche il catalogo incluso: due librerie, 18 set nuovi da dieci preset, 12 basi separate e tutte le dodici texture PNG originali.
+
+Il run #4 complessivamente è fallito **dopo** il caricamento dell’IPA, nella selezione della destinazione simulatore. Non è stato eseguito alcun XCTest in quel run; la build device riuscita e il fallimento del passaggio test restano due risultati distinti. Le modifiche successive ai sorgenti e ai preset non sono attribuite retroattivamente a questa IPA. L’esito di una nuova build dovrà sostituire la provenienza solo dopo download e verifica del nuovo artefatto.
+
+La build unsigned non ha richiesto segreti Apple. B/C non dimostrano D/E/F né il primo avvio offline dell’app; provano compilazione device, packaging e struttura dell’artefatto descritto.
 
 ## Accettazione del modulo pennelli
 
 | ID | Procedura ripetibile | Risultato da registrare | Stato |
 |---|---|---|---|
-| BR-A01 | installazione pulita, rete disattivata, primo avvio | 18 set × 10 preset più basi separate; nessuna risorsa mancante | non eseguita su app |
+| BR-A01 | installazione pulita, rete disattivata, primo avvio | 18 set × 10 preset più basi separate; nessuna risorsa mancante | inclusione di catalogo/asset verificata nell’IPA run #4; primo avvio offline su app non eseguito |
 | BR-A02 | selezionare almeno un preset per ogni categoria e dipingere lo stesso input | nome selezionato, canvas, differenza motivata del segno | non eseguita su app |
 | BR-A03 | generare tavola dal renderer comune con input/colore/seed identici | PNG con preset annotati, parametri, versione motore e hash | `RendererEvidence.generate` e test nativo predisposti; esecuzione non certificata |
 | BR-A04 | per ogni controllo modificare solo un parametro, stessa traccia e seed | differenza pertinente, immagine prima/dopo e metrica | non eseguita; vedi matrice parametri |
@@ -29,7 +33,7 @@ Non esiste un `Atelier-unsigned.ipa` valido finché la CI non lo costruisce e ve
 
 Lo stato “catalogo numericamente valido” non soddisfa BR-A02/03/04. Due preset con JSON diverso possono restare troppo simili nel segno; la distinzione qualitativa richiede una tavola reale e il confronto visivo.
 
-`AtelierTests/RendererTests.swift` contiene le seguenti prove predisposte, il cui esito è ancora da acquisire:
+`AtelierTests/RendererTests.swift` contiene le seguenti prove predisposte. Il run #4 non le ha eseguite perché la destinazione simulatore non è stata risolta; l’esito funzionale resta da acquisire:
 
 - `testDeterministicReplayAndSpacingAffectPixels`: replica input e varia spacing, grana, taper, pressione e colore, cercando differenze nei pixel.
 - `testUndoRedoReopenPreservePixelsAndParameters`: confronta contenuto e output dopo undo/redo e riapertura.

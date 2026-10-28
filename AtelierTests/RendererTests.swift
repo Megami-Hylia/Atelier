@@ -106,6 +106,10 @@ import Metal
         document.change { $0.selectedLayerID = UUID() }
         XCTAssertEqual(document.contents, previous)
         XCTAssertNotNil(document.errorMessage)
+        document.errorMessage = nil
+        document.change { $0.width = 4096; $0.height = 4096 }
+        XCTAssertEqual(document.contents, previous)
+        XCTAssertNotNil(document.errorMessage)
     }
     func testOverBudgetStrokeIsRejectedInsteadOfSilentlyTruncated() throws {
         var tooLong = stroke(); tooLong.size = 1; tooLong.brush.parameters["spacing"] = 0.01

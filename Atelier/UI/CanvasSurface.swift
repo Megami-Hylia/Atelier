@@ -43,6 +43,9 @@ struct CanvasSurface: UIViewRepresentable {
     private var estimates: [NSNumber: (UUID, Int)] = [:]
     private var lastTool = PaintTool.paint
     private let cursor = CAShapeLayer()
+    private var failedRevision: UInt64?
+    private var failedStrokeID: UUID?
+    private var failedSampleCount = 0
 
     init(frame: CGRect) {
         super.init(frame: frame, device: MTLCreateSystemDefaultDevice())
@@ -71,15 +74,20 @@ struct CanvasSurface: UIViewRepresentable {
 
     func draw(in view: MTKView) {
         guard let document, let painter, let drawable = currentDrawable, let pass = currentRenderPassDescriptor else { return }
+        if failedRevision == document.revision, failedStrokeID == active?.id, failedSampleCount == (active?.samples.count ?? 0) { return }
         do {
             var temporary = active
             temporary?.samples.append(contentsOf: predictions)
             let texture = try painter.render(document.contents, liveStroke: temporary, finished: false)
+            failedRevision = nil
             guard let command = painter.queue.makeCommandBuffer(), let encoder = command.makeRenderCommandEncoder(descriptor: pass) else { return }
             encoder.setRenderPipelineState(painter.screenPipeline); encoder.setFragmentTexture(texture, index: 0)
             encoder.drawPrimitives(type: .triangleStrip, vertexStart: 0, vertexCount: 4); encoder.endEncoding()
             command.present(drawable); command.commit()
-        } catch { document.errorMessage = error.localizedDescription }
+        } catch {
+            failedRevision = document.revision; failedStrokeID = active?.id; failedSampleCount = active?.samples.count ?? 0
+            document.errorMessage = error.localizedDescription
+        }
     }
 
     private func sample(_ touch: UITouch) -> PencilSample {
@@ -167,7 +175,7 @@ struct CanvasSurface: UIViewRepresentable {
         let radius = CGFloat(brushSize) * bounds.width / CGFloat(document?.contents.width ?? 1) / 2
         cursor.path = UIBezierPath(ovalIn: CGRect(x: p.x - radius, y: p.y - radius, width: radius * 2, height: radius * 2)).cgPath
     }
-    @objc private func memoryWarning() { painter = nil; do { painter = try MetalPainter() } catch { document?.errorMessage = error.localizedDescription } }
+    @objc private func memoryWarning() { failedRevision = nil; painter = nil; do { painter = try MetalPainter() } catch { document?.errorMessage = error.localizedDescription } }
     func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
         !(gestureRecognizer is UITapGestureRecognizer) && !(otherGestureRecognizer is UITapGestureRecognizer)
     }

@@ -4,10 +4,10 @@ L’obiettivo originale resta l’app iPad completa richiesta, con baseline 5.4.
 
 ## Prima dell’accettazione dell’incremento
 
-1. Il repository GitHub privato autorizzato [Megami-Hylia/Atelier](https://github.com/Megami-Hylia/Atelier) è stato creato e la CI avviata. Acquisire l’esito del workflow macOS da Windows seguendo [README_WINDOWS.md](README_WINDOWS.md); correggere ogni errore Swift/Metal/Xcode prima di produrre l’IPA. Non servono Apple ID o certificati per questa build.
+1. La build device e il packaging sono riusciti nel [run #4](https://github.com/Megami-Hylia/Atelier/actions/runs/40760299865), commit `f10dfb4b05c82b17bbef5a9bbeb1fa4d4d80a558`: IPA reale scaricata e verificata su Windows, B/C raggiunti per quella revisione. Conservare i rapporti insieme a quell’artefatto. Il passaggio test del medesimo run è fallito prima di eseguire XCTest; correggere la destinazione simulatore e acquisire i risultati della nuova esecuzione. Le modifiche successive ai preset/sorgenti richiedono una nuova IPA con provenienza aggiornata.
 2. Eseguire i test di modello e il rendering comparativo reale su Metal. Generare la tavola preset e le prove per parametro; registrare commit e hash. Risolvere somiglianze e parametri inefficaci invece di contare soltanto i nomi.
 3. Verificare librerie/set/pennelli con salvataggio, riavvio, import/export, errori di dati e disco. Riconciliare tutti i controlli implementati con [BRUSH_PARAMETERS.md](BRUSH_PARAMETERS.md).
-4. Verificare il bundle device e il packaging unsigned; scaricare `Atelier-unsigned.ipa` e rapporto CI. Aggiornare separatamente B/C in [ACCEPTANCE.md](ACCEPTANCE.md), mantenendo D/E non eseguiti finché manca hardware/installazione.
+4. Per ogni nuova revisione destinata alla consegna ripetere compilazione, download e verifica dell’IPA, poi aggiornare commit/hash/report. B/C del run #4 non vanno applicati automaticamente ai sorgenti correnti. Mantenere D/E non eseguiti finché mancano firma/installazione e prove su hardware; non confondere una build riuscita con la parità complessiva.
 
 ## Priorità bloccante: sistema pennelli completo
 

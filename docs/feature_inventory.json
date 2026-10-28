@@ -648,8 +648,8 @@
       "interaction": "Renderer comune, Studio, Files, persistenza",
       "id": "BR-17",
       "implementation": "Resources/BrushCatalog.json; BrushShape-*.png; BrushGrain-*.png; scripts/generate_catalog.py",
-      "test": "controlli catalogo nel generatore; consultare rapporto locale, prove qualitative non eseguite",
-      "differences": "180 configurazioni originali +12 basi; differenze JSON non certificano segni distinti; tavola GPU e confronto mancanti",
+      "test": "validatore IPA Windows:18x10 preset nuovi+12 basi,12 PNG128x128 incluse; run #4 40760299865, commit f10dfb4b05c82b17bbef5a9bbeb1fa4d4d80a558",
+      "differences": "inclusione offline delle risorse provata; primo avvio, comportamento e differenze qualitative non verificati; modifiche successive richiedono nuova build",
       "status": "parziale"
     },
     {
@@ -3118,8 +3118,8 @@
       "interaction": "Tutti i moduli e criteri A–F",
       "id": "QA-12",
       "implementation": "Atelier.xcodeproj; .github/workflows/build-ipad-unsigned.yml; scripts/; README_WINDOWS.md",
-      "test": "verifiche statiche e fixture non sostituiscono build nativa o hardware",
-      "differences": "configurazione e procedure presenti; esecuzione/build/IPA/installazione sono criteri distinti in ACCEPTANCE.md",
+      "test": "build Release iphoneos arm64 riuscita; verifica Mach-O device2 e UIDeviceFamily=[2]; run #4 40760299865, commit f10dfb4b05c82b17bbef5a9bbeb1fa4d4d80a558",
+      "differences": "target device compilato e struttura solo iPad provata per la revisione indicata; disponibilità/installazione hardware e parità UI non verificate",
       "status": "parziale"
     },
     {
@@ -3131,8 +3131,8 @@
       "interaction": "Tutti i moduli e criteri A–F",
       "id": "QA-13",
       "implementation": "Atelier.xcodeproj; .github/workflows/build-ipad-unsigned.yml; scripts/; README_WINDOWS.md",
-      "test": "verifiche statiche e fixture non sostituiscono build nativa o hardware",
-      "differences": "configurazione e procedure presenti; esecuzione/build/IPA/installazione sono criteri distinti in ACCEPTANCE.md",
+      "test": "workflow remoto eseguito e artefatto scaricato/verificato su Windows; run #4 40760299865, commit f10dfb4b05c82b17bbef5a9bbeb1fa4d4d80a558",
+      "differences": "compilazione device riuscita; run complessivo fallito nel successivo passo simulatore senza XCTest; esecuzione dello script PowerShell completa non certificata",
       "status": "parziale"
     },
     {
@@ -3144,9 +3144,9 @@
       "interaction": "Tutti i moduli e criteri A–F",
       "id": "QA-14",
       "implementation": "Atelier.xcodeproj; .github/workflows/build-ipad-unsigned.yml; scripts/; README_WINDOWS.md",
-      "test": "verifiche statiche e fixture non sostituiscono build nativa o hardware",
-      "differences": "configurazione e procedure presenti; esecuzione/build/IPA/installazione sono criteri distinti in ACCEPTANCE.md",
-      "status": "parziale"
+      "test": "IPA700285B scaricata, struttura/arm64/platform2/family2/default.metallib/assenza firme e provisioning verificati anche su Windows; run #4 40760299865, commit f10dfb4b05c82b17bbef5a9bbeb1fa4d4d80a558",
+      "differences": "verifica strutturale per il commit indicato; firma/installazione, esecuzione iPad, funzionalità e parità non sono dimostrate",
+      "status": "verificata"
     },
     {
       "feature": "Rapporto build",
@@ -3157,9 +3157,9 @@
       "interaction": "Tutti i moduli e criteri A–F",
       "id": "QA-15",
       "implementation": "Atelier.xcodeproj; .github/workflows/build-ipad-unsigned.yml; scripts/; README_WINDOWS.md",
-      "test": "verifiche statiche e fixture non sostituiscono build nativa o hardware",
-      "differences": "configurazione e procedure presenti; esecuzione/build/IPA/installazione sono criteri distinti in ACCEPTANCE.md",
-      "status": "parziale"
+      "test": "BUILD_REPORT.json reale e SHA25605628391edc69b247e88922c53a88135ee5225b69eddf57d9b9e0c9c496f3563; run #4 40760299865, commit f10dfb4b05c82b17bbef5a9bbeb1fa4d4d80a558",
+      "differences": "rapporto della build device riuscita; test simulatore non eseguiti e sorgenti successivi non coperti dalla stessa provenienza",
+      "status": "verificata"
     },
     {
       "feature": "Firma e installazione Windows",

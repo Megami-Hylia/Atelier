@@ -49,9 +49,13 @@ Il valore deve coincidere con `ipa-verification.json` e `SHA256SUMS.txt`. Il rep
 
 Su Xcode26 il compilatore Metal può essere un componente separato. Lo script verifica `xcrun metal -v` e, se mancante, scarica il componente ufficiale con `xcodebuild -downloadComponent MetalToolchain`, poi registra la versione effettiva. Questo download avviene sul runner macOS e richiede rete e spazio disco; non usa account Apple personali.
 
-`scripts/verify_ipa.py` controlla la radice `Payload/Atelier.app`, Info.plist generato, famiglia dispositivo esattamente `[2]`, piattaforma `iPhoneOS/iphoneos`, eseguibile Mach-O `MH_EXECUTE` con permesso di esecuzione, `arm64`, `LC_BUILD_VERSION` piattaforma **2** (iOS device), assenza di `LC_CODE_SIGNATURE`, directory di firma e provisioning, libreria Metal compilata e risorse JSON. Rifiuta quindi anche un binario **arm64 per simulatore**. Questi controlli sono strutturali; non eseguono l’app su hardware.
+`scripts/verify_ipa.py` controlla la radice `Payload/Atelier.app`, Info.plist generato, famiglia dispositivo esattamente `[2]`, piattaforma `iPhoneOS/iphoneos`, eseguibile Mach-O `MH_EXECUTE` con permesso di esecuzione, `arm64`, `LC_BUILD_VERSION` piattaforma **2** (iOS device), assenza di `LC_CODE_SIGNATURE`, directory di firma e provisioning, e libreria Metal compilata. Rifiuta quindi anche un binario **arm64 per simulatore**.
+
+Controlla inoltre l’effettivo `BrushCatalog.json` incluso nel bundle: schema1, 18 categorie obbligatorie con dieci preset ciascuna e dodici Foundations separati, ID univoci, riferimenti coerenti, seed e parametri numerici validi, tutte le sei shape e sei grain con firma PNG e dimensioni valide. Questa verifica dimostra la presenza offline delle risorse; la distinzione qualitativa dei tratti richiede le prove del renderer. Nessuno di questi controlli esegue l’app su un iPad fisico.
 
 Il progetto imposta `TARGETED_DEVICE_FAMILY=2`, `SUPPORTS_MACCATALYST=NO`, `SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD=NO` e `SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD=NO`. Non esistono target iPhone, Mac, Android o web. `iphonesimulator` serve unicamente ai test iPad e non entra nell’IPA. Un’eventuale distribuzione App Store richiederebbe separatamente una configurazione App Store Connect coerente e l’esclusione della disponibilità sui Mac Apple Silicon; non viene pubblicato nulla in questo flusso.
+
+I test creano un iPad(A16) simulato dedicato sul runtime26.2, con nome univoco per il run, senza riutilizzare gli snapshot preconfigurati dell’immagine. Il boot ha un limite di 300 secondi. Il cleanup riguarda soltanto l’UUID creato dallo script. Un timeout produce una diagnostica esplicita e non diventa un test superato. `test-summary.json` contiene il riepilogo XCTest effettivo, oppure indica che non è disponibile; i PNG allegati provengono dalle prove realmente eseguite.
 
 ## Firma e installazione da Windows: Sideloadly
 
@@ -87,6 +91,7 @@ Per Apple Pencil Pro, hover e funzioni analoghe serve hardware compatibile e una
 | Xcode fissato non disponibile | Consultare inventario ufficiale, aggiornare esplicitamente pin e report, ripetere i test |
 | Errore Swift/Metal o packaging | Leggere `build.log`; nessun artefatto IPA viene presentato come riuscito se la verifica fallisce |
 | Fallisce solo XCTest simulatore | Distinguere IPA device verificata da test falliti; consultare `.xcresult` |
+| Xcode mostra soltanto destinazioni generiche | Controllare `ARCHS_STANDARD`, i runtime disponibili e il log `simulator-destinations.txt`; lo script inizializza Xcode e attende il boot dell’iPad simulato |
 | Firma richiesta da xcodebuild | Controllare tutte le tre impostazioni `CODE_SIGN*`; non aggiungere segreti Apple alla CI |
 | iPad non rilevato | USB funzionante, dispositivo sbloccato/autorizzato, driver Apple e guide ufficiali del firmatore |
 | App non avviabile dopo sette giorni | Rinnovare con il firmatore; preservare prima i documenti |
