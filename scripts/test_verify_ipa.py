@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Synthetic in-memory fixtures test rejection rules; these are NOT app builds."""
 import plistlib
+import json
 import struct
 import tempfile
 import unittest
@@ -8,6 +9,8 @@ import zipfile
 from pathlib import Path
 
 from verify_ipa import macho_slices, verify
+
+RESOURCES = Path(__file__).resolve().parents[1] / "Atelier" / "Resources"
 
 
 def binary(platform=2, signature=False, cpu=0x0100000C):
@@ -34,7 +37,7 @@ class VerificationTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 macho_slices(value)
 
-    def fixture(self, path, families=None, extra=None):
+    def fixture(self, path, families=None, extra=None, catalog_data=None, omitted_asset=None):
         info = {"UIDeviceFamily": [2] if families is None else families,
                 "CFBundleSupportedPlatforms": ["iPhoneOS"], "DTPlatformName": "iphoneos",
                 "CFBundlePackageType": "APPL", "CFBundleExecutable": "Atelier",
@@ -46,7 +49,10 @@ class VerificationTests(unittest.TestCase):
             executable.external_attr = 0o100755 << 16
             archive.writestr(executable, binary())
             archive.writestr("Payload/Atelier.app/default.metallib", b"MTLB" + bytes(40))
-            archive.writestr("Payload/Atelier.app/presets.json", "[]")
+            archive.writestr("Payload/Atelier.app/BrushCatalog.json", catalog_data if catalog_data is not None else (RESOURCES / "BrushCatalog.json").read_bytes())
+            for asset in RESOURCES.glob("Brush*.png"):
+                if asset.name != omitted_asset:
+                    archive.writestr("Payload/Atelier.app/" + asset.name, asset.read_bytes())
             if extra:
                 archive.writestr(extra, b"fixture")
 
@@ -60,6 +66,21 @@ class VerificationTests(unittest.TestCase):
                 self.fixture(fixture, families=families, extra=extra)
                 with self.assertRaises(ValueError):
                     verify(fixture)
+
+    def test_offline_catalog_and_assets_are_required(self):
+        with tempfile.TemporaryDirectory() as directory:
+            fixture = Path(directory) / "synthetic-test-fixture.zip"
+            self.fixture(fixture, omitted_asset="BrushShape-round.png")
+            with self.assertRaises(KeyError):
+                verify(fixture)
+            self.fixture(fixture, catalog_data=b"not JSON")
+            with self.assertRaises(ValueError):
+                verify(fixture)
+            catalog = json.loads((RESOURCES / "BrushCatalog.json").read_bytes())
+            catalog["brushes"].pop()
+            self.fixture(fixture, catalog_data=json.dumps(catalog))
+            with self.assertRaisesRegex(ValueError, "192"):
+                verify(fixture)
 
 
 if __name__ == "__main__":

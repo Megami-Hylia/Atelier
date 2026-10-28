@@ -16,7 +16,7 @@ Generato deterministicamente da `scripts/generate_catalog.py`. 180 preset in 18 
 | Pencils | Colored Core | round / paper | Pencils: variazioni cromatiche e prelievo del pigmento preesistente. |
 | Pens | Fine Nib | round / none | Pens: deposito di base del materiale; risposta progressiva alla pressione. |
 | Pens | Flexible Nib | chisel / none | Pens: bordo schiacciato e ombreggiatura sensibile a inclinazione e azimut. |
-| Pens | Technical Line | round / none | Pens: punta fine continua con uscita rastremata. |
+| Pens | Technical Line | round / none | Pens: linea tecnica fine a spessore costante, continua, senza rastremazione né variazione dimensionale da pressione. |
 | Pens | Fountain Edge | soft / none | Pens: deposito morbido e trasparente per velature. |
 | Pens | Drawing Pen | fleck / paper | Pens: grana marcata con interruzioni del deposito. |
 | Pens | Brush Pen | bristle / none | Pens: impronta a setole combinata con una seconda impronta. |
@@ -92,7 +92,7 @@ Generato deterministicamente da `scripts/generate_catalog.py`. 180 preset in 18 
 | Watercolors | Water Rake | bristle / wash | Watercolors: impronta a setole combinata con una seconda impronta. |
 | Watercolors | Broad Wash | flat / wash | Watercolors: campitura larga con pressione poco influente. |
 | Watercolors | Water Contour | round / wash | Watercolors: linea di contorno stabilizzata a spessore quasi costante. |
-| Watercolors | Water Bloom | fleck / noise | Watercolors: spruzzi separati con impronte multiple e jitter deterministico. |
+| Watercolors | Water Mist | fleck / noise | Watercolors: spruzzi separati con impronte multiple e jitter deterministico. |
 | Watercolors | Pigment Mix | soft / wash | Watercolors: variazioni cromatiche e prelievo del pigmento preesistente. |
 | Charcoals | Vine Core | fleck / charcoal | Charcoals: deposito di base del materiale; risposta progressiva alla pressione. |
 | Charcoals | Charcoal Side | chisel / charcoal | Charcoals: bordo schiacciato e ombreggiatura sensibile a inclinazione e azimut. |
@@ -110,7 +110,7 @@ Generato deterministicamente da `scripts/generate_catalog.py`. 180 preset in 18 
 | Basics | Soft Round | soft / none | Basics: deposito morbido e trasparente per velature. |
 | Basics | Textured Round | fleck / paper | Basics: grana marcata con interruzioni del deposito. |
 | Basics | Double Round | bristle / none | Basics: impronta a setole combinata con una seconda impronta. |
-| Basics | Flat Basic | flat / none | Basics: campitura larga con pressione poco influente. |
+| Basics | Flat Basic | flat / none | Basics: piatto di uso generale a spessore sensibile alla pressione, rapporto di forma medio e deposito progressivo. |
 | Basics | Smooth Liner | round / none | Basics: linea di contorno stabilizzata a spessore quasi costante. |
 | Basics | Basic Scatter | fleck / noise | Basics: spruzzi separati con impronte multiple e jitter deterministico. |
 | Basics | Color Round | round / none | Basics: variazioni cromatiche e prelievo del pigmento preesistente. |
@@ -126,7 +126,7 @@ Generato deterministicamente da `scripts/generate_catalog.py`. 180 preset in 18 
 | Lettering | Prism Script | chisel / paper | Lettering: variazioni cromatiche e prelievo del pigmento preesistente. |
 | Comics | Panel Ink | round / none | Comics: deposito di base del materiale; risposta progressiva alla pressione. |
 | Comics | Manga Edge | chisel / none | Comics: bordo schiacciato e ombreggiatura sensibile a inclinazione e azimut. |
-| Comics | Detail Liner | round / none | Comics: punta fine continua con uscita rastremata. |
+| Comics | Detail Liner | round / none | Comics: liner per fumetto con escursione reale del diametro da pressione e punte lunghe; il limite massimo non blocca l'intero corpo del tratto. |
 | Comics | Tone Wash | soft / none | Comics: deposito morbido e trasparente per velature. |
 | Comics | Rough Inker | fleck / paper | Comics: grana marcata con interruzioni del deposito. |
 | Comics | Speed Pair | bristle / none | Comics: impronta a setole combinata con una seconda impronta. |
@@ -140,7 +140,7 @@ Generato deterministicamente da `scripts/generate_catalog.py`. 180 preset in 18 
 | Design | Soft Layout | soft / none | Design: deposito morbido e trasparente per velature. |
 | Design | Paper Layout | fleck / paper | Design: grana marcata con interruzioni del deposito. |
 | Design | Parallel Guide | bristle / none | Design: impronta a setole combinata con una seconda impronta. |
-| Design | Wide Layout | flat / none | Design: campitura larga con pressione poco influente. |
+| Design | Wide Layout | flat / none | Design: piatto stretto da layout, orientamento da azimut e roll, allargamento inclinando la Pencil e impronte più distanziate. |
 | Design | Contour Guide | round / none | Design: linea di contorno stabilizzata a spessore quasi costante. |
 | Design | Dot Layout | fleck / noise | Design: spruzzi separati con impronte multiple e jitter deterministico. |
 | Design | Spectrum Guide | flat / none | Design: variazioni cromatiche e prelievo del pigmento preesistente. |
@@ -164,15 +164,15 @@ Generato deterministicamente da `scripts/generate_catalog.py`. 180 preset in 18 
 | Street Art | Spray Contour | round / noise | Street Art: linea di contorno stabilizzata a spessore quasi costante. |
 | Street Art | Paint Spit | fleck / noise | Street Art: spruzzi separati con impronte multiple e jitter deterministico. |
 | Street Art | Neon Spray | soft / noise | Street Art: variazioni cromatiche e prelievo del pigmento preesistente. |
-| Digital | Clean Pixel | round / none | Digital: deposito di base del materiale; risposta progressiva alla pressione. |
+| Digital | Crisp Round | round / none | Digital: impronta rotonda con bordo binario e dimensione da pressione; nessuna quantizzazione delle coordinate su griglia. |
 | Digital | Digital Edge | chisel / none | Digital: bordo schiacciato e ombreggiatura sensibile a inclinazione e azimut. |
-| Digital | Pixel Point | round / none | Digital: punta fine continua con uscita rastremata. |
+| Digital | Crisp Point | flat / none | Digital: piccole impronte rettangolari dure a dimensione costante e passo ampio; bordo binario, senza motore a griglia pixel. |
 | Digital | Air Gradient | soft / none | Digital: deposito morbido e trasparente per velature. |
-| Digital | Dither Grain | fleck / paper | Digital: grana marcata con interruzioni del deposito. |
+| Digital | Binary Grain | fleck / paper | Digital: grana e forma frammentata convertite in deposito ad alpha binario; non è un algoritmo di dithering cromatico. |
 | Digital | Twin Light | bristle / none | Digital: impronta a setole combinata con una seconda impronta. |
-| Digital | Block Fill | flat / none | Digital: campitura larga con pressione poco influente. |
+| Digital | Crisp Block | flat / none | Digital: campitura rettangolare dura a dimensione costante; soglia alpha binaria, senza aggancio a una griglia di pixel. |
 | Digital | Vector Liner | round / none | Digital: linea di contorno stabilizzata a spessore quasi costante. |
-| Digital | Pixel Scatter | fleck / noise | Digital: spruzzi separati con impronte multiple e jitter deterministico. |
+| Digital | Crisp Scatter | flat / none | Digital: spruzzi geometrici di impronte rettangolari dure, con conteggio e posizioni casuali deterministiche; nessuna griglia pixel. |
 | Digital | Hue Cycle | round / none | Digital: variazioni cromatiche e prelievo del pigmento preesistente. |
 | Creative | Organic Trace | bristle / wash | Creative: deposito di base del materiale; risposta progressiva alla pressione. |
 | Creative | Ribbon Trace | chisel / wash | Creative: bordo schiacciato e ombreggiatura sensibile a inclinazione e azimut. |

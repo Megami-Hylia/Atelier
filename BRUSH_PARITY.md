@@ -39,6 +39,25 @@ La fonte di queste corrispondenze è la specifica dell'utente, con organizzazion
 
 L'inventario dei singoli pennelli Classic originali non è stato osservato: resta da completare e confrontare. Queste 12 basi non sono presentate come tutta la libreria Classic.
 
+## Revisione qualitativa delle configurazioni
+
+Un controllo dei parametri ha individuato profili troppo simili prima del confronto visivo: alcune differenze di curva erano annullate dal limite del diametro, mentre la scala della grana non aveva effetto quando la grana era assente. I profili seguenti sono stati corretti mantenendo gli identificatori. La tabella descrive differenze effettivamente configurate, **non un'osservazione delle immagini risultanti**.
+
+| ID stabile | Nome attuale | Differenziazione configurata |
+|---|---|---|
+| `atelier-basics-07` | Flat Basic | Forma piatta con rapporto0,65, spessore sensibile alla pressione e deposito progressivo |
+| `atelier-design-07` | Wide Layout | Forma piatta stretta con rapporto0,28, orientamento da azimut/roll, allargamento da tilt e passo più ampio |
+| `atelier-digital-07` | Crisp Block | Rettangolo pieno con rapporto1, dimensione costante e soglia alpha0,45 |
+| `atelier-pens-03` | Technical Line | Punta rotonda fine costante, nessuna rastremazione; diametro minimo e massimo0,13 |
+| `atelier-comics-03` | Detail Liner | Pressione sul diametro con peso1, massimo0,65, punta finale lunga e variazione di alpha/flusso |
+| `atelier-digital-03` | Crisp Point | Piccole impronte rettangolari dure, dimensione0,20 costante, passo0,45 e alpha binario |
+| `atelier-digital-01` | Crisp Round | Punta rotonda con soglia alpha0,50; nome corretto per non promettere un motore pixel a griglia |
+| `atelier-digital-05` | Binary Grain | Grana frammentata e alpha binario; nessuna promessa di dithering cromatico |
+| `atelier-digital-09` | Crisp Scatter | Spruzzi di rettangoli duri con alpha binario, dimensione costante e posizionamento casuale ripetibile |
+| `atelier-watercolors-09` | Water Mist | Rinomina coerente con gli spruzzi effettivamente configurati; nessuna diffusione bloom simulata |
+
+Il generatore controlla ora anche queste proprietà progettuali, oltre a conteggio e unicità delle configurazioni. I nomi dei preset Digital non promettono una griglia pixel, che non è implementata. Rimangono necessari la tavola Metal, il giudizio sulle famiglie e le prove Pencil. L'unicità degli hash delle immagini non costituisce da sola una verifica qualitativa di192 pennelli.
+
 ## Formati ed asset
 
 `Atelier/Resources/BrushCatalog.json` conserva 192 configurazioni e seed UInt64. `scripts/generate_catalog.py` genera le configurazioni e sei forme/sei grane PNG matematiche originali. Il renderer carica queste maschere; le sorgenti importate vengono normalizzate in PNG entro 512×512. L'archivio dei pennelli conserva i byte delle sorgenti senza riferimenti a file esterni. JSON esportato/importato con limite 32 MB; immagini importate entro 8 MB. L'importazione crea nuovi identificatori per non sovrascrivere pennelli esistenti.

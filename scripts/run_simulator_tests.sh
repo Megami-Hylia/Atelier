@@ -6,6 +6,8 @@ mkdir -p build/tests
 exec > >(tee build/tests/test.log) 2>&1
 export DEVELOPER_DIR="${DEVELOPER_DIR:-/Applications/Xcode_26.2.app/Contents/Developer}"
 SIM_ARCH="$(uname -m)"
+xcodebuild -runFirstLaunch
+xcrun simctl list runtimes > build/tests/simulator-runtimes.txt
 DEVICE_ID="$(xcrun simctl list devices available --json | python3 -c '
 import json, sys
 devices = json.load(sys.stdin)["devices"]
@@ -16,9 +18,13 @@ for runtime, entries in devices.items():
                 print(entry["udid"]); sys.exit(0)
 sys.exit("No available iPad iOS 26.2 simulator: simulator tests not executed")
 ')"
+xcrun simctl bootstatus "$DEVICE_ID" -b
+xcodebuild -project Atelier.xcodeproj -scheme Atelier -configuration Debug \
+  -sdk iphonesimulator ARCHS="$SIM_ARCH" -showdestinations > build/tests/simulator-destinations.txt
+cat build/tests/simulator-destinations.txt
 set +e
 xcodebuild -project Atelier.xcodeproj -scheme Atelier -configuration Debug \
-  -sdk iphonesimulator -destination "platform=iOS Simulator,id=$DEVICE_ID" \
+  -sdk iphonesimulator -destination "platform=iOS Simulator,id=$DEVICE_ID" -destination-timeout 120 \
   -derivedDataPath build/DerivedData-tests -resultBundlePath build/tests/AtelierTests.xcresult \
   ARCHS="$SIM_ARCH" ONLY_ACTIVE_ARCH=YES CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO \
   CODE_SIGN_IDENTITY= test

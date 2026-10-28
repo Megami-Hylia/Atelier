@@ -52,7 +52,7 @@ MATERIALS = [
     ("Gouache", "flat", "paper", dict(flow=.8,grainDepth=.42,wetDilution=.12,wetPull=.22,roundness=.7),
      ["Opaque Round", "Gouache Edge", "Gouache Point", "Thin Gouache", "Dry Gouache", "Gouache Comb", "Broad Gouache", "Gouache Contour", "Gouache Flecks", "Gouache Mix"]),
     ("Watercolors", "soft", "wash", dict(flow=.2,grainDepth=.55,wetDilution=.65,wetPull=.65,wetCharge=.65,wetAttack=.45,pressureFlow=.55),
-     ["Water Wash", "Wet Edge", "Detail Water", "Pale Wash", "Granulated Wash", "Water Rake", "Broad Wash", "Water Contour", "Water Bloom", "Pigment Mix"]),
+     ["Water Wash", "Wet Edge", "Detail Water", "Pale Wash", "Granulated Wash", "Water Rake", "Broad Wash", "Water Contour", "Water Mist", "Pigment Mix"]),
     ("Charcoals", "fleck", "charcoal", dict(flow=.6,grainDepth=.82,scatter=.35,pressureOpacity=.65,tiltSize=.65),
      ["Vine Core", "Charcoal Side", "Charcoal Point", "Soft Coal", "Rough Coal", "Coal Rake", "Coal Block", "Coal Contour", "Coal Dust", "Tinted Coal"]),
     ("Basics", "round", "none", dict(flow=1,pressureSize=.45),
@@ -68,7 +68,7 @@ MATERIALS = [
     ("Street Art", "soft", "noise", dict(flow=.28,grainDepth=.5,spacing=.09,opacityJitter=.25),
      ["Spray Cap", "Spray Edge", "Needle Cap", "Mist Cap", "Dry Spray", "Twin Cap", "Wide Cap", "Spray Contour", "Paint Spit", "Neon Spray"]),
     ("Digital", "round", "none", dict(flow=1,spacing=.06,pressureSize=.35),
-     ["Clean Pixel", "Digital Edge", "Pixel Point", "Air Gradient", "Dither Grain", "Twin Light", "Block Fill", "Vector Liner", "Pixel Scatter", "Hue Cycle"]),
+     ["Crisp Round", "Digital Edge", "Crisp Point", "Air Gradient", "Binary Grain", "Twin Light", "Crisp Block", "Vector Liner", "Crisp Scatter", "Hue Cycle"]),
     ("Creative", "bristle", "wash", dict(flow=.6,grainDepth=.5,wetPull=.2,scatter=.25),
      ["Organic Trace", "Ribbon Trace", "Etched Trace", "Dream Wash", "Woven Trace", "Twin Trace", "Broad Ribbon", "Echo Line", "Petal Scatter", "Prism Trail"]),
 ]
@@ -85,6 +85,63 @@ VARIANTS = [
     ("fleck", "noise", dict(spacing=.7,spacingJitter=.45,jitterLateral=.6,jitterLinear=.3,scatter=1,stampCount=3,countJitter=.7,flow=.65), "spruzzi separati con impronte multiple e jitter deterministico"),
     (None, None, dict(hueJitter=.18,saturationJitter=.2,brightnessJitter=.1,strokeHue=.08,wetPull=.45,wetDilution=.25), "variazioni cromatiche e prelievo del pigmento preesistente"),
 ]
+
+# Explicit designs for profiles whose shared role templates previously produced
+# near-duplicates. IDs remain stable; pressure curves are not used as cosmetic
+# differentiators when a max-size clamp makes the curve inert.
+SPECIAL_PROFILES = {
+    ("basics", 6): dict(
+        shape="flat", grain="none",
+        parameters=dict(roundness=.65, pressureSize=.55, maxSize=.9, minSize=.02,
+                        flow=.55, spacing=.09, accumulation=.55, wetAttack=0),
+        reason="piatto di uso generale a spessore sensibile alla pressione, rapporto di forma medio e deposito progressivo"),
+    ("design", 6): dict(
+        shape="flat", grain="none",
+        parameters=dict(roundness=.28, pressureSize=.15, tiltSize=.65, tiltRoundness=.3,
+                        azimuth=1, barrelRoll=.75, flow=.22, spacing=.18,
+                        accumulation=.65, wetAttack=0, maxSize=1),
+        reason="piatto stretto da layout, orientamento da azimut e roll, allargamento inclinando la Pencil e impronte più distanziate"),
+    ("digital", 6): dict(
+        shape="flat", grain="none",
+        parameters=dict(roundness=1, pressureSize=0, minSize=1, maxSize=1,
+                        flow=1, opacity=1, spacing=.035, alphaThreshold=.45,
+                        taperStart=0, taperEnd=0, taperSize=0, wetAttack=0,
+                        pressureCurve=1),
+        reason="campitura rettangolare dura a dimensione costante; soglia alpha binaria, senza aggancio a una griglia di pixel"),
+    ("pens", 2): dict(
+        shape="round", grain="none",
+        parameters=dict(pressureSize=0, minSize=.13, maxSize=.13,
+                        spacing=.035, flow=.95, wetAttack=0,
+                        taperStart=0, taperEnd=0, taperSize=0, taperOpacity=0,
+                        streamline=.2, pressureCurve=1),
+        reason="linea tecnica fine a spessore costante, continua, senza rastremazione né variazione dimensionale da pressione"),
+    ("comics", 2): dict(
+        shape="round", grain="none",
+        parameters=dict(pressureSize=1, minSize=.015, maxSize=.65, pressureCurve=1.15,
+                        spacing=.045, flow=.9, wetAttack=0, pressureOpacity=.3,
+                        pressureFlow=.4, streamline=.35, taperStart=.12,
+                        taperEnd=.4, taperSize=1, taperOpacity=.25),
+        reason="liner per fumetto con escursione reale del diametro da pressione e punte lunghe; il limite massimo non blocca l'intero corpo del tratto"),
+    ("digital", 0): dict(
+        parameters=dict(alphaThreshold=.5),
+        reason="impronta rotonda con bordo binario e dimensione da pressione; nessuna quantizzazione delle coordinate su griglia"),
+    ("digital", 2): dict(
+        shape="flat", grain="none",
+        parameters=dict(roundness=1, minSize=.2, maxSize=.2, pressureSize=0,
+                        pressureCurve=1, spacing=.45, flow=1, opacity=1,
+                        alphaThreshold=.55, wetAttack=0, taperStart=0,
+                        taperEnd=0, taperSize=0),
+        reason="piccole impronte rettangolari dure a dimensione costante e passo ampio; bordo binario, senza motore a griglia pixel"),
+    ("digital", 4): dict(
+        parameters=dict(alphaThreshold=.5, flow=1, opacity=1, wetAttack=0),
+        reason="grana e forma frammentata convertite in deposito ad alpha binario; non è un algoritmo di dithering cromatico"),
+    ("digital", 8): dict(
+        shape="flat", grain="none",
+        parameters=dict(roundness=.9, pressureSize=0, minSize=.4, maxSize=.4,
+                        flow=1, opacity=1, alphaThreshold=.6, grainDepth=0,
+                        wetAttack=0, pressureCurve=1),
+        reason="spruzzi geometrici di impronte rettangolari dure, con conteggio e posizioni casuali deterministiche; nessuna griglia pixel"),
+}
 
 
 def png(path, size, values):
@@ -172,7 +229,11 @@ def generate():
             # Continuous differences reflect material response, not cosmetic IDs.
             parameters["pressureCurve"]=round(.75+material_index*.06+index*.025,3)
             parameters["grainScale"]=round(parameters.get("grainScale",1)+material_index*.055,3)
-            brush=make_brush(f"atelier-{set_id}-{index+1:02}",names[index],set_id,new_shape or shape,new_grain or grain,parameters,f"{name}: {reason}.",index)
+            special=SPECIAL_PROFILES.get((set_id,index),{})
+            parameters.update(special.get("parameters",{}))
+            configured_shape=special.get("shape",new_shape or shape)
+            configured_grain=special.get("grain",new_grain or grain)
+            brush=make_brush(f"atelier-{set_id}-{index+1:02}",names[index],set_id,configured_shape,configured_grain,parameters,f"{name}: {special.get('reason',reason)}.",index)
             brushes.append(brush)
     sets.append(dict(id="classic-foundations",libraryID="classic",name="Foundations"))
     basics=[
@@ -213,6 +274,21 @@ def validate(catalog):
     assert all(math.isfinite(v) for b in brushes for v in b["parameters"].values())
     assert all(0<=b["seed"]<2**64 for b in brushes)
     assert json.loads(json.dumps(catalog))==catalog
+    by_id={b["id"]:b for b in brushes}
+    # Check meaningful design differences rather than only JSON/hash uniqueness.
+    flats=[by_id[f"atelier-{category}-07"] for category in ["basics","design","digital"]]
+    assert len({b["parameters"]["roundness"] for b in flats})==3
+    assert flats[1]["parameters"]["azimuth"]==1 and flats[1]["parameters"]["tiltSize"]>0
+    assert flats[2]["parameters"]["alphaThreshold"]>0 and flats[2]["parameters"]["minSize"]==flats[2]["parameters"]["maxSize"]
+    technical=by_id["atelier-pens-03"]["parameters"]
+    comic=by_id["atelier-comics-03"]["parameters"]
+    point=by_id["atelier-digital-03"]["parameters"]
+    assert technical["minSize"]==technical["maxSize"] and technical["taperEnd"]==0
+    assert comic["pressureSize"]==1 and comic["maxSize"]>.5 and comic["taperEnd"]>.3
+    assert by_id["atelier-digital-03"]["shape"]=="flat" and point["alphaThreshold"]>0
+    assert all("pixel" not in b["name"].lower() for b in brushes if b["setID"]=="digital")
+    assert all(by_id[f"atelier-digital-{index:02}"]["parameters"]["alphaThreshold"]>0 for index in [1,3,5,7,9])
+    assert by_id["atelier-watercolors-09"]["name"]=="Water Mist"
 
 
 if __name__=="__main__":

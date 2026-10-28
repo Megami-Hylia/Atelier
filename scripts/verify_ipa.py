@@ -3,6 +3,7 @@
 import argparse
 import hashlib
 import json
+import math
 import plistlib
 import stat
 import struct
@@ -15,11 +16,67 @@ IOS = 2
 LC_BUILD_VERSION = 0x32
 LC_CODE_SIGNATURE = 0x1D
 MACH_MAGICS = {b"\xcf\xfa\xed\xfe", b"\xfe\xed\xfa\xcf", b"\xca\xfe\xba\xbe", b"\xbe\xba\xfe\xca", b"\xca\xfe\xba\xbf", b"\xbf\xba\xfe\xca"}
+BRUSH_SETS = {"pencils": "Pencils", "pens": "Pens", "inks": "Inks", "markers": "Markers",
+              "pastels": "Pastels", "oils": "Oils", "paints": "Paints", "gouache": "Gouache",
+              "watercolors": "Watercolors", "charcoals": "Charcoals", "basics": "Basics",
+              "lettering": "Lettering", "comics": "Comics", "design": "Design", "grunge": "Grunge",
+              "street-art": "Street Art", "digital": "Digital", "creative": "Creative"}
+SHAPES = {"round", "soft", "flat", "chisel", "bristle", "fleck"}
+GRAINS = {"none", "paper", "canvas", "noise", "charcoal", "wash"}
 
 
 def require(condition, message):
     if not condition:
         raise ValueError(message)
+
+
+def verify_catalog(archive, app):
+    catalog = json.loads(archive.read(app + "BrushCatalog.json"))
+    require(isinstance(catalog, dict) and catalog.get("schemaVersion") == 1, "Invalid bundled BrushCatalog schema")
+    libraries, sets, brushes = (catalog.get(key) for key in ("libraries", "sets", "brushes"))
+    require(all(isinstance(value, list) for value in (libraries, sets, brushes)), "Invalid bundled catalog collections")
+    require(len(libraries) == 2 and {v["id"] for v in libraries} == {"atelier", "classic"}, "Bundled libraries differ from v1 inventory")
+    expected_sets = set(BRUSH_SETS) | {"classic-foundations"}
+    require(len(sets) == 19 and {v["id"] for v in sets} == expected_sets, "Bundled sets differ from 18 sets + Classic Foundations")
+    require(all(v["libraryID"] == ("classic" if v["id"] == "classic-foundations" else "atelier") for v in sets), "Invalid set/library relationship")
+    require(all(v["name"] == BRUSH_SETS[v["id"]] for v in sets if v["id"] in BRUSH_SETS), "Required category title differs")
+    require(len(brushes) == 192, f"Expected 192 bundled presets, got {len(brushes)}")
+    ids = [v["id"] for v in brushes]
+    require(len(set(ids)) == 192, "Duplicate bundled brush IDs")
+    for set_id in BRUSH_SETS:
+        require(sum(v.get("setID") == set_id for v in brushes) == 10, f"Expected ten brushes in {set_id}")
+    classic = [v for v in brushes if v.get("setID") == "classic-foundations"]
+    require(len(classic) == 12 and {v["id"] for v in classic} == {f"classic-foundation-{i:02d}" for i in range(1, 13)}, "Classic inventory must be twelve separate Foundations")
+    for brush in brushes:
+        require(brush.get("setID") in expected_sets, "Orphaned bundled brush")
+        require(isinstance(brush.get("name"), str) and brush["name"].strip(), "Missing bundled brush name")
+        require(brush.get("shape") in SHAPES and brush.get("grain") in GRAINS, "Unknown bundled shape or grain")
+        require(type(brush.get("seed")) is int and 0 < brush["seed"] <= 0xFFFFFFFFFFFFFFFF, "Invalid persistent brush seed")
+        params = brush.get("parameters")
+        require(isinstance(params, dict) and params, "Missing persistent brush parameters")
+        require(all(type(v) in (int, float) and math.isfinite(v) for v in params.values()), "Invalid numeric brush parameters")
+    require(catalog.get("selectedID") in ids and all(v in ids for v in catalog.get("recentIDs", [])), "Invalid catalog selection or recents")
+    assets = []
+    for prefix, values in (("BrushShape", SHAPES), ("BrushGrain", GRAINS)):
+        for value in sorted(values):
+            name = f"{app}{prefix}-{value}.png"
+            data = archive.read(name)
+            require(len(data) >= 33 and data[:8] == b"\x89PNG\r\n\x1a\n", f"Invalid PNG signature: {name}")
+            # iOS copypng may prepend a CgBI chunk before IHDR.
+            offset, dimensions = 8, None
+            while offset + 12 <= len(data):
+                length = struct.unpack_from(">I", data, offset)[0]
+                require(offset + length + 12 <= len(data), f"Truncated PNG chunk: {name}")
+                if data[offset + 4:offset + 8] == b"IHDR":
+                    require(length == 13, f"Invalid PNG IHDR: {name}")
+                    dimensions = struct.unpack_from(">II", data, offset + 8)
+                    break
+                offset += length + 12
+            require(dimensions and all(0 < size <= 2048 for size in dimensions), f"Invalid brush asset dimensions: {name}")
+            assets.append({"path": name, "width": dimensions[0], "height": dimensions[1]})
+    return {"schema_version": 1, "libraries": 2, "new_sets": 18, "presets_per_new_set": 10,
+            "new_presets": 180, "classic_foundations": 12, "total_presets": 192, "assets": assets,
+            "scope": "Offline resource inclusion and configuration validation; qualitative behavior requires renderer/device tests."}
 
 
 def macho_slices(data):
@@ -99,7 +156,7 @@ def verify(path):
         require(shader_name in names, "Compiled default.metallib is absent")
         shader = archive.read(shader_name)
         require(len(shader) > 32 and shader[:4] == b"MTLB", "Invalid compiled Metal library")
-        require(any(name.endswith(".json") for name in names), "No bundled preset JSON found")
+        catalog_report = verify_catalog(archive, app)
     with path.open("rb") as stream:
         checksum = hashlib.file_digest(stream, "sha256").hexdigest()
     return {
@@ -110,6 +167,7 @@ def verify(path):
         "executable": executable, "device_family": info["UIDeviceFamily"],
         "platform": info["DTPlatformName"], "minimum_os": info.get("MinimumOSVersion"),
         "metal_library": shader_name, "mach_o_binaries": binaries,
+        "bundled_brushes": catalog_report,
         "provisioning_profiles": [], "signatures": [],
         "scope": "Structural validation only; no installation, hardware or parity claim."
     }
@@ -122,7 +180,7 @@ def main():
     args = parser.parse_args()
     try:
         report = verify(args.ipa)
-    except (ValueError, KeyError, OSError, zipfile.BadZipFile, plistlib.InvalidFileException, struct.error) as error:
+    except (ValueError, TypeError, KeyError, OSError, zipfile.BadZipFile, plistlib.InvalidFileException, struct.error) as error:
         print(f"IPA VERIFICATION FAILED: {error}", file=sys.stderr)
         return 1
     output = json.dumps(report, indent=2)
