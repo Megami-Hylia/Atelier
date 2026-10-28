@@ -5,7 +5,7 @@ Stato al **28 ottobre 2026**: incremento di sorgenti in lavorazione; la parità 
 | Criterio | Stato | Evidenza / passaggio necessario |
 |---|---|---|
 | A — Sorgenti e progetto completati | **incompleto** | sorgenti dell’incremento e progetto presenti; molte voci della matrice assenti o parziali |
-| B — Build nativa device riuscita | **non eseguita** | manca esecuzione autorizzata su runner macOS/Xcode |
+| B — Build nativa device riuscita | **in attesa di esito** | repository privato autorizzato creato, workflow avviato/in coda; nessun rapporto di successo acquisito |
 | C — IPA unsigned confezionata e verificata | **non generata** | verrà prodotta solo dopo B e controlli Mach-O/plist/firma riusciti |
 | D — Firma/installazione Windows | **non eseguita** | passo separato, credenziali inserite dall’utente nel programma locale |
 | E — Test iPad reale e prestazioni | **non eseguiti** | nessun iPad o Apple Pencil collegato per questa consegna |
@@ -19,15 +19,27 @@ Non esiste un `Atelier-unsigned.ipa` valido finché la CI non lo costruisce e ve
 |---|---|---|---|
 | BR-A01 | installazione pulita, rete disattivata, primo avvio | 18 set × 10 preset più basi separate; nessuna risorsa mancante | non eseguita su app |
 | BR-A02 | selezionare almeno un preset per ogni categoria e dipingere lo stesso input | nome selezionato, canvas, differenza motivata del segno | non eseguita su app |
-| BR-A03 | generare tavola dal renderer comune con input/colore/seed identici | PNG con preset annotati, parametri, versione motore e hash | da generare su Metal; nessuna tavola simulata sostitutiva |
+| BR-A03 | generare tavola dal renderer comune con input/colore/seed identici | PNG con preset annotati, parametri, versione motore e hash | `RendererEvidence.generate` e test nativo predisposti; esecuzione non certificata |
 | BR-A04 | per ogni controllo modificare solo un parametro, stessa traccia e seed | differenza pertinente, immagine prima/dopo e metrica | non eseguita; vedi matrice parametri |
 | BR-A05 | crea → duplica → rinomina → riordina → sposta → salva → termina → riapri → reset | JSON e asset prima/dopo identici salvo cambi richiesti | test di modello da eseguire; flusso UI non verificato |
 | BR-A06 | dipingere campioni multicolore; sfumare; cancellare usando la stessa famiglia | sfumino trasporta colore e gomma riduce alpha; nessun tratto colore aggiunto dalla gomma | non eseguita su GPU/hardware |
-| BR-A07 | esporta/importa singolo pennello, set e libreria originali; tentare file malformati | round trip, ordine, asset e parametri; rifiuti espliciti | da eseguire sui formati Atelier; proprietari non supportati |
+| BR-A07 | esporta/importa singolo pennello, set e libreria originali; tentare file malformati | round trip, ordine, asset e parametri; rifiuti espliciti | JSON Atelier originale; export autonomo set ancora incompleto, test native predisposti, proprietari non supportati |
 | BR-A08 | tratto → undo → redo → salva → riapri → export | stesso risultato del renderer a parità di input; documentare tolleranza float | non eseguita su Metal |
 | BR-A09 | ripetere BR-A02/04/06 con iPad e Pencil identificati | log hardware con sensori effettivi e capacità disponibili | non eseguita; input sintetico separato |
 
 Lo stato “catalogo numericamente valido” non soddisfa BR-A02/03/04. Due preset con JSON diverso possono restare troppo simili nel segno; la distinzione qualitativa richiede una tavola reale e il confronto visivo.
+
+`AtelierTests/RendererTests.swift` contiene le seguenti prove predisposte, il cui esito è ancora da acquisire:
+
+- `testDeterministicReplayAndSpacingAffectPixels`: replica input e varia spacing, grana, taper, pressione e colore, cercando differenze nei pixel.
+- `testUndoRedoReopenPreservePixelsAndParameters`: confronta contenuto e output dopo undo/redo e riapertura.
+- `testEraserChangesAlphaAndSmudgeMovesExistingPigment`: misura riduzione dell’alpha e trasporto di pigmento verso una zona prima trasparente.
+- `testOpaqueStrokeHasNoTransparentTileSeam`: verifica continuità opaca in tre pixel adiacenti al confine; non misura continuità della texture.
+- `testCatalogComparisonFromActualMetalRenderer`: genera tavola dal motore effettivo e controlla unicità degli hash per l’input sintetico scelto.
+- `testInvalidDocumentCannotReplaceCurrentState`: protegge lo stato corrente da modifiche non valide.
+- `testDuplicatingDocumentPreservesOriginalFile`: verifica che la copia di un documento non alteri il file originale.
+
+`BrushTests.swift` esercita persistenza, ripristino, validazione e JSON originali. L’esistenza dei test non costituisce un risultato di esecuzione. Una differenza di PNG prova un effetto, ma non da sola fedeltà qualitativa o equivalenza fisica con il riferimento.
 
 ## Scenari del renderer e dei documenti
 

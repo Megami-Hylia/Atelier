@@ -87,6 +87,9 @@ struct BrushStudioView: View {
                 .frame(minWidth: 290)
                 Divider()
                 VStack(spacing: 12) {
+                    if let message = store.errorMessage {
+                        Text(message).font(.caption).foregroundStyle(.red).textSelection(.enabled)
+                    }
                     HStack { Text("Area di prova").font(.headline); Spacer(); Button("Pulisci") { pad.clear() } }
                     CanvasSurface(document: pad, brush: draft, tool: .paint, color: SIMD4<Float>(0.12, 0.2, 0.35, 1), brushSize: 48, opacity: 1)
                         .background(.white).clipShape(RoundedRectangle(cornerRadius: 8))

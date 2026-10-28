@@ -46,18 +46,28 @@ import Metal
     func testEraserChangesAlphaAndSmudgeMovesExistingPigment() throws {
         let painter = try MetalPainter()
         var contents = DocumentContents(width: 384, height: 128); contents.background = .zero
-        let paint = stroke()
+        var paint = stroke(); paint.samples = [PencilSample(x: 100, y: 64, time: 0)]; paint.size = 40
         contents.layers[0].strokes = [paint]
-        let before = try painter.image(contents).pngData()
-        var erase = stroke(tool: .erase); erase.size = 64; contents.layers[0].strokes.append(erase)
-        XCTAssertNotEqual(before, try painter.image(contents).pngData())
+        let texture = try painter.render(contents)
+        let paintedAlpha = alpha(texture, x: 100, y: 64)
+        XCTAssertGreaterThan(paintedAlpha, 0.9)
+        XCTAssertLessThan(alpha(texture, x: 180, y: 64), 0.01)
+        var erase = paint; erase.tool = .erase; contents.layers[0].strokes.append(erase)
+        let erased = try painter.render(contents)
+        XCTAssertLessThan(alpha(erased, x: 100, y: 64), paintedAlpha * 0.5)
         var smudge = stroke(tool: .smudge)
-        for i in smudge.samples.indices { smudge.samples[i].x += 20; smudge.samples[i].y += 8 }
-        smudge.brush.parameters["smudge"] = 1; smudge.size = 64
+        smudge.samples = [PencilSample(x: 100, y: 64, time: 0), PencilSample(x: 200, y: 64, time: 1)]
+        smudge.brush.parameters["smudge"] = 1; smudge.size = 40
         contents.layers[0].strokes = [paint, smudge]
-        XCTAssertNotEqual(before, try painter.image(contents).pngData())
+        let dragged = try painter.render(contents)
+        XCTAssertGreaterThan(alpha(dragged, x: 180, y: 64), 0.1, "Smudge must transport existing pigment to previously transparent pixels.")
     }
-    func testTileBoundaryHasNoGrainCoordinateReset() throws {
+    private func alpha(_ texture: MTLTexture, x: Int, y: Int) -> Float {
+        var pixel = [UInt16](repeating: 0, count: 4)
+        pixel.withUnsafeMutableBytes { texture.getBytes($0.baseAddress!, bytesPerRow: 8, from: MTLRegionMake2D(x, y, 1, 1), mipmapLevel: 0) }
+        return Float(Float16(bitPattern: pixel[3]))
+    }
+    func testOpaqueStrokeHasNoTransparentTileSeam() throws {
         // A long opaque stroke must cross x=256 without opening a transparent seam.
         let painter = try MetalPainter()
         var content = DocumentContents(width: 512, height: 128); content.background = .zero
@@ -92,5 +102,16 @@ import Metal
         document.change { $0.width = Int.max }
         XCTAssertEqual(document.contents, previous)
         XCTAssertNotNil(document.errorMessage)
+    }
+    func testDuplicatingDocumentPreservesOriginalFile() throws {
+        let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: folder) }
+        let source = folder.appendingPathComponent("original.atelier"), destination = folder.appendingPathComponent("copy.atelier")
+        let original = PaintDocument(); try original.save(to: source)
+        let bytes = try Data(contentsOf: source)
+        let copy = PaintDocument(); try copy.load(from: source); copy.storageURL = nil
+        copy.change { $0.id = UUID(); $0.name += " copia" }; try copy.save(to: destination)
+        XCTAssertEqual(bytes, try Data(contentsOf: source))
+        XCTAssertNotEqual(original.contents.id, copy.contents.id)
     }
 }

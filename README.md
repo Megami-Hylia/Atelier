@@ -1,6 +1,6 @@
 # Atelier per iPad
 
-**Progetto incompleto.** Questo pacchetto contiene un incremento nativo SwiftUI/UIKit/Metal dedicato al sistema pennelli, ai documenti e alla pipeline unsigned. Non è una replica completa o verificata di Procreate. La build nativa non è stata eseguita in questo ambiente Windows e **l’IPA non è stata generata**.
+**Progetto incompleto.** Questo pacchetto contiene un incremento nativo SwiftUI/UIKit/Metal dedicato al sistema pennelli, ai documenti e alla pipeline unsigned. Non è una replica completa o verificata di Procreate. La CI macOS è stata avviata sul repository privato autorizzato; finché manca un rapporto di successo la build non è attestata e **l’IPA non è dichiarata generata**.
 
 Il prodotto è pensato per funzionare offline senza acquisti, abbonamenti, pubblicità o strumenti a pagamento. Il codice dell’incremento e le risorse dei pennelli sono originali. Le categorie e il riferimento 5.4.14 organizzano il confronto richiesto; non implicano identità di pennelli, algoritmi o compatibilità proprietaria.
 

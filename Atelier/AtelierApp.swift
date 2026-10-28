@@ -87,6 +87,7 @@ struct AtelierRoot: View {
     private func duplicate(_ url: URL) {
         do {
             let d = PaintDocument(); try d.load(from: url)
+            d.storageURL = nil
             d.change { $0.id = UUID(); $0.name += " copia" }
             try d.save(to: gallery.folder.appendingPathComponent(d.contents.id.uuidString).appendingPathExtension("atelier")); gallery.refresh()
         } catch { self.error = error.localizedDescription }

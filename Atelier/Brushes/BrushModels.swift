@@ -1,6 +1,7 @@
 import Foundation
 import Combine
 import SwiftUI
+import ImageIO
 
 struct BrushPreset: Codable, Identifiable, Equatable {
     var id: String
@@ -61,6 +62,8 @@ final class BrushStore: ObservableObject {
     @Published var errorMessage: String?
     private let storageURL: URL
     private var factory: BrushArchive?
+    private var durableArchive: BrushArchive?
+    private var recoveryCopyFailed = false
 
     var selectedBrush: BrushPreset { brushes.first { $0.id == selectedID } ?? brushes.first ?? .fallback }
     var recentBrushes: [BrushPreset] { recentIDs.compactMap { id in brushes.first { $0.id == id } } }
@@ -89,10 +92,12 @@ final class BrushStore: ObservableObject {
             // Preserve damaged files; never overwrite recovery evidence with factory defaults.
             if FileManager.default.fileExists(atPath: self.storageURL.path) {
                 let backup = self.storageURL.appendingPathExtension("recovery-\(UUID().uuidString)")
-                try? FileManager.default.copyItem(at: self.storageURL, to: backup)
+                do { try FileManager.default.copyItem(at: self.storageURL, to: backup) }
+                catch { recoveryCopyFailed = true }
             }
             errorMessage = "Caricamento pennelli: \(error.localizedDescription). Il file esistente è conservato."
         }
+        if !brushes.isEmpty { durableArchive = archive }
     }
 
     private func apply(_ archive: BrushArchive) {
@@ -111,7 +116,7 @@ final class BrushStore: ObservableObject {
     static func validate(_ archive: BrushArchive) throws {
         guard archive.schemaVersion == 1 else { throw BrushArchiveError.invalid("Versione libreria non supportata.") }
         guard archive.brushes.count <= 10_000, archive.sets.count <= 1_000, archive.libraries.count <= 100 else { throw BrushArchiveError.invalid("La libreria supera i limiti di sicurezza.") }
-        guard !archive.brushes.isEmpty, !archive.sets.isEmpty, !archive.libraries.isEmpty else { throw BrushArchiveError.invalid("La libreria deve contenere almeno un pennello, un set e una raccolta.") }
+        guard !archive.sets.isEmpty, !archive.libraries.isEmpty else { throw BrushArchiveError.invalid("La libreria deve contenere almeno un set e una raccolta.") }
         guard Set(archive.brushes.map(\.id)).count == archive.brushes.count,
               Set(archive.sets.map(\.id)).count == archive.sets.count,
               Set(archive.libraries.map(\.id)).count == archive.libraries.count else { throw BrushArchiveError.invalid("Identificatori duplicati nella libreria.") }
@@ -125,22 +130,42 @@ final class BrushStore: ObservableObject {
                   (brush.shapeData?.count ?? 0) <= 8_000_000, (brush.grainData?.count ?? 0) <= 8_000_000 else { throw BrushArchiveError.invalid("Configurazione pennello non valida.") }
             guard ["round", "soft", "flat", "bristle", "fleck", "chisel"].contains(brush.shape),
                   ["none", "paper", "canvas", "charcoal", "wash", "noise"].contains(brush.grain) else { throw BrushArchiveError.invalid("Forma o grana sconosciuta.") }
+            for data in [brush.shapeData, brush.grainData].compactMap({ $0 }) {
+                guard let source = CGImageSourceCreateWithData(data as CFData, nil),
+                      CGImageSourceGetCount(source) == 1,
+                      let type = CGImageSourceGetType(source), type as String == "public.png",
+                      let properties = CGImageSourceCopyPropertiesAtIndex(source, 0, nil) as? [CFString: Any],
+                      let width = properties[kCGImagePropertyPixelWidth] as? Int,
+                      let height = properties[kCGImagePropertyPixelHeight] as? Int,
+                      (1...512).contains(width), (1...512).contains(height) else {
+                    throw BrushArchiveError.invalid("Sorgente importata non valida: serve un PNG singolo entro 512 × 512 pixel.")
+                }
+            }
             for descriptor in BrushParameter.all {
                 if let value = brush.parameters[descriptor.id], !descriptor.range.contains(value) {
                     throw BrushArchiveError.invalid("Parametro fuori intervallo: \(descriptor.title).")
                 }
+            }
+            guard brush.value("minSize") <= brush.value("maxSize", 1),
+                  brush.value("minOpacity") <= brush.value("maxOpacity", 1) else {
+                throw BrushArchiveError.invalid("Il minimo del pennello non può superare il massimo.")
             }
         }
     }
 
     func persist() {
         do {
+            guard !recoveryCopyFailed else { throw BrushArchiveError.invalid("Impossibile conservare una copia di recupero del file precedente. Salvataggio bloccato per proteggerlo.") }
             try Self.validate(archive)
             try FileManager.default.createDirectory(at: storageURL.deletingLastPathComponent(), withIntermediateDirectories: true)
             let encoder = JSONEncoder(); encoder.outputFormatting = [.sortedKeys]
             try encoder.encode(archive).write(to: storageURL, options: .atomic)
+            durableArchive = archive
             errorMessage = nil
-        } catch { errorMessage = "Salvataggio pennelli: \(error.localizedDescription)" }
+        } catch {
+            if let durableArchive { apply(durableArchive) }
+            errorMessage = "Salvataggio pennelli annullato: \(error.localizedDescription)"
+        }
     }
 
     func select(_ brush: BrushPreset) {
@@ -212,6 +237,14 @@ final class BrushStore: ObservableObject {
         sets[index].name = name; persist()
     }
 
+    func duplicateSet(_ set: BrushSet) {
+        let copy = BrushSet(id: UUID().uuidString, libraryID: set.libraryID, name: set.name + " copia")
+        let originals = brushes.filter { $0.setID == set.id }
+        sets.append(copy)
+        for var brush in originals { brush.id = UUID().uuidString; brush.setID = copy.id; brushes.append(brush) }
+        selectedSetID = copy.id; persist()
+    }
+
     func deleteSet(_ set: BrushSet) {
         guard sets.count > 1, let destination = sets.first(where: { $0.id != set.id }) else { return }
         for index in brushes.indices where brushes[index].setID == set.id { brushes[index].setID = destination.id }
@@ -260,10 +293,13 @@ final class BrushStore: ObservableObject {
         persist()
     }
 
-    func exportData(brush: BrushPreset? = nil, libraryID: String? = nil) throws -> Data {
+    func exportData(brush: BrushPreset? = nil, libraryID: String? = nil, setID: String? = nil) throws -> Data {
         var result = archive
         if let brush {
             result.brushes = [brush]; result.sets = sets.filter { $0.id == brush.setID }
+            result.libraries = libraries.filter { library in result.sets.contains { $0.libraryID == library.id } }
+        } else if let setID {
+            result.sets = sets.filter { $0.id == setID }; result.brushes = brushes.filter { $0.setID == setID }
             result.libraries = libraries.filter { library in result.sets.contains { $0.libraryID == library.id } }
         } else if let libraryID {
             result.libraries = libraries.filter { $0.id == libraryID }; result.sets = sets.filter { $0.libraryID == libraryID }

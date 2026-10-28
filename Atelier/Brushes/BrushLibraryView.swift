@@ -43,6 +43,15 @@ struct BrushLibraryView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
+                if let message = store.errorMessage {
+                    HStack(alignment: .top) {
+                        Text(message).font(.caption).foregroundStyle(.red).textSelection(.enabled)
+                        Spacer()
+                        Button("Chiudi") { store.errorMessage = nil }
+                    }
+                    .padding().background(Color.red.opacity(0.08))
+                    .accessibilityElement(children: .combine)
+                }
                 HStack {
                     Menu {
                         ForEach(store.libraries) { library in
@@ -86,6 +95,8 @@ struct BrushLibraryView: View {
                             .listRowBackground(!recents && store.selectedSetID == set.id ? Color.accentColor.opacity(0.2) : Color.clear)
                             .contextMenu {
                                 Button("Rinomina") { name = set.name; nameAction = .renameSet(set); showName = true }
+                                Button("Duplica set") { store.duplicateSet(set) }
+                                Button("Esporta set JSON Atelier") { prepareExport(setID: set.id) }
                                 Button("Elimina set e sposta i pennelli", role: .destructive) { store.deleteSet(set) }
                             }
                         }
@@ -109,6 +120,7 @@ struct BrushLibraryView: View {
                                     .accessibilityLabel("Modifica \(brush.name)")
                             }
                             .listRowBackground(store.selectedID == brush.id ? Color.accentColor.opacity(0.25) : Color.clear)
+                            .moveDisabled(!query.isEmpty || recents)
                             .contextMenu {
                                 Button("Modifica") { editingBrush = brush }
                                 Button("Rinomina") { name = brush.name; nameAction = .renameBrush(brush); showName = true }
@@ -171,8 +183,8 @@ struct BrushLibraryView: View {
         }
     }
 
-    private func prepareExport(brush: BrushPreset? = nil, libraryID: String? = nil) {
-        do { exportDocument = BrushJSONDocument(data: try store.exportData(brush: brush, libraryID: libraryID)); exporting = true }
+    private func prepareExport(brush: BrushPreset? = nil, libraryID: String? = nil, setID: String? = nil) {
+        do { exportDocument = BrushJSONDocument(data: try store.exportData(brush: brush, libraryID: libraryID, setID: setID)); exporting = true }
         catch { store.errorMessage = error.localizedDescription }
     }
 }

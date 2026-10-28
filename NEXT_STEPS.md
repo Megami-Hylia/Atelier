@@ -4,7 +4,7 @@ L’obiettivo originale resta l’app iPad completa richiesta, con baseline 5.4.
 
 ## Prima dell’accettazione dell’incremento
 
-1. Collegare il progetto a un repository GitHub autorizzato e abilitare Actions sul repository. Eseguire il workflow macOS da Windows seguendo [README_WINDOWS.md](README_WINDOWS.md). Correggere ogni errore Swift/Metal/Xcode prima di produrre l’IPA. Non servono Apple ID o certificati per questa build.
+1. Il repository GitHub privato autorizzato [Megami-Hylia/Atelier](https://github.com/Megami-Hylia/Atelier) è stato creato e la CI avviata. Acquisire l’esito del workflow macOS da Windows seguendo [README_WINDOWS.md](README_WINDOWS.md); correggere ogni errore Swift/Metal/Xcode prima di produrre l’IPA. Non servono Apple ID o certificati per questa build.
 2. Eseguire i test di modello e il rendering comparativo reale su Metal. Generare la tavola preset e le prove per parametro; registrare commit e hash. Risolvere somiglianze e parametri inefficaci invece di contare soltanto i nomi.
 3. Verificare librerie/set/pennelli con salvataggio, riavvio, import/export, errori di dati e disco. Riconciliare tutti i controlli implementati con [BRUSH_PARAMETERS.md](BRUSH_PARAMETERS.md).
 4. Verificare il bundle device e il packaging unsigned; scaricare `Atelier-unsigned.ipa` e rapporto CI. Aggiornare separatamente B/C in [ACCEPTANCE.md](ACCEPTANCE.md), mantenendo D/E non eseguiti finché manca hardware/installazione.
