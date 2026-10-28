@@ -102,6 +102,20 @@ import Metal
         document.change { $0.width = Int.max }
         XCTAssertEqual(document.contents, previous)
         XCTAssertNotNil(document.errorMessage)
+        document.errorMessage = nil
+        document.change { $0.selectedLayerID = UUID() }
+        XCTAssertEqual(document.contents, previous)
+        XCTAssertNotNil(document.errorMessage)
+    }
+    func testOverBudgetStrokeIsRejectedInsteadOfSilentlyTruncated() throws {
+        var tooLong = stroke(); tooLong.size = 1; tooLong.brush.parameters["spacing"] = 0.01
+        tooLong.samples = [PencilSample(x: -32768, y: 64, time: 0), PencilSample(x: 32768, y: 64, time: 1)]
+        XCTAssertThrowsError(try StrokePlanner.stamps(for: tooLong))
+        let document = PaintDocument(width: 384, height: 128)
+        let previous = document.contents
+        document.commit(tooLong)
+        XCTAssertEqual(document.contents, previous)
+        XCTAssertNotNil(document.errorMessage)
     }
     func testDuplicatingDocumentPreservesOriginalFile() throws {
         let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)

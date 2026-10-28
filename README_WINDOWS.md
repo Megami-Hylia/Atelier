@@ -47,6 +47,8 @@ Il valore deve coincidere con `ipa-verification.json` e `SHA256SUMS.txt`. Il rep
 
 `scripts/build_unsigned_ipa.sh` compila l’app con firma disabilitata anche nelle impostazioni effettive dei target: `CODE_SIGNING_ALLOWED=NO`, `CODE_SIGNING_REQUIRED=NO`, `CODE_SIGN_IDENTITY=`. Non usa `-exportArchive`. Copia con `ditto` il bundle per dispositivo e crea lo ZIP preservando permessi e collegamenti.
 
+Su Xcode26 il compilatore Metal può essere un componente separato. Lo script verifica `xcrun metal -v` e, se mancante, scarica il componente ufficiale con `xcodebuild -downloadComponent MetalToolchain`, poi registra la versione effettiva. Questo download avviene sul runner macOS e richiede rete e spazio disco; non usa account Apple personali.
+
 `scripts/verify_ipa.py` controlla la radice `Payload/Atelier.app`, Info.plist generato, famiglia dispositivo esattamente `[2]`, piattaforma `iPhoneOS/iphoneos`, eseguibile Mach-O `MH_EXECUTE` con permesso di esecuzione, `arm64`, `LC_BUILD_VERSION` piattaforma **2** (iOS device), assenza di `LC_CODE_SIGNATURE`, directory di firma e provisioning, libreria Metal compilata e risorse JSON. Rifiuta quindi anche un binario **arm64 per simulatore**. Questi controlli sono strutturali; non eseguono l’app su hardware.
 
 Il progetto imposta `TARGETED_DEVICE_FAMILY=2`, `SUPPORTS_MACCATALYST=NO`, `SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD=NO` e `SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD=NO`. Non esistono target iPhone, Mac, Android o web. `iphonesimulator` serve unicamente ai test iPad e non entra nell’IPA. Un’eventuale distribuzione App Store richiederebbe separatamente una configurazione App Store Connect coerente e l’esclusione della disponibilità sui Mac Apple Silicon; non viene pubblicato nulla in questo flusso.

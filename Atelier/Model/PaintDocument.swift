@@ -65,6 +65,7 @@ struct DocumentContents: Codable, Equatable {
               colorSpace == "sRGB", (36...1200).contains(dpi),
               [background.x, background.y, background.z, background.w].allSatisfy({ $0.isFinite && (0...1).contains($0) }),
               Set(layers.map(\.id)).count == layers.count else { throw DocumentError.invalidData }
+        guard selectedLayerID == nil || layers.contains(where: { $0.id == selectedLayerID }) else { throw DocumentError.invalidData }
         guard layers.allSatisfy({ layer in
             layer.opacity.isFinite && (0...1).contains(layer.opacity) && (0...2).contains(layer.blendMode) &&
             layer.strokes.allSatisfy { stroke in
@@ -128,6 +129,9 @@ enum DocumentError: LocalizedError {
     func commit(_ stroke: PaintStroke) {
         guard !stroke.samples.isEmpty else { return }
         guard !selectedLayer.locked else { errorMessage = DocumentError.lockedLayer.localizedDescription; return }
+        do {
+            _ = try StrokePlanner.tileBins(StrokePlanner.stamps(for: stroke), width: contents.width, height: contents.height)
+        } catch { errorMessage = error.localizedDescription; return }
         let id = selectedLayer.id
         change { value in
             guard let index = value.layers.firstIndex(where: { $0.id == id }) else { return }
@@ -205,6 +209,9 @@ enum DocumentError: LocalizedError {
         guard size <= 128 * 1024 * 1024 else { throw DocumentError.tooLarge }
         let loaded = try JSONDecoder().decode(DocumentContents.self, from: Data(contentsOf: url))
         try loaded.validate()
+        for layer in loaded.layers { for stroke in layer.strokes {
+            _ = try StrokePlanner.tileBins(StrokePlanner.stamps(for: stroke), width: loaded.width, height: loaded.height)
+        } }
         contents = loaded; storageURL = url; undoStates = []; redoStates = []; revision &+= 1
     }
     private func autosave() {

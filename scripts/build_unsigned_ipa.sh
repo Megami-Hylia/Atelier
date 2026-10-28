@@ -24,6 +24,13 @@ xcrun --sdk iphoneos --show-sdk-version | tee "$OUT/sdk-version.txt"
 grep -qx '26.2' "$OUT/sdk-version.txt"
 sw_vers > "$OUT/macos-version.txt"
 xcrun swift --version > "$OUT/swift-version.txt"
+if ! xcrun --sdk iphoneos metal -v > "$OUT/metal-version.txt" 2>&1; then
+  cat "$OUT/metal-version.txt"
+  echo 'Installing the official Metal Toolchain component for the selected Xcode.'
+  xcodebuild -downloadComponent MetalToolchain
+  xcrun --sdk iphoneos metal -v > "$OUT/metal-version.txt" 2>&1
+fi
+cat "$OUT/metal-version.txt"
 
 BUILD_ARGS=(-project Atelier.xcodeproj -scheme Atelier -configuration Release
   -sdk iphoneos -destination 'generic/platform=iOS' -derivedDataPath "$DERIVED"
@@ -80,7 +87,7 @@ report = {'status':'BUILT_AND_STRUCTURALLY_VERIFIED', 'commit':commit,
  'runner_image':os.environ.get('ImageOS'), 'runner_image_version':os.environ.get('ImageVersion'),
  'workflow_run_url':f"{os.environ.get('GITHUB_SERVER_URL','https://github.com')}/{os.environ.get('GITHUB_REPOSITORY','')}/actions/runs/{os.environ.get('GITHUB_RUN_ID','')}",
  'xcode':read('xcode-version.txt'), 'sdk':read('sdk-version.txt'), 'macos':read('macos-version.txt'),
- 'swift':read('swift-version.txt'), 'ipa':json.loads(read('ipa-verification.json')),
+ 'swift':read('swift-version.txt'), 'metal':read('metal-version.txt'), 'ipa':json.loads(read('ipa-verification.json')),
  'signing':'disabled; no Apple secrets used', 'hardware_tests':'not executed by this script',
  'simulator_tests':'separate CI step; see test log/xcresult', 'parity':'not demonstrated by build'}
 (out/'BUILD_REPORT.json').write_text(json.dumps(report,indent=2)+'\n')

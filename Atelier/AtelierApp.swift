@@ -159,7 +159,12 @@ struct PaintingWorkspace: View {
     }
     private var toolbar: some View {
         HStack(spacing: 22) {
-            Button("Galleria") { leave() }.font(.headline)
+            Button("Galleria") {
+                do {
+                    if let url = document.storageURL { try document.save(to: url) }
+                    leave()
+                } catch { document.errorMessage = "Impossibile salvare: \(error.localizedDescription). Il documento resta aperto." }
+            }.font(.headline)
             Button { panel = "actions" } label: { Image(systemName: "wrench") }.accessibilityLabel("Azioni")
                 .popover(isPresented: presented("actions"), arrowEdge: .top) { actions.frame(width: 330) }
             Spacer()

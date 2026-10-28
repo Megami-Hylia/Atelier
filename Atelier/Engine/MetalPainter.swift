@@ -105,19 +105,7 @@ private struct TileInfo {
         lastStampCount += stamps.count
         guard !stamps.isEmpty else { return }
         let tileSize = 256, columns = (source.width + tileSize - 1) / tileSize
-        var bins: [Int: [GPUStamp]] = [:]
-        var entryCount = 0
-        for stamp in stamps {
-            let extent = stamp.geometry.z * 1.5
-            let x0 = max(0, Int(floor((stamp.geometry.x - extent) / Float(tileSize))))
-            let y0 = max(0, Int(floor((stamp.geometry.y - extent) / Float(tileSize))))
-            let x1 = min(columns - 1, Int(floor((stamp.geometry.x + extent) / Float(tileSize))))
-            let y1 = min((source.height - 1) / tileSize, Int(floor((stamp.geometry.y + extent) / Float(tileSize))))
-            guard x1 >= x0, y1 >= y0 else { continue }
-            entryCount += (x1 - x0 + 1) * (y1 - y0 + 1)
-            guard entryCount <= 262_144 else { throw DocumentError.strokeBudget }
-            for y in y0...y1 { for x in x0...x1 { bins[y * columns + x, default: []].append(stamp) } }
-        }
+        let bins = try StrokePlanner.tileBins(stamps, width: source.width, height: source.height)
         let shape = try asset(stroke.brush, shape: true), grain = try asset(stroke.brush, shape: false)
         for key in bins.keys.sorted() {
             guard let values = bins[key], let encoder = command.makeComputeCommandEncoder() else { throw RenderError.command("tile encoder") }

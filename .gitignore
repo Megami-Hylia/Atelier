@@ -10,3 +10,4 @@ __pycache__/
 *.cer
 *.ipa
 *.xcarchive/
+docs/build-evidence/

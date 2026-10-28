@@ -24,6 +24,24 @@ struct GPUStamp {
 }
 
 enum StrokePlanner {
+    static func tileBins(_ stamps: [GPUStamp], width: Int, height: Int) throws -> [Int: [GPUStamp]] {
+        let tileSize = 256, columns = (width + tileSize - 1) / tileSize
+        var bins: [Int: [GPUStamp]] = [:]
+        var entryCount = 0
+        for stamp in stamps {
+            let extent = stamp.geometry.z * 1.5
+            let x0 = max(0, Int(floor((stamp.geometry.x - extent) / Float(tileSize))))
+            let y0 = max(0, Int(floor((stamp.geometry.y - extent) / Float(tileSize))))
+            let x1 = min(columns - 1, Int(floor((stamp.geometry.x + extent) / Float(tileSize))))
+            let y1 = min((height - 1) / tileSize, Int(floor((stamp.geometry.y + extent) / Float(tileSize))))
+            guard x1 >= x0, y1 >= y0 else { continue }
+            entryCount += (x1 - x0 + 1) * (y1 - y0 + 1)
+            guard entryCount <= 262_144 else { throw DocumentError.strokeBudget }
+            for y in y0...y1 { for x in x0...x1 { bins[y * columns + x, default: []].append(stamp) } }
+        }
+        return bins
+    }
+
     static func stamps(for stroke: PaintStroke, finished: Bool = true) throws -> [GPUStamp] {
         guard !stroke.samples.isEmpty else { return [] }
         let brush = stroke.brush
