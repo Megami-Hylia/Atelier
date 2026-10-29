@@ -140,6 +140,7 @@ struct PaintingWorkspace: View {
     @AppStorage("leftHanded") private var leftHanded = false
     @AppStorage("fingerPainting") private var fingerPainting = false
     @State private var immersive = false
+    @State private var selecting = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -148,6 +149,7 @@ struct PaintingWorkspace: View {
                 Color(white: 0.19)
                 CanvasSurface(document: document, brush: brushes.selectedBrush, tool: tool, color: rgba(color), brushSize: size, opacity: opacity,
                               fingerPainting: fingerPainting, onToolChange: { tool = $0 }, onPalette: { panel = "color" }, onClipboard: { panel = "clipboard" }, onQuickMenu: { panel = "quick" })
+                    .overlay { if selecting { TransformSelectionView(document: document) { selecting = false } } }
                     .aspectRatio(CGFloat(document.contents.width) / CGFloat(document.contents.height), contentMode: .fit)
                     .padding(44)
                 if !immersive { sideControls }
@@ -182,6 +184,7 @@ struct PaintingWorkspace: View {
             }.font(.headline)
             Button { panel = "actions" } label: { Image(systemName: "wrench") }.accessibilityLabel("Azioni")
                 .popover(isPresented: presented("actions"), arrowEdge: .top) { actions.frame(width: 330) }
+            Button { selecting.toggle(); panel = nil } label: { Image(systemName: "lasso").foregroundStyle(selecting ? Color.blue : .white) }.accessibilityLabel("Selezione e trasformazione")
             Spacer()
             toolButton(.paint, "paintbrush.pointed.fill", "Pennello")
             toolButton(.smudge, "hand.draw.fill", "Sfumino")
