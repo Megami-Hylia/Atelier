@@ -32,7 +32,13 @@ struct TransformSelectionView: View {
                     }
                     .onEnded { value in
                         if moving {
-                            transform { point, _ in CGPoint(x: point.x + value.translation.width / sx, y: point.y + value.translation.height / sy) }
+                            var dx = value.translation.width / sx, dy = value.translation.height / sy
+                            if snapping, let bounds {
+                                let targetX = CGFloat(document.contents.width)/2, targetY = CGFloat(document.contents.height)/2
+                                if abs(bounds.midX+dx-targetX) < 8/sx { dx = targetX-bounds.midX }
+                                if abs(bounds.midY+dy-targetY) < 8/sy { dy = targetY-bounds.midY }
+                            }
+                            transform { point, _ in CGPoint(x: point.x + dx, y: point.y + dy) }
                             delta = .zero
                         } else if let marquee {
                             let box = CGRect(x: marquee.minX / sx, y: marquee.minY / sy, width: marquee.width / sx, height: marquee.height / sy)
@@ -80,7 +86,7 @@ struct TransformSelectionView: View {
                     Path { p in p.move(to: CGPoint(x: box.midX,y: box.minY)); p.addLine(to: CGPoint(x: box.midX,y: box.minY-30)) }.stroke(.green,lineWidth: 1).allowsHitTesting(false)
                     Circle().fill(.green).frame(width: 9,height: 9).frame(width: 36,height: 36).contentShape(Rectangle()).position(x: box.midX,y: box.minY-30)
                         .gesture(DragGesture().onEnded { value in
-                            var angle = atan2(value.location.y-box.midY,value.location.x-box.midX) + .pi/2
+                            var angle = atan2(box.minY-30+value.translation.height-box.midY,value.translation.width) + .pi/2
                             if snapping { angle = (angle/(.pi/4)).rounded() * (.pi/4) }
                             rotate(angle)
                         }).accessibilityLabel("Ruota selezione")

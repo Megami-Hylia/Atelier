@@ -1,5 +1,7 @@
-# Selezione e trasformazione: incremento
+# Trasforma: stato della ricostruzione
 
-Implementati nei sorgenti: selezione rettangolare/ellittica dei tratti del livello attivo, aggiunta, seleziona tutto, inversione dell’insieme dei tratti, riquadro, spostamento, scala uniforme con pulsanti/maniglie, rotazione90°, riflessioni e undo delle operazioni.
+Barra scura con Forma libera, Uniforme, Distorci, Altera; riquadro tratteggiato con otto maniglie e rotazione verde. Apertura con tutti i tratti del livello selezionati. Selezione rettangolare/ellittica, aggiunta, inversione, spostamento, scala uniforme/libera, rotazione, riflessioni, adattamento e ripristino dei tratti selezionati allo stato di apertura. Aggancio al centro della tela e rotazione a passi di 45 gradi.
 
-La selezione corrente riguarda tratti interi se almeno un campione ricade nella forma: NON ritaglia i pixel sul contorno, non limita ancora pittura/gomma, non passa alla clipboard come maschera. Le maniglie scalano uniformemente. Distorsione prospettica, warp, selezione automatica per colore, libera/poligonale, feather, snapping, interpolazione raster e salvataggio delle selezioni restano da implementare. Non sono sostituiti da pulsanti inattivi. Pertanto la richiesta «tutte le funzioni» non è ancora completata. Build e test della revisione devono essere verificati prima di dichiararla disponibile nell’IPA.
+Le modifiche vengono applicate al termine del trascinamento. La deformazione Distorci sposta i campioni con pesi bilineari, Altera usa pesi locali quadratici: sono implementazioni sui percorsi, non trasformazioni prospettiche e warp pixel del riferimento. Non sono presenti selezione pixel, interpolazione raster, snapping ad altri oggetti o una griglia warp. Le impronte del pennello non vengono deformate come bitmap; il risultato può differire dal riferimento.
+
+Compilazione e verifica grafica di questa revisione da confermare. Nessuna equivalenza completa dichiarata.
