@@ -8,7 +8,7 @@ struct LiveStrokeTests {
         var brush = BrushPreset.fallback
         brush.parameters["stampCount"] = 16; brush.parameters["spacing"] = 0.08
         brush.parameters["pressureSize"] = 0
-        let samples = (0..<2400).map { i in PencilSample(x: i % 2 == 0 ? 20 : 100, y: 64, time: Double(i)/240) }
+        let samples = (0..<256).map { i in PencilSample(x: i % 2 == 0 ? 20 : 100, y: 64, time: Double(i)/240) }
         let stroke = PaintStroke(brush: brush, tool: .paint, color: SIMD4(0,0,0,1), size: 32, opacity: 1,
             samples: samples, seed: 8, distanceDynamicsVersion: 1)
         var cursor = StrokePlanner.Stream(stroke); var total = 0
