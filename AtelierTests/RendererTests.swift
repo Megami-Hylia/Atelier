@@ -9,6 +9,24 @@ import Metal
         PaintStroke(brush: brush, tool: tool, color: SIMD4(0.2, 0.35, 0.7, 1), size: 32, opacity: 1,
                     samples: PencilSample.demo(width: 384, height: 128), seed: 42)
     }
+    func testLayerAdjustmentsAffectPixelsAndSurviveReopen() throws {
+        let painter = try MetalPainter()
+        let document = PaintDocument(width: 384, height: 128)
+        document.commit(stroke())
+        let original = try painter.image(document.contents).pngData()
+        document.change { $0.layers[0].adjustments = ["hue": 0.5, "saturation": 0.7] }
+        let adjusted = try painter.image(document.contents).pngData()
+        XCTAssertNotEqual(original, adjusted)
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let url = directory.appendingPathComponent("adjusted.atelier")
+        try document.save(to: url)
+        let reopened = PaintDocument(); try reopened.load(from: url)
+        XCTAssertEqual(document.contents, reopened.contents)
+        XCTAssertEqual(adjusted, try painter.image(reopened.contents).pngData())
+        document.undo()
+        XCTAssertEqual(original, try painter.image(document.contents).pngData())
+    }
     private func imageData(_ painter: MetalPainter, _ strokes: [PaintStroke]) throws -> Data {
         var contents = DocumentContents(width: 384, height: 128)
         contents.layers[0].strokes = strokes

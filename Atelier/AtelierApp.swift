@@ -184,6 +184,8 @@ struct PaintingWorkspace: View {
             }.font(.headline)
             Button { panel = "actions" } label: { Image(systemName: "wrench") }.accessibilityLabel("Azioni")
                 .popover(isPresented: presented("actions"), arrowEdge: .top) { actions.frame(width: 330) }
+            Button { panel = "adjustments" } label: { Image(systemName: "wand.and.stars").foregroundStyle(panel == "adjustments" ? Color.blue : .white) }.accessibilityLabel("Regolazioni")
+                .popover(isPresented: presented("adjustments"), arrowEdge: .top) { AdjustmentsPanel(document: document).frame(width: 340, height: 540) }
             Button { selecting.toggle(); panel = nil } label: { Image(systemName: "lasso").foregroundStyle(selecting ? Color.blue : .white) }.accessibilityLabel("Selezione e trasformazione")
             Spacer()
             toolButton(.paint, "paintbrush.pointed.fill", "Pennello")

@@ -5,7 +5,7 @@ import UIKit
     var canMergeSelected: Bool {
         guard let index = contents.layers.firstIndex(where: { $0.id == selectedLayer.id }), index > 0 else { return false }
         return [contents.layers[index - 1], contents.layers[index]].allSatisfy { layer in
-            !layer.locked && layer.visible && layer.opacity == 1 && layer.blendMode == 0 && layer.strokes.allSatisfy {
+            (layer.adjustments?.isEmpty ?? true) && !layer.locked && layer.visible && layer.opacity == 1 && layer.blendMode == 0 && layer.strokes.allSatisfy {
                 $0.tool == .paint && $0.brush.value("blendMode") == 0 && $0.brush.value("wetPull") == 0 && $0.brush.value("wetDilution") == 0 && $0.brush.value("pressureBleed") == 0
             }
         }

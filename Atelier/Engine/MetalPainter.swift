@@ -27,6 +27,7 @@ private struct TileInfo {
     private let paintPipeline: MTLComputePipelineState
     private let clearPipeline: MTLComputePipelineState
     private let compositePipeline: MTLComputePipelineState
+    private let adjustments: LayerAdjustments
     private let loader: MTKTextureLoader
     private var textures: [MTLTexture] = []
     private var cachedLayer: PaintLayer?
@@ -41,6 +42,7 @@ private struct TileInfo {
         guard let device = MTLCreateSystemDefaultDevice(), let queue = device.makeCommandQueue(),
               let library = device.makeDefaultLibrary() else { throw RenderError.unavailable }
         self.device = device; self.queue = queue; loader = MTKTextureLoader(device: device)
+        adjustments = LayerAdjustments(device: device)
         func compute(_ name: String) throws -> MTLComputePipelineState {
             guard let function = library.makeFunction(name: name) else { throw RenderError.shader(name) }
             return try device.makeComputePipelineState(function: function)
@@ -167,7 +169,9 @@ private struct TileInfo {
         for value in document.layers where value.visible {
             try clear(layer, color: .zero, command: command)
             let selected = value.id == (document.selectedLayerID ?? document.layers.first?.id)
-            let cacheHit = selected && cachedLayer == value
+            var cacheIdentity = value
+            cacheIdentity.adjustments = nil
+            let cacheHit = selected && cachedLayer == cacheIdentity
             if cacheHit { try copy(textures[4], to: layer, command: command) }
             var strokes = cacheHit ? [] : value.strokes
             // Preserve committed pixels before adding the provisional live stroke.
@@ -182,7 +186,7 @@ private struct TileInfo {
                 linearStroke.color.x = Self.linear(stroke.color.x); linearStroke.color.y = Self.linear(stroke.color.y); linearStroke.color.z = Self.linear(stroke.color.z)
                 try encode(linearStroke, finished: liveStroke?.id != stroke.id || finished, source: snapshot, target: layer, command: command)
             }
-                if selected { try copy(layer, to: textures[4], command: command); cachedLayer = value }
+                if selected { try copy(layer, to: textures[4], command: command); cachedLayer = cacheIdentity }
             }
             strokes = selected ? liveStroke.map { [$0] } ?? [] : []
             for stroke in strokes {
@@ -195,9 +199,14 @@ private struct TileInfo {
                 linearStroke.color.x = Self.linear(stroke.color.x); linearStroke.color.y = Self.linear(stroke.color.y); linearStroke.color.z = Self.linear(stroke.color.z)
                 try encode(linearStroke, finished: liveStroke?.id != stroke.id || finished, source: snapshot, target: layer, command: command)
             }
+            var filteredLayer = layer
+            if let values = value.adjustments, !values.isEmpty {
+                try adjustments.apply(values, source: layer, target: snapshot, command: command)
+                filteredLayer = snapshot
+            }
             guard let encoder = command.makeComputeCommandEncoder() else { throw RenderError.command("compositing") }
             var options = SIMD2<Float>(value.opacity, Float(value.blendMode))
-            encoder.setTexture(composite, index: 0); encoder.setTexture(layer, index: 1); encoder.setTexture(nextComposite, index: 2)
+            encoder.setTexture(composite, index: 0); encoder.setTexture(filteredLayer, index: 1); encoder.setTexture(nextComposite, index: 2)
             encoder.setBytes(&options, length: MemoryLayout<SIMD2<Float>>.stride, index: 0)
             dispatch(encoder, pipeline: compositePipeline, width: document.width, height: document.height); encoder.endEncoding()
             swap(&composite, &nextComposite)
