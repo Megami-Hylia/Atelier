@@ -57,7 +57,7 @@ struct BrushStudioView: View {
                             Picker("Componente", selection: $editingSecondary) { Text("Primario").tag(false); Text("Secondario").tag(true) }.pickerStyle(.segmented)
                             BrushPreview(brush: componentDraft, lightOnDark: true).frame(height: 60)
                             Picker("Metodo di combinazione", selection: Binding(get: { draft.combineMode ?? 0 }, set: { draft.combineMode = $0 })) {
-                                Text("Normale").tag(0); Text("Moltiplica").tag(1); Text("Scolora").tag(2)
+                                ForEach(CombineMode.menuOrder) { mode in Text(mode.title).tag(mode.rawValue) }
                             }
                         }
                     }

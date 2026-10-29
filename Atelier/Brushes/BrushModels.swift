@@ -147,7 +147,7 @@ final class BrushStore: ObservableObject {
         }
         for brush in archive.brushes {
             let components = brush.secondaryBrushes ?? []
-            guard components.count <= 1, (0...2).contains(brush.combineMode ?? 0), components.allSatisfy({ ($0.secondaryBrushes ?? []).isEmpty }) else { throw BrushArchiveError.invalid("Un pennello combinato richiede due componenti semplici.") }
+            guard components.count <= 1, CombineMode(rawValue: brush.combineMode ?? 0) != nil, components.allSatisfy({ ($0.secondaryBrushes ?? []).isEmpty }) else { throw BrushArchiveError.invalid("Un pennello combinato richiede due componenti semplici.") }
             for var component in components {
                 component.setID = brush.setID
                 try validate(BrushArchive(libraries: archive.libraries, sets: archive.sets, brushes: [component]))

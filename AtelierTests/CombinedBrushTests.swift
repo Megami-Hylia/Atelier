@@ -3,6 +3,23 @@ import Testing
 @testable import Atelier
 
 @MainActor struct CombinedBrushTests {
+    @Test func everyCombineModeSurvivesArchiveRoundTrip() throws {
+        var primary = BrushPreset.fallback; primary.setID = "set"
+        var secondary = primary; secondary.id = "secondary"
+        primary.secondaryBrushes = [secondary]
+        for mode in CombineMode.allCases {
+            primary.combineMode = mode.rawValue
+            let archive = BrushArchive(libraries: [BrushLibrary(id: "library", name: "Test")], sets: [BrushSet(id: "set", libraryID: "library", name: "Test")], brushes: [primary])
+            try BrushStore.validate(archive)
+            let decoded = try JSONDecoder().decode(BrushArchive.self, from: JSONEncoder().encode(archive))
+            #expect(decoded.brushes[0].combineMode == mode.rawValue)
+        }
+        #expect(CombineMode(rawValue: 11) == nil)
+        #expect(CombineMode.normal.rawValue == 0)
+        #expect(CombineMode.multiply.rawValue == 1)
+        #expect(CombineMode.screen.rawValue == 2)
+    }
+
     @Test func combiningPreservesBothSourcesAndOriginalsAfterReopen() throws {
         let path = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         defer { try? FileManager.default.removeItem(at: path) }

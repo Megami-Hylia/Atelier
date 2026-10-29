@@ -15,9 +15,36 @@ struct TileInfo { uint2 origin; uint2 size; uint count; };
 constant sampler linearSampler(coord::normalized, address::clamp_to_edge, filter::linear);
 constant sampler repeatSampler(coord::normalized, address::repeat, filter::linear);
 
+float colourBurn(float base, float paint) {
+    if (base >= 1) return 1;
+    if (paint <= 0) return 0;
+    return 1 - min(1.0f, (1-base)/paint);
+}
+float colourDodge(float base, float paint) {
+    if (base <= 0) return 0;
+    if (paint >= 1) return 1;
+    return min(1.0f, base/(1-paint));
+}
 float3 blendRGB(float3 base, float3 paint, int mode) {
     if (mode == 1) return base * paint;
     if (mode == 2) return 1 - (1 - base) * (1 - paint);
+    if (mode == 3) return min(base, paint);
+    if (mode == 5) return max(float3(0), base + paint - 1);
+    if (mode == 6) return max(base, paint);
+    if (mode == 8) return select(2*base*paint, 1-2*(1-base)*(1-paint), base > 0.5);
+    if (mode == 10) return abs(base-paint);
+    if (mode == 4 || mode == 7 || mode == 9) {
+        float3 result;
+        for (uint i=0; i<3; i++) {
+            if (mode == 4) result[i] = colourBurn(base[i],paint[i]);
+            else if (mode == 7) result[i] = colourDodge(base[i],paint[i]);
+            else {
+                float vivid = paint[i] <= 0.5 ? colourBurn(base[i],2*paint[i]) : colourDodge(base[i],2*paint[i]-1);
+                result[i] = vivid < 0.5 ? 0 : 1;
+            }
+        }
+        return result;
+    }
     return paint;
 }
 
