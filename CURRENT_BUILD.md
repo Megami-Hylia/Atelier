@@ -1,9 +1,9 @@
 # Build corrente
 
-IPA compilata da `12b613aee0ffe1e40403d46aa052d963b87b42ca`.
-Workflow: https://github.com/Megami-Hylia/Atelier/actions/runs/40862087433
-SHA256: `c03391602c5c748c6cfa4c79545ae4678377ba6456cfec0650c614de95805971`.
+IPA compilata da `f287d86d12a8d4df8b43178e1a337c873a8c103a`.
+Workflow: https://github.com/Megami-Hylia/Atelier/actions/runs/40865199165
+SHA256: `039056e1bed3af6d339b8abcedff4135182327a8222ed639b1c2a0f51a0214eb`.
 
-Compilazione iPad arm64 e verifica strutturale superate. Test simulatore di questa revisione ancora in corso. Nessun test su iPad fisico o misura di latenza.
+Compilazione iPad arm64 e verifica strutturale superate. Contiene la barra pennello compatta con anteprima durante il trascinamento, oltre alle precedenti modifiche di colori, livelli, gesti, selezione, regolazioni e Azioni.
 
-Contiene colori, livelli, menu gestuali, selezione per tratti, regolazioni e Azioni. Le funzionalità sono parziali; vedere ACTIONS_STATUS.md e SELECTION_STATUS.md. I risultati 15/15 delle vecchie relazioni sono storici e non attestano questa revisione.
+Test simulatore della revisione precedente 12b613a: 19 superati, zero falliti o saltati. Test di questa revisione ancora in corso. Nessuna verifica grafica su iPad fisico o misura di latenza.
