@@ -12,23 +12,23 @@ struct AtelierColors: View {
     @AppStorage("customPalette") private var palette = "DB6B3F,E8C578,466F79,304D5F,77624B,A34A4A,EEE8DC,2D2D2D"
     var body: some View {
         VStack(spacing: 0) {
-            Capsule().fill(Color(white: 0.4)).frame(width: 36, height: 3).padding(.top, 6)
+            Capsule().fill(Color(white: 0.4)).frame(width: 36, height: 3).padding(.top, 4)
             HStack {
                 Text("Colori").font(PanelStyle.title)
                 Spacer()
                 HStack(spacing: 0) {
-                    Button { color = previousColor; sync(); remember() } label: { Rectangle().fill(previousColor).frame(width: 34, height: 24) }.accessibilityLabel("Colore precedente")
-                    Rectangle().fill(color).frame(width: 34, height: 24).accessibilityLabel("Colore attuale")
+                    Rectangle().fill(color).frame(width: 38, height: 22).accessibilityLabel("Colore attuale")
+                    Button { let old = color; color = previousColor; previousColor = old; sync(); remember() } label: { Rectangle().fill(previousColor).frame(width: 38, height: 22) }.accessibilityLabel("Colore precedente")
                 }.clipShape(RoundedRectangle(cornerRadius: 4))
-            }.padding(.horizontal, 14).padding(.vertical, 10)
+            }.padding(.horizontal, 16).padding(.vertical, 7)
             ScrollView {
-                VStack(spacing: 10) {
+                VStack(spacing: mode == 1 ? 0 : 10) {
                     if mode == 0 { disc }
                     if mode == 1 || mode == 2 {
-                        square.aspectRatio(1, contentMode: .fit).clipped()
-                        ColorTrack(value: $hue, colors: [.red, .yellow, .green, .cyan, .blue, .purple, .red], label: "Tonalità", edited: { apply(); remember() }).onChange(of: hue) { _, _ in apply() }
-                        ColorTrack(value: $saturation, colors: [Color(white: brightness), Color(hue: hue, saturation: 1, brightness: brightness)], label: "Saturazione", edited: { apply(); remember() }).onChange(of: saturation) { _, _ in apply() }
-                        ColorTrack(value: $brightness, colors: [.black, Color(hue: hue, saturation: saturation, brightness: 1)], label: "Luminosità", edited: { apply(); remember() }).onChange(of: brightness) { _, _ in apply() }
+                        square.frame(height: 310).clipped().padding(.bottom, 2)
+                        ColorTrack(value: $hue, colors: [.red, .yellow, .green, .cyan, .blue, .purple, .red], label: "Tonalità", thumb: Color(hue: hue, saturation: 1, brightness: 1), edited: { apply(); remember() }).onChange(of: hue) { _, _ in apply() }
+                        ColorTrack(value: $saturation, colors: [Color(white: brightness), Color(hue: hue, saturation: 1, brightness: brightness)], label: "Saturazione", thumb: Color(hue: hue, saturation: saturation, brightness: brightness), edited: { apply(); remember() }).onChange(of: saturation) { _, _ in apply() }
+                        ColorTrack(value: $brightness, colors: [.black, Color(hue: hue, saturation: saturation, brightness: 1)], label: "Luminosità", thumb: Color(white: brightness), edited: { apply(); remember() }).onChange(of: brightness) { _, _ in apply() }
                     }
                     if mode == 2 {
                         sectionTitle("Complementari")
@@ -48,9 +48,9 @@ struct AtelierColors: View {
                         Spacer()
                         Button("Cancella") { history = "" }.font(.system(size: 12)).foregroundStyle(.secondary)
                     }.padding(.top, 6)
-                    swatches(history)
+                    swatches(history.split(separator: ",").prefix(10).joined(separator: ","))
                     sectionTitle("Progressione")
-                    swatches(palette)
+                    if mode == 1 { progression } else { swatches(palette) }
                     if mode == 4 {
                         HStack {
                             Button("Aggiungi colore") { palette = (palette.split(separator: ",").map(String.init) + [currentHex]).suffix(64).joined(separator: ",") }
@@ -58,7 +58,7 @@ struct AtelierColors: View {
                             Button("Rimuovi ultimo") { palette = palette.split(separator: ",").dropLast().joined(separator: ",") }.disabled(palette.isEmpty)
                         }.font(.caption).padding(.vertical, 8)
                     }
-                }.padding(.horizontal, 8).padding(.bottom, 8)
+                }.padding(.horizontal, 4).padding(.bottom, 2)
             }.scrollIndicators(.hidden)
             HStack(spacing: 0) {
                 tab("Disco", "circle", 0)
@@ -66,19 +66,19 @@ struct AtelierColors: View {
                 tab("Armonia", "point.3.connected.trianglepath.dotted", 2)
                 tab("Valori", "slider.horizontal.3", 3)
                 tab("Tavolozze", "square.grid.3x3.fill", 4)
-            }.padding(.top, 6).padding(.bottom, 8).background(Color(white: 0.085))
+            }.padding(.top, 2).padding(.bottom, 2).background(Color(white: 0.085))
         }
-        .background(Color(white: 0.12)).foregroundStyle(.white)
+        .background(Color(white: 0.105)).foregroundStyle(.white)
         .atelierPanel()
         .onAppear { previousColor = color; sync(); if !(0...4).contains(mode) { mode = 1 } }
         .onChange(of: color) { _, _ in sync() }.onDisappear { remember() }
     }
     private func sectionTitle(_ title: String) -> some View {
-        HStack { Text(title).font(.system(size: 12, weight: .semibold)); Spacer() }.padding(.top, 6)
+        HStack { Text(title).font(.system(size: 11, weight: .medium)); Spacer() }.padding(.horizontal, 5).frame(height: 26)
     }
     private func tab(_ name: String, _ icon: String, _ index: Int) -> some View {
         Button { mode = index } label: {
-            VStack(spacing: 5) {
+            VStack(spacing: 2) {
                 Image(systemName: icon).font(.system(size: 19)).frame(height: 23)
                 Text(name).font(.system(size: 10))
             }.foregroundStyle(mode == index ? Color.blue : Color(white: 0.65)).frame(maxWidth: .infinity).frame(minHeight: 44)
@@ -100,7 +100,7 @@ struct AtelierColors: View {
             ZStack {
                 LinearGradient(colors: [.white, Color(hue: hue, saturation: 1, brightness: 1)], startPoint: .leading, endPoint: .trailing)
                 LinearGradient(colors: [.clear, .black], startPoint: .top, endPoint: .bottom)
-                Circle().stroke(.white, lineWidth: 2).background(Circle().stroke(.black, lineWidth: 4)).frame(width: 12, height: 12)
+                Circle().stroke(.white.opacity(0.9), lineWidth: 1.5).background(Circle().stroke(.black.opacity(0.65), lineWidth: 3)).frame(width: 14, height: 14)
                     .position(x: saturation * geometry.size.width, y: (1 - brightness) * geometry.size.height)
             }.contentShape(Rectangle()).gesture(DragGesture(minimumDistance: 0).onChanged { value in
                 saturation = min(1, max(0, value.location.x / geometry.size.width)); brightness = 1 - min(1, max(0, value.location.y / geometry.size.height)); apply()
@@ -108,6 +108,26 @@ struct AtelierColors: View {
             .accessibilityLabel("Saturazione e luminosità").accessibilityValue("\(Int(saturation * 100)) e \(Int(brightness * 100)) percento")
         }
     }
+    private var progression: some View {
+        let rows = [
+            ["12219A","25239D","422299","63218F","842080","A51D76","C51877","E6117E","F20989"],
+            ["073CB5","2144B0","4349AA","674CA1","895095","AB518A","C94D88","E04491"],
+            ["0393C3","1C91B6","3D8FA9","608B9F","838A9C","A68E9F","C095A7"]
+        ]
+        return VStack(spacing: 0) {
+            ForEach(rows.indices, id: \.self) { row in
+                HStack(spacing: 0) {
+                    ForEach(rows[row], id: \.self) { hex in
+                        Button { select(hex); remember() } label: {
+                            Rectangle().fill(colorFor(hex) ?? .clear).frame(width: 34, height: 33)
+                        }.buttonStyle(.plain).accessibilityLabel("Progressione \(hex)")
+                    }
+                    Spacer(minLength: 0)
+                }
+            }
+        }.frame(maxWidth: .infinity, alignment: .leading)
+    }
+
     private func swatches(_ text: String) -> some View {
         LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 1), count: 10), spacing: 1) {
             ForEach(Array(text.split(separator: ",").enumerated()), id: \.offset) { _, value in
@@ -149,13 +169,14 @@ private struct ColorTrack: View {
     @Binding var value: Double
     let colors: [Color]
     let label: String
+    var thumb: Color? = nil
     var edited: () -> Void
     var body: some View {
         GeometryReader { geometry in
             let width = max(1, geometry.size.width - 14)
             ZStack(alignment: .leading) {
                 LinearGradient(colors: colors, startPoint: .leading, endPoint: .trailing).frame(height: 4).clipShape(Capsule()).padding(.horizontal, 7)
-                Circle().fill(colors.last ?? .white).overlay(Circle().stroke(Color(white: 0.8), lineWidth: 1.5)).frame(width: 14, height: 14).offset(x: min(1, max(0, value)) * width)
+                Circle().fill(thumb ?? colors.last ?? .white).overlay(Circle().stroke(Color(white: 0.8), lineWidth: 1.5)).frame(width: 10, height: 10).padding(.leading, 2).offset(x: min(1, max(0, value)) * width)
             }.frame(height: 30).contentShape(Rectangle())
                 .gesture(DragGesture(minimumDistance: 0).onChanged { point in value = min(1, max(0, (point.location.x - 7) / width)) }.onEnded { _ in edited() })
         }.frame(height: 30)

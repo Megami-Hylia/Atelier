@@ -195,7 +195,7 @@ struct PaintingWorkspace: View {
             Button { panel = "layers" } label: { Image(systemName: "square.on.square.fill") }.accessibilityLabel("Livelli")
                 .popover(isPresented: presented("layers"), arrowEdge: .top) { layers.frame(width: 360, height: 540) }
             Button { panel = "color" } label: { Circle().fill(color).overlay(Circle().stroke(.gray)).frame(width: 30, height: 30) }.accessibilityLabel("Colore")
-                .popover(isPresented: presented("color"), arrowEdge: .top) { AtelierColors(color: $color).frame(width: 350, height: 650) }
+                .popover(isPresented: presented("color"), arrowEdge: .top) { AtelierColors(color: $color).frame(width: 350, height: 700) }
         }.font(.system(size: 20)).buttonStyle(.plain).padding(.horizontal, 16).frame(height: 48).background(Color(uiColor: .systemBackground))
     }
     private func toolButton(_ item: PaintTool, _ icon: String, _ label: String) -> some View {
