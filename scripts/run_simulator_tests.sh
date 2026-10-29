@@ -58,9 +58,9 @@ PY
 xcodebuild -project Atelier.xcodeproj -scheme Atelier -configuration Debug \
   -sdk iphonesimulator ARCHS="$SIM_ARCH" -showdestinations > build/tests/simulator-destinations.txt
 cat build/tests/simulator-destinations.txt
-TEST_SELECTION=()
+TEST_SELECTION=(-parallel-testing-enabled NO)
 if [[ "${ATELIER_TEST_SCOPE:-all}" == visual ]]; then
-  TEST_SELECTION=(-only-testing:AtelierTests/BrushLibraryVisualTests)
+  TEST_SELECTION+=(-only-testing:AtelierTests/BrushLibraryVisualTests)
 fi
 set +e
 xcodebuild -project Atelier.xcodeproj -scheme Atelier -configuration Debug \
