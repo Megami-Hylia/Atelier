@@ -151,6 +151,9 @@ private struct TileInfo {
         let tileSize = 256, columns = (source.width + tileSize - 1) / tileSize
         let bins = try StrokePlanner.tileBins(stamps, width: source.width, height: source.height)
         let shape = try asset(stroke.brush, shape: true), grain = try asset(stroke.brush, shape: false)
+        let secondary = stroke.brush.secondaryBrushes?.first
+        let secondaryShape = try secondary.map { try asset($0, shape: true) } ?? shape
+        let secondaryGrain = try secondary.map { try asset($0, shape: false) } ?? grain
         for key in bins.keys.sorted() {
             guard let values = bins[key], let encoder = command.makeComputeCommandEncoder() else { throw RenderError.command("tile encoder") }
             let buffer = values.withUnsafeBytes { device.makeBuffer(bytes: $0.baseAddress!, length: $0.count, options: .storageModeShared) }
@@ -170,6 +173,7 @@ private struct TileInfo {
                                 size: SIMD2(UInt32(right - x), UInt32(bottom - y)), count: UInt32(values.count))
             encoder.setTexture(source, index: 0); encoder.setTexture(target, index: 1)
             encoder.setTexture(shape, index: 2); encoder.setTexture(grain, index: 3); encoder.setTexture(pickup ?? source, index: 4)
+            encoder.setTexture(secondaryShape, index: 5); encoder.setTexture(secondaryGrain, index: 6)
             encoder.setBuffer(buffer, offset: 0, index: 0); encoder.setBytes(&tile, length: MemoryLayout<TileInfo>.stride, index: 1)
             dispatch(encoder, pipeline: paintPipeline, width: Int(tile.size.x), height: Int(tile.size.y))
             encoder.endEncoding()

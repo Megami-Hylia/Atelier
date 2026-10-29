@@ -12,6 +12,7 @@ struct BrushJSONDocument: FileDocument {
 struct BrushLibraryView: View {
     @ObservedObject var store: BrushStore
     @State private var query = ""
+    @State private var selection: [String] = []
     @State private var recents = false
     @State private var favorites = false
     @State private var searching = false
@@ -59,6 +60,10 @@ struct BrushLibraryView: View {
                 HStack {
                     Text("Libreria pennelli").font(PanelStyle.title)
                     Spacer()
+                    if !selection.isEmpty {
+                        Button("Combina") { if let combined = store.combine(selection) { selection = []; editingBrush = combined } }.disabled(selection.count != 2)
+                        Button("Fine") { selection = [] }
+                    }
                     Button { searching.toggle(); if !searching { query = "" } } label: { Image(systemName: "magnifyingglass").frame(width: 32, height: 44) }
                         .accessibilityLabel("Cerca pennelli")
                     Menu {
@@ -118,7 +123,7 @@ struct BrushLibraryView: View {
                     List {
                         ForEach(visibleBrushes) { brush in
                             HStack(spacing: 10) {
-                                Button { if store.selectedID == brush.id { editingBrush = brush } else { store.select(brush) } } label: {
+                                Button { if !selection.isEmpty { toggleSelection(brush) } else if store.selectedID == brush.id { editingBrush = brush } else { store.select(brush) } } label: {
                                     VStack(alignment: .leading, spacing: 1) {
                                         HStack {
                                             Text(brush.name).font(.system(size: 12, weight: .semibold)).lineLimit(1)
@@ -135,10 +140,13 @@ struct BrushLibraryView: View {
 
                             }
                             .padding(.horizontal, 8).padding(.vertical, 6)
-                            .background(store.selectedID == brush.id ? PanelStyle.selection : Color.clear, in: RoundedRectangle(cornerRadius: 6))
+                            .background(selection.first == brush.id || (selection.isEmpty && store.selectedID == brush.id) ? PanelStyle.selection : selection.contains(brush.id) ? Color(red: 0.09, green: 0.24, blue: 0.42) : Color.clear, in: RoundedRectangle(cornerRadius: 6))
                             .listRowInsets(EdgeInsets(top: 2, leading: 4, bottom: 2, trailing: 4))
                             .listRowSeparator(.hidden).listRowBackground(Color.clear)
                             .accessibilityAddTraits(store.selectedID == brush.id ? .isSelected : [])
+                            .swipeActions(edge: .leading, allowsFullSwipe: true) {
+                                Button(selection.contains(brush.id) ? "Deseleziona" : "Seleziona") { toggleSelection(brush) }.tint(.blue)
+                            }
                             .swipeActions(edge: .trailing, allowsFullSwipe: false) {
                                 Button("Elimina", role: .destructive) { deleteCandidate = brush }
                                 Button("Duplica") { _ = store.duplicate(brush) }.tint(.gray)
@@ -201,6 +209,11 @@ struct BrushLibraryView: View {
         }
         .atelierPanel()
         .frame(minWidth: 0, idealWidth: 420, minHeight: 520, idealHeight: 650)
+    }
+
+    private func toggleSelection(_ brush: BrushPreset) {
+        if selection.contains(brush.id) { selection.removeAll { $0 == brush.id } }
+        else { selection.append(brush.id) }
     }
 
     private func applyName() {

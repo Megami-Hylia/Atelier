@@ -15,6 +15,8 @@ struct BrushPreset: Codable, Identifiable, Equatable, Sendable {
     var grainData: Data? = nil
     var author: String? = "Atelier"
     var notes: String? = nil
+    var secondaryBrushes: [BrushPreset]? = nil
+    var combineMode: Int? = nil
 
     func value(_ key: String, _ fallback: Double = 0) -> Double {
         parameters[key] ?? fallback
@@ -144,6 +146,12 @@ final class BrushStore: ObservableObject {
             guard archive.libraries.contains(where: { $0.id == set.libraryID }), !set.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { throw BrushArchiveError.invalid("Set senza raccolta valida o senza nome.") }
         }
         for brush in archive.brushes {
+            let components = brush.secondaryBrushes ?? []
+            guard components.count <= 1, (0...2).contains(brush.combineMode ?? 0), components.allSatisfy({ ($0.secondaryBrushes ?? []).isEmpty }) else { throw BrushArchiveError.invalid("Un pennello combinato richiede due componenti semplici.") }
+            for var component in components {
+                component.setID = brush.setID
+                try validate(BrushArchive(libraries: archive.libraries, sets: archive.sets, brushes: [component]))
+            }
             guard archive.sets.contains(where: { $0.id == brush.setID }), !brush.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
                   brush.name.count <= 200, brush.parameters.count <= 512,
                   brush.parameters.values.allSatisfy({ $0.isFinite && abs($0) <= 100_000 }),
@@ -186,6 +194,21 @@ final class BrushStore: ObservableObject {
             if let durableArchive { apply(durableArchive) }
             errorMessage = "Salvataggio pennelli annullato: \(error.localizedDescription)"
         }
+    }
+
+    @discardableResult func combine(_ ids: [String]) -> BrushPreset? {
+        guard ids.count == 2, ids[0] != ids[1],
+              let primary = brushes.first(where: { $0.id == ids[0] }),
+              let secondary = brushes.first(where: { $0.id == ids[1] }),
+              (primary.secondaryBrushes ?? []).isEmpty, (secondary.secondaryBrushes ?? []).isEmpty else {
+            errorMessage = "Seleziona due pennelli semplici per combinarli."; return nil
+        }
+        var combined = primary
+        combined.id = UUID().uuidString; combined.name = primary.name + " + " + secondary.name
+        combined.name = String(combined.name.prefix(200))
+        combined.secondaryBrushes = [secondary]; combined.combineMode = 0
+        insert(combined)
+        return errorMessage == nil ? combined : nil
     }
 
     func saveResetPoint(_ brush: BrushPreset) {

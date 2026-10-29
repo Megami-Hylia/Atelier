@@ -76,6 +76,7 @@ enum StrokePlanner {
 
     // The cursor retains constant-size state, never the growing sample array.
     struct Stream {
+        private var secondary: [Stream] = []
         private var context: PaintStroke
         private var rng: SeededGenerator
         private var initialRotation: Float = 0
@@ -95,6 +96,11 @@ enum StrokePlanner {
             self.finalDistance = finalDistance
             initialRotation = p("randomRotation") > 0 ? rng.unit() * .pi * 2 : 0
             strokeHue = rng.signed() * p("strokeHue") * 0.5
+            if var brush = stroke.brush.secondaryBrushes?.first {
+                brush.parameters["blendMode"] = Double(stroke.brush.combineMode ?? 0)
+                var component = stroke; component.brush = brush; component.samples = []
+                secondary = [Stream(component, finalDistance: finalDistance)]
+            }
         }
 
         func matches(_ stroke: PaintStroke) -> Bool {
@@ -122,12 +128,20 @@ enum StrokePlanner {
                 }
                 previous = value; lastRawSample = raw; sampleCount += 1
             }
+            if !secondary.isEmpty {
+                let extra = try secondary[0].append(samples).map { stamp -> GPUStamp in var value = stamp; value.variation.y = 1; return value }
+                result += extra
+                result.sort { $0.variation.z == $1.variation.z ? $0.variation.y < $1.variation.y : $0.variation.z < $1.variation.z }
+                guard stampCount + secondary[0].stampCount <= 100_000 else { throw DocumentError.strokeBudget }
+            }
             return result
         }
 
         mutating func dot() throws -> [GPUStamp] {
             guard let previous else { return [] }
-            return try makeStamps(a: previous, b: previous, t: 0, segmentLength: 0.001)
+            var result = try makeStamps(a: previous, b: previous, t: 0, segmentLength: 0.001)
+            if !secondary.isEmpty { result += try secondary[0].dot().map { stamp -> GPUStamp in var value = stamp; value.variation.y = 1; return value } }
+            return result
         }
 
         private mutating func makeStamps(a: PencilSample, b: PencilSample, t: Float, segmentLength: Float) throws -> [GPUStamp] {
@@ -185,7 +199,7 @@ enum StrokePlanner {
                                   min(1, p("wetDilution") + p("pressureBleed") * (1 - pressure)),
                                   context.tool == .smudge ? max(0.02, p("smudge", 0.7)) : p("wetPull")),
                     rendering: SIMD4(p("blendMode"), context.tool == .paint ? 0 : context.tool == .smudge ? 1 : 2, p("alphaThreshold"), p("wetGrade")),
-                    variation: SIMD4(rng.unit(), 0, 0, 0))
+                    variation: SIMD4(rng.unit(), 0, nextDistance, 0))
                 stamps.append(stamp)
                 if p("dualEnabled") > 0.5 {
                     stamp.geometry.z *= max(0.1, p("dualScale", 0.6))

@@ -31,6 +31,8 @@ kernel void paintTile(texture2d<float, access::read> source [[texture(0)]],
                       texture2d<float, access::sample> shapeSource [[texture(2)]],
                       texture2d<float, access::sample> grainSource [[texture(3)]],
                       texture2d<float, access::read> pickupSource [[texture(4)]],
+                      texture2d<float, access::sample> secondaryShape [[texture(5)]],
+                      texture2d<float, access::sample> secondaryGrain [[texture(6)]],
                       constant Stamp *stamps [[buffer(0)]], constant TileInfo &tile [[buffer(1)]],
                       uint2 local [[thread_position_in_grid]]) {
     if (any(local >= tile.size)) return;
@@ -45,12 +47,13 @@ kernel void paintTile(texture2d<float, access::read> source [[texture(0)]],
         float cs = cos(s.geometry.w), sn = sin(s.geometry.w);
         float2 uv = float2(delta.x * cs + delta.y * sn, -delta.x * sn + delta.y * cs) / s.shape.xy;
         if (any(abs(uv) > 1)) continue;
-        float mask = shapeSource.sample(linearSampler, uv * 0.5 + 0.5).r;
+        float mask = s.variation.y > 0.5 ? secondaryShape.sample(linearSampler, uv * 0.5 + 0.5).r : shapeSource.sample(linearSampler, uv * 0.5 + 0.5).r;
         float2 grainPosition = mix(uv * s.geometry.z, position, s.texture.x);
         float2 g = mix(grainPosition / max(0.1f, s.geometry.z), grainPosition / 32, s.texture.y);
         float cg = cos(s.texture.z), sg = sin(s.texture.z);
         g = float2(g.x * cg - g.y * sg, g.x * sg + g.y * cg) / s.grain.x;
-        float grain = clamp((grainSource.sample(repeatSampler, g).r - 0.5) * s.grain.z + 0.5 + s.grain.w, 0.0f, 1.0f);
+        float grainValue = s.variation.y > 0.5 ? secondaryGrain.sample(repeatSampler, g).r : grainSource.sample(repeatSampler, g).r;
+        float grain = clamp((grainValue - 0.5) * s.grain.z + 0.5 + s.grain.w, 0.0f, 1.0f);
         mask *= mix(1.0f, grain, s.grain.y);
         mask *= clamp(1 - s.texture.w * (uv.y + 1) * 0.5, 0.0f, 1.0f);
         float alpha = clamp(mask * s.color.w, 0.0f, 1.0f);
