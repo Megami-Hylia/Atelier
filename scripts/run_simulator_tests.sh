@@ -58,12 +58,16 @@ PY
 xcodebuild -project Atelier.xcodeproj -scheme Atelier -configuration Debug \
   -sdk iphonesimulator ARCHS="$SIM_ARCH" -showdestinations > build/tests/simulator-destinations.txt
 cat build/tests/simulator-destinations.txt
+TEST_SELECTION=()
+if [[ "${ATELIER_TEST_SCOPE:-all}" == visual ]]; then
+  TEST_SELECTION=(-only-testing:AtelierTests/BrushLibraryVisualTests)
+fi
 set +e
 xcodebuild -project Atelier.xcodeproj -scheme Atelier -configuration Debug \
   -sdk iphonesimulator -destination "platform=iOS Simulator,id=$DEVICE_ID" -destination-timeout 120 \
   -derivedDataPath build/DerivedData-tests -resultBundlePath build/tests/AtelierTests.xcresult \
   ARCHS="$SIM_ARCH" ONLY_ACTIVE_ARCH=YES CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO \
-  CODE_SIGN_IDENTITY= test
+  CODE_SIGN_IDENTITY= "${TEST_SELECTION[@]}" test
 TEST_STATUS=$?
 set -e
 if [[ -d build/tests/AtelierTests.xcresult ]]; then

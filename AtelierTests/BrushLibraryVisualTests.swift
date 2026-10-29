@@ -11,7 +11,9 @@ final class BrushLibraryVisualTests: XCTestCase {
         let store = BrushStore(storageURL: folder.appendingPathComponent("library.json"))
         XCTAssertNil(store.errorMessage)
         let controller = UIHostingController(rootView: BrushLibraryView(store: store))
-        let window = UIWindow(frame: CGRect(x: 0, y: 0, width: 420, height: 650))
+        let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.first)
+        let window = UIWindow(windowScene: scene)
+        window.frame = CGRect(x: 0, y: 0, width: 420, height: 650)
         window.rootViewController = controller
         window.overrideUserInterfaceStyle = .dark
         window.makeKeyAndVisible()
@@ -23,7 +25,17 @@ final class BrushLibraryVisualTests: XCTestCase {
         let image = UIGraphicsImageRenderer(bounds: window.bounds).image { _ in
             window.drawHierarchy(in: window.bounds, afterScreenUpdates: true)
         }
-        XCTAssertNotNil(image.cgImage)
+        let cgImage = try XCTUnwrap(image.cgImage)
+        var pixels = [UInt8](repeating: 0, count: cgImage.width * cgImage.height * 4)
+        let colorSpace = CGColorSpaceCreateDeviceRGB()
+        try pixels.withUnsafeMutableBytes { bytes in
+            let context = try XCTUnwrap(CGContext(data: bytes.baseAddress, width: cgImage.width, height: cgImage.height,
+                bitsPerComponent: 8, bytesPerRow: cgImage.width * 4, space: colorSpace,
+                bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue))
+            context.draw(cgImage, in: CGRect(x: 0, y: 0, width: cgImage.width, height: cgImage.height))
+        }
+        let visiblePixels = stride(from: 0, to: pixels.count, by: 4).filter { max(pixels[$0], max(pixels[$0+1], pixels[$0+2])) > 80 }.count
+        XCTAssertGreaterThan(visiblePixels, cgImage.width * cgImage.height / 100, "A blank screenshot is not visual evidence.")
         let attachment = XCTAttachment(image: image)
         attachment.name = "Brush-Library-420x650"
         attachment.lifetime = .keepAlways
