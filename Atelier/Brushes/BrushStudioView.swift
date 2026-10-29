@@ -21,25 +21,7 @@ struct BrushStudioView: View {
         self.store = store; _draft = State(initialValue: brush)
     }
 
-    var body: some View {
-        NavigationStack {
-            GeometryReader { geometry in
-            let wide = geometry.size.width >= 950
-            let layout = wide ? AnyLayout(HStackLayout(spacing: 0)) : AnyLayout(VStackLayout(spacing: 0))
-            layout {
-                if wide {
-                List(BrushParameter.categories, id: \.self) { title in
-                    Button { category = title } label: { Text(title).foregroundStyle(.primary).padding(.vertical, 8) }
-                        .listRowBackground(category == title ? Color.accentColor.opacity(0.25) : Color.clear)
-                }
-                .listStyle(.plain).frame(width: 185)
-                } else {
-                    Picker("Categoria", selection: $category) {
-                        ForEach(BrushParameter.categories, id: \.self) { Text($0).tag($0) }
-                    }
-                    .pickerStyle(.menu).padding(.horizontal).frame(minHeight: 44)
-                }
-                Divider()
+    private var settings: some View {
                 Form {
                     Section(category) {
                         if category == "Shape" {
@@ -94,6 +76,28 @@ struct BrushStudioView: View {
                             .font(.caption).foregroundStyle(.secondary)
                     }
                 }
+    }
+
+    var body: some View {
+        NavigationStack {
+            GeometryReader { geometry in
+            let wide = geometry.size.width >= 950
+            let layout = wide ? AnyLayout(HStackLayout(spacing: 0)) : AnyLayout(VStackLayout(spacing: 0))
+            layout {
+                if wide {
+                List(BrushParameter.categories, id: \.self) { title in
+                    Button { category = title } label: { Text(title).foregroundStyle(.primary).padding(.vertical, 8) }
+                        .listRowBackground(category == title ? Color.accentColor.opacity(0.25) : Color.clear)
+                }
+                .listStyle(.plain).frame(width: 185)
+                } else {
+                    Picker("Categoria", selection: $category) {
+                        ForEach(BrushParameter.categories, id: \.self) { Text($0).tag($0) }
+                    }
+                    .pickerStyle(.menu).padding(.horizontal).frame(minHeight: 44)
+                }
+                Divider()
+                settings
                 .frame(minWidth: 0, maxWidth: .infinity, maxHeight: .infinity)
                 Divider()
                 VStack(spacing: 12) {
