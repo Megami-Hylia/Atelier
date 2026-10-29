@@ -147,7 +147,7 @@ struct PaintingWorkspace: View {
             ZStack(alignment: leftHanded ? .trailing : .leading) {
                 Color(white: 0.19)
                 CanvasSurface(document: document, brush: brushes.selectedBrush, tool: tool, color: rgba(color), brushSize: size, opacity: opacity,
-                              fingerPainting: fingerPainting, onToolChange: { tool = $0 }, onPalette: { panel = "color" })
+                              fingerPainting: fingerPainting, onToolChange: { tool = $0 }, onPalette: { panel = "color" }, onClipboard: { panel = "clipboard" }, onQuickMenu: { panel = "quick" })
                     .aspectRatio(CGFloat(document.contents.width) / CGFloat(document.contents.height), contentMode: .fit)
                     .padding(44)
                 if !immersive { sideControls }
@@ -155,6 +155,12 @@ struct PaintingWorkspace: View {
             }.clipped()
         }
         .background(Color(white: 0.09))
+        .overlay(alignment: .bottom) {
+            if panel == "clipboard" || panel == "quick" {
+                GestureCommandPanel(document: document, quick: panel == "quick") { panel = nil }
+                    .padding(.horizontal, 20).padding(.bottom, 30)
+            }
+        }
         .overlay(alignment: .bottomTrailing) {
             if immersive { Button("Mostra interfaccia", systemImage: "arrow.down.right.and.arrow.up.left") { immersive = false }.padding().background(.regularMaterial) }
         }
@@ -221,44 +227,7 @@ struct PaintingWorkspace: View {
             }
         }
     }
-    private var layers: some View {
-        VStack(spacing: 0) {
-            HStack { Text("Livelli").font(.title2.bold()); Spacer(); Button { document.addLayer() } label: { Image(systemName: "plus") } }.padding()
-            List {
-                ForEach(document.contents.layers.reversed()) { layer in
-                    VStack(alignment: .leading) {
-                        HStack {
-                            Button { document.selectLayer(layer.id) } label: { Text(layer.name).fontWeight(document.selectedLayer.id == layer.id ? .bold : .regular) }.buttonStyle(.plain)
-                            Spacer()
-                            Toggle("Visibile", isOn: layerBinding(layer.id, \.visible)).labelsHidden()
-                        }
-                        if document.selectedLayer.id == layer.id {
-                            TextField("Nome livello", text: layerBinding(layer.id, \.name))
-                            Slider(value: layerBinding(layer.id, \.opacity), in: 0...1) { Text("Opacità") }
-                            Picker("Fusione", selection: layerBinding(layer.id, \.blendMode)) { Text("Normale").tag(0); Text("Moltiplica").tag(1); Text("Scolora").tag(2) }
-                            Toggle("Bloccato", isOn: layerBinding(layer.id, \.locked))
-                            HStack {
-                                Button("Duplica") { document.duplicateLayer(layer.id) }
-                                Button("Svuota", role: .destructive) { document.clearLayer() }.disabled(layer.locked)
-                            }.buttonStyle(.bordered)
-                        }
-                    }.padding(.vertical, 5)
-                        .listRowBackground(document.selectedLayer.id == layer.id ? Color.blue : Color(white: 0.13))
-                        .contextMenu {
-                            Button("Duplica", systemImage: "doc.on.doc") { document.duplicateLayer(layer.id) }
-                            Button(layer.locked ? "Sblocca" : "Blocca", systemImage: layer.locked ? "lock.open" : "lock") { layerBinding(layer.id, \.locked).wrappedValue.toggle() }
-                            Button("Elimina", role: .destructive) { document.deleteLayer(layer.id) }.disabled(document.contents.layers.count == 1)
-                        }
-                        .swipeActions { Button("Elimina", role: .destructive) { document.deleteLayer(layer.id) }.disabled(document.contents.layers.count == 1) }
-                }
-                .onMove { source, destination in
-                    document.change { c in
-                        var visibleOrder = Array(c.layers.reversed()); visibleOrder.move(fromOffsets: source, toOffset: destination); c.layers = Array(visibleOrder.reversed())
-                    }
-                }
-            }.environment(\.editMode, .constant(.active))
-        }
-    }
+    private var layers: some View { LayerPanel(document: document) }
     private func layerBinding<T>(_ id: UUID, _ keyPath: WritableKeyPath<PaintLayer, T>) -> Binding<T> {
         Binding(get: { (document.contents.layers.first { $0.id == id } ?? document.selectedLayer)[keyPath: keyPath] },
                 set: { value in document.change { c in if let index = c.layers.firstIndex(where: { $0.id == id }) { c.layers[index][keyPath: keyPath] = value } } })

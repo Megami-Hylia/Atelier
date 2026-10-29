@@ -11,6 +11,8 @@ struct CanvasSurface: UIViewRepresentable {
     var fingerPainting = false
     var onToolChange: ((PaintTool) -> Void)? = nil
     var onPalette: (() -> Void)? = nil
+    var onClipboard: (() -> Void)? = nil
+    var onQuickMenu: (() -> Void)? = nil
 
     func makeUIView(context: Context) -> PencilCanvas {
         let view = PencilCanvas(frame: .zero)
@@ -20,7 +22,7 @@ struct CanvasSurface: UIViewRepresentable {
     func updateUIView(_ view: PencilCanvas, context: Context) {
         view.document = document; view.brush = brush; view.tool = tool; view.paintColor = color
         view.brushSize = brushSize; view.paintOpacity = opacity; view.fingerPainting = fingerPainting
-        view.onToolChange = onToolChange; view.onPalette = onPalette
+        view.onToolChange = onToolChange; view.onPalette = onPalette; view.onClipboard = onClipboard; view.onQuickMenu = onQuickMenu
         view.drawableSize = CGSize(width: document.contents.width, height: document.contents.height)
         view.setNeedsDisplay()
     }
@@ -36,6 +38,8 @@ struct CanvasSurface: UIViewRepresentable {
     var fingerPainting = false
     var onToolChange: ((PaintTool) -> Void)?
     var onPalette: (() -> Void)?
+    var onClipboard: (() -> Void)?
+    var onQuickMenu: (() -> Void)?
     private var frameInFlight = false
     private var frameRequested = false
     private var painter: MetalPainter?
@@ -58,9 +62,19 @@ struct CanvasSurface: UIViewRepresentable {
         accessibilityLabel = "Canvas di pittura"; accessibilityHint = "Disegna con Apple Pencil. Due dita per spostare, pizzica per lo zoom."
         let pencil = UIPencilInteraction(); pencil.delegate = self; addInteraction(pencil)
         let pinch = UIPinchGestureRecognizer(target: self, action: #selector(zoom(_:)))
-        let pan = UIPanGestureRecognizer(target: self, action: #selector(pan(_:))); pan.minimumNumberOfTouches = 2
+        let pan = UIPanGestureRecognizer(target: self, action: #selector(pan(_:))); pan.minimumNumberOfTouches = 2; pan.maximumNumberOfTouches = 2
         let rotation = UIRotationGestureRecognizer(target: self, action: #selector(rotate(_:)))
         for gesture in [pinch, pan, rotation] { gesture.delegate = self; gesture.allowedTouchTypes = [NSNumber(value: UITouch.TouchType.direct.rawValue)]; addGestureRecognizer(gesture) }
+        let clipboardSwipe = UISwipeGestureRecognizer(target: self, action: #selector(showClipboard))
+        clipboardSwipe.direction = .down; clipboardSwipe.numberOfTouchesRequired = 3
+        let quickSwipe = UISwipeGestureRecognizer(target: self, action: #selector(showQuickMenu))
+        quickSwipe.direction = .down; quickSwipe.numberOfTouchesRequired = 4
+        clipboardSwipe.require(toFail: quickSwipe)
+        for swipe in [clipboardSwipe, quickSwipe] {
+            swipe.allowedTouchTypes = [NSNumber(value: UITouch.TouchType.direct.rawValue)]
+            addGestureRecognizer(swipe)
+            pinch.require(toFail: swipe); rotation.require(toFail: swipe)
+        }
         let undo = UITapGestureRecognizer(target: self, action: #selector(undoTap)); undo.numberOfTouchesRequired = 2
         let redo = UITapGestureRecognizer(target: self, action: #selector(redoTap)); redo.numberOfTouchesRequired = 3
         undo.require(toFail: redo); addGestureRecognizer(undo); addGestureRecognizer(redo)
@@ -181,6 +195,8 @@ struct CanvasSurface: UIViewRepresentable {
         let p = gesture.translation(in: superview); transform.tx += p.x; transform.ty += p.y; gesture.setTranslation(.zero, in: superview)
     }
     @objc private func rotate(_ gesture: UIRotationGestureRecognizer) { transform = transform.rotated(by: gesture.rotation); gesture.rotation = 0 }
+    @objc private func showClipboard() { onClipboard?() }
+    @objc private func showQuickMenu() { onQuickMenu?() }
     @objc private func undoTap() { document?.undo() }
     @objc private func redoTap() { document?.redo() }
     @objc private func hover(_ gesture: UIHoverGestureRecognizer) {
