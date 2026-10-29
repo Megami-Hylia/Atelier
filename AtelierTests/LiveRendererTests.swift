@@ -85,6 +85,19 @@ final class LiveRendererTests: XCTestCase {
         XCTAssertEqual(painter.lastPlannedSampleCount, 32, "Only the bounded provisional tail needs replanning.")
     }
 
+    func testDenseReplayRendersBeyondOldWholeStrokeBudget() throws {
+        let painter = try MetalPainter()
+        var document = DocumentContents(width: 64, height: 64); document.background = .zero
+        var brush = BrushPreset.fallback
+        brush.parameters["pressureSize"] = 0; brush.parameters["stampCount"] = 4
+        let samples = (0..<200).map { i in PencilSample(x: i % 2 == 0 ? 12 : 52, y: 32.5, time: Double(i)/240) }
+        document.layers[0].strokes = [PaintStroke(brush: brush, tool: .paint, color: SIMD4(0,0,0,1), size: 1, opacity: 1,
+            samples: samples, seed: 8, distanceDynamicsVersion: 1)]
+        let result = pixels(try painter.render(document))
+        XCTAssertGreaterThan(painter.lastStampCount, 100_000)
+        XCTAssertGreaterThan(Float(Float16(bitPattern: result[(32*64+32)*4+3])), 0.5)
+    }
+
     func testAppendingFinishedStrokeDoesNotReplayCommittedHistory() throws {
         let painter = try MetalPainter()
         var document = DocumentContents(width: 384, height: 128)
