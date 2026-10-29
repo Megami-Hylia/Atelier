@@ -34,6 +34,20 @@ import UIKit
             if cut { clearLayer() }
         } catch { errorMessage = error.localizedDescription }
     }
+    func copySelectedStrokes(_ ids: Set<UUID>) {
+        var value = contents, layer = selectedLayer
+        layer.strokes = layer.strokes.filter { ids.contains($0.id) }
+        guard !layer.strokes.isEmpty else { errorMessage = "Nessun tratto selezionato."; return }
+        value.layers = [layer]; value.selectedLayerID = layer.id; value.background = .zero
+        do {
+            let data = try JSONEncoder().encode(value)
+            guard data.count <= 32 * 1024 * 1024 else { throw DocumentError.tooLarge }
+            var item: [String: Any] = [Self.clipboardType: data]
+            if let png = try MetalPainter().image(value).pngData() { item["public.png"] = png }
+            UIPasteboard.general.setItems([item]); errorMessage = nil
+        } catch { errorMessage = error.localizedDescription }
+    }
+
     func pasteLayers() {
         do {
             guard let data = UIPasteboard.general.data(forPasteboardType: Self.clipboardType) else {

@@ -142,6 +142,8 @@ struct PaintingWorkspace: View {
     @AppStorage("fingerPainting") private var fingerPainting = false
     @State private var immersive = false
     @State private var selecting = false
+    @State private var selectionMode = false
+    @State private var selectedStrokes = Set<UUID>()
 
     var body: some View {
         VStack(spacing: 0) {
@@ -150,7 +152,10 @@ struct PaintingWorkspace: View {
                 Color(white: 0.19)
                 CanvasSurface(document: document, brush: brushes.selectedBrush, tool: tool, color: rgba(color), brushSize: size, opacity: opacity,
                               fingerPainting: fingerPainting, onToolChange: { tool = $0 }, onPalette: { panel = "color" }, onClipboard: { panel = "clipboard" }, onQuickMenu: { panel = "quick" })
-                    .overlay { if selecting { TransformSelectionView(document: document) { selecting = false } } }
+                    .overlay {
+                        if selectionMode { StrokeSelectionView(document: document, selected: $selectedStrokes, color: rgba(color), transform: { selectionMode = false; selecting = true }, close: { selectionMode = false }) }
+                        else if selecting { TransformSelectionView(document: document, initialSelection: selectedStrokes.isEmpty ? nil : selectedStrokes) { selecting = false } }
+                    }
                     .aspectRatio(CGFloat(document.contents.width) / CGFloat(document.contents.height), contentMode: .fit)
                     .padding(44)
                 if !immersive { sideControls }
@@ -187,7 +192,8 @@ struct PaintingWorkspace: View {
                 .popover(isPresented: presented("actions"), arrowEdge: .top) { actions.frame(width: 330) }
             Button { panel = "adjustments" } label: { Image(systemName: "wand.and.stars").foregroundStyle(panel == "adjustments" ? Color.blue : Color.primary) }.accessibilityLabel("Regolazioni")
                 .popover(isPresented: presented("adjustments"), arrowEdge: .top) { AdjustmentsPanel(document: document).frame(width: 340, height: 540) }
-            Button { selecting.toggle(); panel = nil } label: { Image(systemName: "lasso").foregroundStyle(selecting ? Color.blue : Color.primary) }.accessibilityLabel("Selezione e trasformazione")
+            Button { selectionMode.toggle(); selecting = false; panel = nil } label: { Image(systemName: "lasso").foregroundStyle(selectionMode ? Color.blue : Color.primary) }.accessibilityLabel("Selezione")
+            Button { selecting.toggle(); selectionMode = false; panel = nil } label: { Image(systemName: "arrow.up.left.and.arrow.down.right").foregroundStyle(selecting ? Color.blue : Color.primary) }.accessibilityLabel("Selezione e trasformazione")
             Spacer()
             toolButton(.paint, "paintbrush.pointed.fill", "Pennello")
             toolButton(.smudge, "hand.draw.fill", "Sfumino")

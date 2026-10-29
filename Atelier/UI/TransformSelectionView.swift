@@ -2,6 +2,7 @@ import SwiftUI
 
 struct TransformSelectionView: View {
     @ObservedObject var document: PaintDocument
+    var initialSelection: Set<UUID>? = nil
     var close: () -> Void
     @AppStorage("selectionOverlayOpacity") private var overlayOpacity = 0.25
     @State private var selected = Set<UUID>()
@@ -136,7 +137,7 @@ struct TransformSelectionView: View {
                     }
                 }.padding(10).atelierPanel()
             }
-        }.onAppear { originals = document.selectedLayer.strokes; selected = Set(originals.map(\.id)) }
+        }.onAppear { originals = document.selectedLayer.strokes; selected = initialSelection ?? Set(originals.map(\.id)) }
     }
     private func rotate(_ angle: CGFloat) {
         transform(rotation: Float(angle)) { point, center in
