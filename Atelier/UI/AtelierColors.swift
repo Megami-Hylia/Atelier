@@ -129,7 +129,9 @@ struct AtelierColors: View {
     private func sync() {
         var h: CGFloat = 0, s: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 1
         UIColor(color).getHue(&h, saturation: &s, brightness: &b, alpha: &a)
-        hue = Double(h); saturation = Double(s); brightness = Double(b); hex = currentHex
+        if b > 0 && s > 0 { hue = Double(h) }
+        if b > 0 { saturation = Double(s) }
+        brightness = Double(b); hex = currentHex
     }
     private func colorFor(_ hex: String) -> Color? {
         let text = hex.replacingOccurrences(of: "#", with: "")
