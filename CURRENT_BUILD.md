@@ -1,9 +1,9 @@
 # Build corrente
 
-Commit: 9495c0b28bd7197d8ac8bafa1a3e5fbd0e4ca40c
+IPA compilata da `12b613aee0ffe1e40403d46aa052d963b87b42ca`.
+Workflow: https://github.com/Megami-Hylia/Atelier/actions/runs/40862087433
+SHA256: `c03391602c5c748c6cfa4c79545ae4678377ba6456cfec0650c614de95805971`.
 
-Build iPad e verifica Windows riuscite. SHA-256: 44e9a1339453c4728f006b43da6e337d0b76d9deac9069f62c123bf53259af0a
+Compilazione iPad arm64 e verifica strutturale superate. Test simulatore di questa revisione ancora in corso. Nessun test su iPad fisico o misura di latenza.
 
-Correzioni renderer/cache e interfaccia incluse. Test di questa revisione in verifica: https://github.com/Megami-Hylia/Atelier/actions/runs/40852060922
-
-I 15 test dei vecchi rapporti riguardano 5871e5d. Latenza su iPad non misurata; parità completa non raggiunta. Vedere PERFORMANCE_WORK.md.
+Contiene colori, livelli, menu gestuali, selezione per tratti, regolazioni e Azioni. Le funzionalità sono parziali; vedere ACTIONS_STATUS.md e SELECTION_STATUS.md. I risultati 15/15 delle vecchie relazioni sono storici e non attestano questa revisione.
