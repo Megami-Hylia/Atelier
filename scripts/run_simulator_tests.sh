@@ -38,15 +38,15 @@ trap cleanup_created_simulator EXIT
 python3 - "$DEVICE_ID" <<'PY'
 import datetime, json, pathlib, subprocess, sys
 device = sys.argv[1]
-report = {'udid':device, 'timeout_seconds':300, 'started_utc':datetime.datetime.now(datetime.timezone.utc).isoformat()}
+report = {'udid':device, 'timeout_seconds':600, 'started_utc':datetime.datetime.now(datetime.timezone.utc).isoformat()}
 try:
-    result = subprocess.run(['xcrun', 'simctl', 'bootstatus', device, '-b'], timeout=300)
+    result = subprocess.run(['xcrun', 'simctl', 'bootstatus', device, '-b'], timeout=600)
     report['status'] = 'booted' if result.returncode == 0 else 'failed'
     status = result.returncode
 except subprocess.TimeoutExpired:
     report['status'] = 'timed_out'
     status = 124
-    print('ERROR: fresh iPad simulator boot exceeded 300 seconds; no XCTest executed.', file=sys.stderr)
+    print('ERROR: fresh iPad simulator boot exceeded 600 seconds; no XCTest executed.', file=sys.stderr)
 report['finished_utc'] = datetime.datetime.now(datetime.timezone.utc).isoformat()
 pathlib.Path('build/tests/simulator-boot.json').write_text(json.dumps(report, indent=2) + '\n')
 with open('build/tests/simulator-inventory.json', 'w') as output:
