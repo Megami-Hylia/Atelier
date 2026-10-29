@@ -3,6 +3,7 @@ import SwiftUI
 struct AdjustmentsPanel: View {
     @ObservedObject var document: PaintDocument
     @State private var section: String?
+    @State private var pending: [String: Float] = [:]
     private let groups: [(String, [(String, String, ClosedRange<Float>, Float)])] = [
         ("Tonalità, saturazione, luminosità", [("hue","Tonalità",-1...1,0),("saturation","Saturazione",0...2,1),("brightness","Luminosità",-0.5...0.5,0)]),
         ("Bilanciamento colore",[("red","Rosso",-0.3...0.3,0),("green","Verde",-0.3...0.3,0),("blue","Blu",-0.3...0.3,0)]),
@@ -25,7 +26,7 @@ struct AdjustmentsPanel: View {
                     ForEach(group.1, id: \.0) { parameter in
                         VStack(alignment: .leading) {
                             HStack { Text(parameter.1); Spacer(); Text(value(parameter.0, parameter.3), format: .number.precision(.fractionLength(2))).monospacedDigit() }
-                            Slider(value: Binding(get: { value(parameter.0, parameter.3) }, set: { set(parameter.0, $0) }), in: parameter.2).accessibilityLabel(parameter.1)
+                            Slider(value: Binding(get: { value(parameter.0, parameter.3) }, set: { pending[parameter.0] = $0 }), in: parameter.2, onEditingChanged: { editing in if !editing, let value = pending.removeValue(forKey: parameter.0) { set(parameter.0, value) } }).accessibilityLabel(parameter.1)
                         }.padding(.vertical, 7)
                     }
                     Button("Ripristina questa regolazione") {
@@ -39,10 +40,11 @@ struct AdjustmentsPanel: View {
                     ForEach(groups, id: \.0) { group in Button(group.0) { section = group.0 }.foregroundStyle(.white).padding(.vertical, 7) }
                 }
             }.listStyle(.plain).scrollContentBackground(.hidden)
+            Text("Rilascia il cursore per applicare la regolazione.").font(.caption).foregroundStyle(.secondary).padding(.horizontal)
             Text("Livello: " + document.selectedLayer.name).font(.caption).foregroundStyle(.secondary).padding(10)
         }.background(Color(white: 0.12)).foregroundStyle(.white)
     }
-    private func value(_ key: String, _ fallback: Float) -> Float { document.selectedLayer.adjustments?[key] ?? fallback }
+    private func value(_ key: String, _ fallback: Float) -> Float { pending[key] ?? document.selectedLayer.adjustments?[key] ?? fallback }
     private func set(_ key: String, _ value: Float) {
         guard !document.selectedLayer.locked else { document.errorMessage = DocumentError.lockedLayer.localizedDescription; return }
         let id = document.selectedLayer.id

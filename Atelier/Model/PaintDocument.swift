@@ -68,7 +68,7 @@ struct DocumentContents: Codable, Equatable {
               Set(layers.map(\.id)).count == layers.count else { throw DocumentError.invalidData }
         guard selectedLayerID == nil || layers.contains(where: { $0.id == selectedLayerID }) else { throw DocumentError.invalidData }
         guard layers.allSatisfy({ layer in
-            (layer.adjustments ?? [:]).allSatisfy { key, value in value.isFinite && abs(value) <= 64 } && layer.opacity.isFinite && (0...1).contains(layer.opacity) && (0...2).contains(layer.blendMode) &&
+            (layer.adjustments ?? [:]).allSatisfy({ key, value in value.isFinite && abs(value) <= 64 }) && layer.opacity.isFinite && (0...1).contains(layer.opacity) && (0...2).contains(layer.blendMode) &&
             layer.strokes.allSatisfy { stroke in
                 !stroke.samples.isEmpty && stroke.samples.count <= 1_000_000 &&
                 stroke.size.isFinite && (0.1...2048).contains(stroke.size) && stroke.opacity.isFinite && (0...1).contains(stroke.opacity) &&
