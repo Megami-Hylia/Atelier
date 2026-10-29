@@ -102,7 +102,7 @@ struct BrushLibraryView: View {
                         }
                         .onMove { store.moveSets(in: store.selectedLibraryID, from: $0, to: $1) }
                     }
-                    .listStyle(.plain).frame(width: 172)
+                    .listStyle(.plain).frame(width: 150)
                     Divider()
                     List {
                         ForEach(visibleBrushes) { brush in
@@ -171,7 +171,7 @@ struct BrushLibraryView: View {
                 if case .failure(let error) = result { store.errorMessage = "Esportazione: \(error.localizedDescription)" }
             }
         }
-        .frame(minWidth: 560, idealWidth: 620, minHeight: 520, idealHeight: 680)
+        .frame(minWidth: 0, idealWidth: 480, minHeight: 520, idealHeight: 650)
     }
 
     private func applyName() {

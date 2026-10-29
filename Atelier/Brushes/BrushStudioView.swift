@@ -112,13 +112,13 @@ struct BrushStudioView: View {
                 .frame(height: wide ? nil : min(300, geometry.size.height * 0.4))
             }
             }
-            .navigationTitle(draft.name).navigationBarTitleDisplayMode(.inline)
+            .navigationTitle("Laboratorio Pennelli · " + draft.name).navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) { Button("Annulla") { dismiss() } }
                 ToolbarItemGroup(placement: .topBarTrailing) {
                     Button("Ripristina") { confirmingReset = true }
                     Button("Duplica") { draft.id = UUID().uuidString; draft.name += " copia"; newCopy = true }
-                    Button("Salva") {
+                    Button("Fine") {
                         if newCopy { store.insert(draft) } else { store.save(draft) }
                         if store.errorMessage == nil { dismiss() }
                     }.bold()

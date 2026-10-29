@@ -167,7 +167,7 @@ struct PaintingWorkspace: View {
         }
     }
     private var toolbar: some View {
-        HStack(spacing: 22) {
+        HStack(spacing: 18) {
             Button("Galleria") {
                 do {
                     if let url = document.storageURL { try document.save(to: url) }
@@ -180,18 +180,18 @@ struct PaintingWorkspace: View {
             toolButton(.paint, "paintbrush.pointed.fill", "Pennello")
             toolButton(.smudge, "hand.draw.fill", "Sfumino")
             toolButton(.erase, "eraser.fill", "Gomma")
-            Button { panel = "layers" } label: { Image(systemName: "square.3.layers.3d") }.accessibilityLabel("Livelli")
+            Button { panel = "layers" } label: { Image(systemName: "square.on.square.fill") }.accessibilityLabel("Livelli")
                 .popover(isPresented: presented("layers"), arrowEdge: .top) { layers.frame(width: 360, height: 540) }
             Button { panel = "color" } label: { Circle().fill(color).overlay(Circle().stroke(.gray)).frame(width: 30, height: 30) }.accessibilityLabel("Colore")
                 .popover(isPresented: presented("color"), arrowEdge: .top) { AtelierColors(color: $color).frame(width: 350, height: 490) }
-        }.font(.system(size: 21)).buttonStyle(.plain).padding(.horizontal, 22).frame(height: 54)
+        }.font(.system(size: 20)).buttonStyle(.plain).padding(.horizontal, 16).frame(height: 48).background(Color(white: 0.075))
     }
     private func toolButton(_ item: PaintTool, _ icon: String, _ label: String) -> some View {
         Button {
             if tool == item { panel = "brush-\(item.rawValue)" } else { tool = item }
         } label: { Image(systemName: icon).foregroundStyle(tool == item ? Color.blue : .white).frame(width: 30, height: 40) }
             .accessibilityLabel(label)
-            .popover(isPresented: presented("brush-\(item.rawValue)"), arrowEdge: .top) { BrushLibraryView(store: brushes).frame(width: 650, height: 650) }
+            .popover(isPresented: presented("brush-\(item.rawValue)"), arrowEdge: .top) { BrushLibraryView(store: brushes).frame(width: 480, height: 650) }
     }
     private func presented(_ value: String) -> Binding<Bool> { Binding(get: { panel == value }, set: { if !$0 && panel == value { panel = nil } }) }
     private var sideControls: some View {
@@ -243,6 +243,12 @@ struct PaintingWorkspace: View {
                             }.buttonStyle(.bordered)
                         }
                     }.padding(.vertical, 5)
+                        .listRowBackground(document.selectedLayer.id == layer.id ? Color.blue : Color(white: 0.13))
+                        .contextMenu {
+                            Button("Duplica", systemImage: "doc.on.doc") { document.duplicateLayer(layer.id) }
+                            Button(layer.locked ? "Sblocca" : "Blocca", systemImage: layer.locked ? "lock.open" : "lock") { layerBinding(layer.id, \.locked).wrappedValue.toggle() }
+                            Button("Elimina", role: .destructive) { document.deleteLayer(layer.id) }.disabled(document.contents.layers.count == 1)
+                        }
                         .swipeActions { Button("Elimina", role: .destructive) { document.deleteLayer(layer.id) }.disabled(document.contents.layers.count == 1) }
                 }
                 .onMove { source, destination in
