@@ -32,9 +32,9 @@ if ! xcrun --sdk iphoneos metal -v > "$OUT/metal-version.txt" 2>&1; then
 fi
 cat "$OUT/metal-version.txt"
 
-BUILD_ARGS=(-project Atelier.xcodeproj -scheme Atelier -configuration Release
+BUILD_ARGS=(-jobs 1 -project Atelier.xcodeproj -scheme Atelier -configuration Release
   -sdk iphoneos -destination 'generic/platform=iOS' -derivedDataPath "$DERIVED"
-  ARCHS=arm64 ONLY_ACTIVE_ARCH=NO TARGETED_DEVICE_FAMILY=2
+  ARCHS=arm64 ONLY_ACTIVE_ARCH=NO TARGETED_DEVICE_FAMILY=2 SWIFT_MAXIMUM_CONCURRENT_COMPILE_TASKS=1
   SUPPORTS_MACCATALYST=NO SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD=NO
   CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO 'CODE_SIGN_IDENTITY='
   'DEVELOPMENT_TEAM=' 'PROVISIONING_PROFILE_SPECIFIER=')
