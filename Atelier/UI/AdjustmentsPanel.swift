@@ -18,7 +18,7 @@ struct AdjustmentsPanel: View {
     ]
     var body: some View {
         VStack(spacing: 0) {
-            HStack { Text("Regolazioni").font(.title2.bold()); Spacer(); if section != nil { Button("Indietro") { section = nil } } }.padding(16)
+            HStack { Text("Regolazioni").font(PanelStyle.title); Spacer(); if section != nil { Button("Indietro") { section = nil } } }.padding(16)
             List {
                 if let section, let group = groups.first(where: { $0.0 == section }) {
                     Text(section).font(.headline)
@@ -42,7 +42,7 @@ struct AdjustmentsPanel: View {
             }.listStyle(.plain).scrollContentBackground(.hidden)
             Text("Rilascia il cursore per applicare la regolazione.").font(.caption).foregroundStyle(.secondary).padding(.horizontal)
             Text("Livello: " + document.selectedLayer.name).font(.caption).foregroundStyle(.secondary).padding(10)
-        }.background(Color(white: 0.12)).foregroundStyle(.white)
+        }.atelierPanel()
     }
     private func value(_ key: String, _ fallback: Float) -> Float { pending[key] ?? document.selectedLayer.adjustments?[key] ?? fallback }
     private func set(_ key: String, _ value: Float) {

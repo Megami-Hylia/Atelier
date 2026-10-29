@@ -78,7 +78,7 @@ struct TransformSelectionView: View {
                             Button("Fine", action: close)
                         }.font(.subheadline).padding(8)
                     }
-                }.padding(10).background(Color(white: 0.1), in: RoundedRectangle(cornerRadius: 10)).foregroundStyle(.white)
+                }.padding(10).atelierPanel()
             }
         }
     }

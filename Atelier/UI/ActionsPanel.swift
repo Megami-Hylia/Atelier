@@ -16,7 +16,7 @@ struct ActionsPanel: View {
     private let icons = ["plus.square.on.square", "rectangle", "square.and.arrow.up", "play.fill", "switch.2", "questionmark.circle"]
     var body: some View {
         VStack(spacing: 0) {
-            HStack { Text("Azioni").font(.title2.bold()); Spacer() }.padding(16)
+            HStack { Text("Azioni").font(PanelStyle.title); Spacer() }.padding(16)
             HStack(spacing: 0) {
                 ForEach(0..<names.count, id: \.self) { index in
                     Button { tab = index } label: {
@@ -25,7 +25,7 @@ struct ActionsPanel: View {
                     }.buttonStyle(.plain).accessibilityLabel(names[index])
                 }
             }.padding(.horizontal, 8)
-            Form {
+            List {
                 if tab == 0 {
                     Button("Nuovo livello") { document.addLayer() }
                     Button("Incolla livelli Atelier") { document.pasteLayers() }
@@ -71,7 +71,7 @@ struct ActionsPanel: View {
                     Text("Disegno locale e offline. Nessun acquisto o abbonamento.")
                     Text("Le modifiche si salvano nel documento. L’app e la parità funzionale sono ancora incomplete.").font(.footnote)
                 }
-            }.scrollContentBackground(.hidden)
-        }.background(light ? Color(white: 0.94) : Color(white: 0.12))
+            }.listStyle(.plain).scrollContentBackground(.hidden)
+        }.atelierPanel()
     }
 }

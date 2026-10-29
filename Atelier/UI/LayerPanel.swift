@@ -6,7 +6,7 @@ struct LayerPanel: View {
     @State private var editMode = EditMode.inactive
     var body: some View {
         VStack(spacing: 0) {
-            HStack { Text("Livelli").font(.title2.bold()).contextMenu { Button("Riordina livelli") { editMode = .active }; Button("Fine riordino") { editMode = .inactive } }; Spacer(); Button { document.addLayer() } label: { Image(systemName: "plus").font(.title2) }.accessibilityLabel("Nuovo livello") }.padding(18)
+            HStack { Text("Livelli").font(PanelStyle.title).contextMenu { Button("Riordina livelli") { editMode = .active }; Button("Fine riordino") { editMode = .inactive } }; Spacer(); Button { document.addLayer() } label: { Image(systemName: "plus").font(.title2) }.accessibilityLabel("Nuovo livello") }.padding(18)
             List {
                 ForEach(Array(document.contents.layers.reversed())) { layer in
                     HStack(spacing: 12) {
@@ -21,7 +21,7 @@ struct LayerPanel: View {
                     }
                     .foregroundStyle(.white).padding(.vertical, 5).contentShape(Rectangle())
                     .onTapGesture { document.selectLayer(layer.id); optionsID = layer.id }
-                    .listRowBackground(document.selectedLayer.id == layer.id ? Color.blue : Color(white: 0.13))
+                    .listRowBackground(document.selectedLayer.id == layer.id ? PanelStyle.selection : PanelStyle.content)
                     .listRowSeparatorTint(Color(white: 0.18))
                     .swipeActions(edge: .trailing, allowsFullSwipe: false) {
                         Button("Elimina", role: .destructive) { document.deleteLayer(layer.id) }.disabled(document.contents.layers.count <= 1)
@@ -45,10 +45,10 @@ struct LayerPanel: View {
                     Button { document.change { $0.background.w = $0.background.w == 0 ? 1 : 0 } } label: { Image(systemName: document.contents.background.w > 0 ? "checkmark.square.fill" : "square") }.buttonStyle(.plain).accessibilityLabel("Visibilità sfondo")
                 }.listRowBackground(Color(white: 0.1))
             }.listStyle(.plain).scrollContentBackground(.hidden).environment(\.editMode, $editMode)
-        }.background(Color(white: 0.11))
+        }.atelierPanel()
     }
     private func layerOptions(_ layer: PaintLayer) -> some View {
-        Form {
+        List {
             TextField("Rinomina", text: binding(layer.id, \.name))
             Slider(value: binding(layer.id, \.opacity), in: 0...1) { Text("Opacità") }
             Picker("Fusione", selection: binding(layer.id, \.blendMode)) { Text("Normale").tag(0); Text("Moltiplica").tag(1); Text("Scolora").tag(2) }
@@ -58,7 +58,7 @@ struct LayerPanel: View {
             Button("Unisci sotto") { document.mergeSelectedDown(); optionsID = nil }.disabled(!document.canMergeSelected)
             Button("Cancella contenuto", role: .destructive) { document.clearLayer(); optionsID = nil }.disabled(layer.locked)
             Button("Elimina livello", role: .destructive) { document.deleteLayer(layer.id); optionsID = nil }.disabled(document.contents.layers.count <= 1)
-        }
+        }.listStyle(.plain).scrollContentBackground(.hidden).atelierPanel()
     }
     private func binding<T>(_ id: UUID, _ key: WritableKeyPath<PaintLayer, T>) -> Binding<T> {
         Binding(get: { (document.contents.layers.first { $0.id == id } ?? document.selectedLayer)[keyPath: key] }, set: { newValue in
@@ -73,12 +73,12 @@ struct GestureCommandPanel: View {
     var close: () -> Void
     var body: some View {
         VStack(spacing: 14) {
-            HStack { Text(quick ? "Menu rapido" : "Copia e Incolla").font(.headline); Spacer(); Button(action: close) { Image(systemName: "xmark.circle.fill") }.accessibilityLabel("Chiudi") }
+            HStack { Text(quick ? "Menu rapido" : "Copia e Incolla").font(.system(size: 18, weight: .bold)); Spacer(); Button(action: close) { Image(systemName: "xmark.circle.fill") }.accessibilityLabel("Chiudi") }
             ViewThatFits(in: .horizontal) {
                 HStack(spacing: 18) { commands }
                 ScrollView(.horizontal) { HStack(spacing: 18) { commands } }
             }
-        }.padding(16).frame(maxWidth: 620).background(Color(white: 0.12), in: RoundedRectangle(cornerRadius: 12)).foregroundStyle(.white)
+        }.padding(16).frame(maxWidth: 620).atelierPanel()
     }
     @ViewBuilder private var commands: some View {
         if quick {

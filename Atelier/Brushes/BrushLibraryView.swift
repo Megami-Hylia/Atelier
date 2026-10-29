@@ -57,7 +57,7 @@ struct BrushLibraryView: View {
                     .accessibilityElement(children: .combine)
                 }
                 HStack {
-                    Text("Libreria pennelli").font(.system(size: 22, weight: .bold))
+                    Text("Libreria pennelli").font(PanelStyle.title)
                     Spacer()
                     Button { searching.toggle(); if !searching { query = "" } } label: { Image(systemName: "magnifyingglass").frame(width: 32, height: 44) }
                         .accessibilityLabel("Cerca pennelli")
@@ -113,7 +113,7 @@ struct BrushLibraryView: View {
                         }
                         .onMove { store.moveSets(in: store.selectedLibraryID, from: $0, to: $1) }
                     }
-                    .listStyle(.plain).font(.system(size: 12, weight: .medium)).listRowSeparator(.hidden).scrollContentBackground(.hidden).background(Color(white: 0.13)).frame(width: 152)
+                    .listStyle(.plain).font(.system(size: 12, weight: .medium)).listRowSeparator(.hidden).scrollContentBackground(.hidden).background(PanelStyle.sidebar).frame(width: 152)
                     Divider()
                     List {
                         ForEach(visibleBrushes) { brush in
@@ -135,7 +135,7 @@ struct BrushLibraryView: View {
 
                             }
                             .padding(.horizontal, 8).padding(.vertical, 6)
-                            .background(store.selectedID == brush.id ? Color(red: 0.03, green: 0.43, blue: 1) : Color.clear, in: RoundedRectangle(cornerRadius: 6))
+                            .background(store.selectedID == brush.id ? PanelStyle.selection : Color.clear, in: RoundedRectangle(cornerRadius: 6))
                             .listRowInsets(EdgeInsets(top: 2, leading: 4, bottom: 2, trailing: 4))
                             .listRowSeparator(.hidden).listRowBackground(Color.clear)
                             .accessibilityAddTraits(store.selectedID == brush.id ? .isSelected : [])
@@ -168,7 +168,7 @@ struct BrushLibraryView: View {
                                 .foregroundStyle(.secondary).padding(.vertical)
                         }
                     }
-                    .listStyle(.plain).scrollContentBackground(.hidden).background(Color(white: 0.1))
+                    .listStyle(.plain).scrollContentBackground(.hidden).background(PanelStyle.content)
                 }
             }
             .navigationTitle("").navigationBarTitleDisplayMode(.inline)
@@ -199,7 +199,7 @@ struct BrushLibraryView: View {
                 if case .failure(let error) = result { store.errorMessage = "Esportazione: \(error.localizedDescription)" }
             }
         }
-        .preferredColorScheme(.dark)
+        .atelierPanel()
         .frame(minWidth: 0, idealWidth: 420, minHeight: 520, idealHeight: 650)
     }
 

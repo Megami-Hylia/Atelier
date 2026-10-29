@@ -14,7 +14,7 @@ struct AtelierColors: View {
         VStack(spacing: 0) {
             Capsule().fill(Color(white: 0.4)).frame(width: 36, height: 3).padding(.top, 6)
             HStack {
-                Text("Colori").font(.system(size: 23, weight: .bold))
+                Text("Colori").font(PanelStyle.title)
                 Spacer()
                 HStack(spacing: 0) {
                     Button { color = previousColor; sync(); remember() } label: { Rectangle().fill(previousColor).frame(width: 34, height: 24) }.accessibilityLabel("Colore precedente")
@@ -69,6 +69,7 @@ struct AtelierColors: View {
             }.padding(.top, 6).padding(.bottom, 8).background(Color(white: 0.085))
         }
         .background(Color(white: 0.12)).foregroundStyle(.white)
+        .atelierPanel()
         .onAppear { previousColor = color; sync(); if !(0...4).contains(mode) { mode = 1 } }
         .onChange(of: color) { _, _ in sync() }.onDisappear { remember() }
     }
