@@ -185,9 +185,9 @@ struct PaintingWorkspace: View {
             }.font(.headline)
             Button { panel = "actions" } label: { Image(systemName: "wrench") }.accessibilityLabel("Azioni")
                 .popover(isPresented: presented("actions"), arrowEdge: .top) { actions.frame(width: 330) }
-            Button { panel = "adjustments" } label: { Image(systemName: "wand.and.stars").foregroundStyle(panel == "adjustments" ? Color.blue : .white) }.accessibilityLabel("Regolazioni")
+            Button { panel = "adjustments" } label: { Image(systemName: "wand.and.stars").foregroundStyle(panel == "adjustments" ? Color.blue : Color.primary) }.accessibilityLabel("Regolazioni")
                 .popover(isPresented: presented("adjustments"), arrowEdge: .top) { AdjustmentsPanel(document: document).frame(width: 340, height: 540) }
-            Button { selecting.toggle(); panel = nil } label: { Image(systemName: "lasso").foregroundStyle(selecting ? Color.blue : .white) }.accessibilityLabel("Selezione e trasformazione")
+            Button { selecting.toggle(); panel = nil } label: { Image(systemName: "lasso").foregroundStyle(selecting ? Color.blue : Color.primary) }.accessibilityLabel("Selezione e trasformazione")
             Spacer()
             toolButton(.paint, "paintbrush.pointed.fill", "Pennello")
             toolButton(.smudge, "hand.draw.fill", "Sfumino")
@@ -201,7 +201,7 @@ struct PaintingWorkspace: View {
     private func toolButton(_ item: PaintTool, _ icon: String, _ label: String) -> some View {
         Button {
             if tool == item { panel = "brush-\(item.rawValue)" } else { tool = item }
-        } label: { Image(systemName: icon).foregroundStyle(tool == item ? Color.blue : .white).frame(width: 30, height: 40) }
+        } label: { Image(systemName: icon).foregroundStyle(tool == item ? Color.blue : Color.primary).frame(width: 30, height: 40) }
             .accessibilityLabel(label)
             .popover(isPresented: presented("brush-\(item.rawValue)"), arrowEdge: .top) { BrushLibraryView(store: brushes).frame(width: 480, height: 650) }
     }
@@ -212,7 +212,7 @@ struct PaintingWorkspace: View {
             VStack { Text("\(Int(opacity * 100)) %").font(.caption2).monospacedDigit(); Slider(value: $opacity, in: 0.01...1).frame(width: 130).rotationEffect(.degrees(-90)).frame(width: 32, height: 140) }.accessibilityLabel("Opacità pennello")
             Button { document.undo() } label: { Image(systemName: "arrow.uturn.backward") }.disabled(!document.canUndo).keyboardShortcut("z", modifiers: .command).accessibilityLabel("Annulla")
             Button { document.redo() } label: { Image(systemName: "arrow.uturn.forward") }.disabled(!document.canRedo).keyboardShortcut("z", modifiers: [.command, .shift]).accessibilityLabel("Ripeti")
-        }.padding(10).background(Color(white: 0.12)).padding(.vertical, 30)
+        }.padding(10).background(Color(uiColor: .secondarySystemBackground)).padding(.vertical, 30)
     }
     private var actions: some View {
         ActionsPanel(document: document, exportPNG: { exportPNG() }, comparison: { contactSheet() }, hideInterface: { panel = nil; immersive = true }).frame(height: 600)
