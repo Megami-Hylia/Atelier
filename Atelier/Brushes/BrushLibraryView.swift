@@ -13,6 +13,9 @@ struct BrushLibraryView: View {
     @ObservedObject var store: BrushStore
     @State private var query = ""
     @State private var recents = false
+    @State private var favorites = false
+    @State private var searching = false
+    @State private var editMode = EditMode.inactive
     @State private var editingBrush: BrushPreset?
     @State private var name = ""
     @State private var nameAction: NameAction?
@@ -37,6 +40,7 @@ struct BrushLibraryView: View {
                 store.libraries.contains { library in library.name.localizedCaseInsensitiveContains(search) && store.sets.contains { $0.libraryID == library.id && $0.id == brush.setID } }
             }
         }
+        if favorites { return store.brushes.filter { store.favoriteIDs.contains($0.id) } }
         return recents ? store.recentBrushes : store.brushes.filter { $0.setID == store.selectedSetID }
     }
 
@@ -53,22 +57,25 @@ struct BrushLibraryView: View {
                     .accessibilityElement(children: .combine)
                 }
                 HStack {
+                    Text("Libreria pennelli").font(.system(size: 22, weight: .bold))
+                    Spacer()
+                    Button { searching.toggle(); if !searching { query = "" } } label: { Image(systemName: "magnifyingglass").frame(width: 32, height: 44) }
+                        .accessibilityLabel("Cerca pennelli")
                     Menu {
                         ForEach(store.libraries) { library in
                             Button(library.name) {
                                 store.selectedLibraryID = library.id
                                 store.selectedSetID = store.sets.first { $0.libraryID == library.id }?.id ?? ""
-                                recents = false
+                                recents = false; favorites = false
                             }
                         }
                         Divider()
                         Button("Gestisci librerie", systemImage: "books.vertical") { managingLibraries = true }
                     } label: {
-                        Label(store.libraries.first { $0.id == store.selectedLibraryID }?.name ?? "Librerie", systemImage: "chevron.down")
-                            .font(.headline).lineLimit(1)
+                        Image(systemName: "books.vertical").frame(width: 32, height: 44).accessibilityLabel("Scegli libreria")
                     }
-                    Spacer()
                     Menu {
+                        Button(editMode == .active ? "Fine riordino" : "Riordina pennelli e set", systemImage: "arrow.up.arrow.down") { editMode = editMode == .active ? .inactive : .active }
                         Button("Nuovo pennello", systemImage: "plus") { editingBrush = store.createBrush(in: store.selectedSetID) }
                         Button("Nuovo set", systemImage: "folder.badge.plus") { name = ""; nameAction = .newSet; showName = true }
                         Button("Importa JSON Atelier", systemImage: "square.and.arrow.down") { importing = true }
@@ -80,19 +87,23 @@ struct BrushLibraryView: View {
                     .accessibilityLabel("Aggiungi, importa o esporta pennelli")
                 }
                 .padding(.horizontal)
-                TextField("Cerca pennelli, set e librerie", text: $query)
-                    .textFieldStyle(.roundedBorder).padding(.horizontal).padding(.bottom, 10)
+                if searching {
+                    TextField("Cerca pennelli, set e librerie", text: $query)
+                        .textFieldStyle(.roundedBorder).padding(.horizontal).padding(.bottom, 10)
+                }
                 HStack(spacing: 0) {
                     List {
                         Button {
-                            recents = true
+                            recents = true; favorites = false
                         } label: { Label("Recenti", systemImage: "clock") }
-                        .listRowBackground(recents ? Color.accentColor.opacity(0.2) : Color.clear)
+                        .listRowBackground(recents ? Color(white: 0.22) : Color.clear)
+                        Button { favorites = true; recents = false } label: { Label("Preferiti", systemImage: "star") }
+                            .listRowBackground(favorites ? Color(white: 0.22) : Color.clear)
                         ForEach(store.sets.filter { $0.libraryID == store.selectedLibraryID }) { set in
                             Button {
-                                recents = false; store.selectedSetID = set.id
-                            } label: { Text(set.name).foregroundStyle(.primary).lineLimit(2).padding(.vertical, 7) }
-                            .listRowBackground(!recents && store.selectedSetID == set.id ? Color.accentColor.opacity(0.2) : Color.clear)
+                                recents = false; favorites = false; store.selectedSetID = set.id
+                            } label: { Label(set.name, systemImage: "paintbrush.pointed").font(.system(size: 12, weight: .medium)).foregroundStyle(.primary).lineLimit(2).padding(.vertical, 5) }
+                            .listRowBackground(!recents && !favorites && store.selectedSetID == set.id ? Color(white: 0.22) : Color.clear)
                             .contextMenu {
                                 Button("Rinomina") { name = set.name; nameAction = .renameSet(set); showName = true }
                                 Button("Duplica set") { store.duplicateSet(set) }
@@ -102,26 +113,40 @@ struct BrushLibraryView: View {
                         }
                         .onMove { store.moveSets(in: store.selectedLibraryID, from: $0, to: $1) }
                     }
-                    .listStyle(.plain).frame(width: 150)
+                    .listStyle(.plain).font(.system(size: 12, weight: .medium)).listRowSeparator(.hidden).scrollContentBackground(.hidden).background(Color(white: 0.13)).frame(width: 152)
                     Divider()
                     List {
                         ForEach(visibleBrushes) { brush in
                             HStack(spacing: 10) {
-                                Button { store.select(brush) } label: {
+                                Button { if store.selectedID == brush.id { editingBrush = brush } else { store.select(brush) } } label: {
                                     VStack(alignment: .leading, spacing: 1) {
-                                        Text(brush.name).font(.subheadline).foregroundStyle(.primary)
-                                        BrushPreview(brush: brush).frame(height: 54).clipped()
+                                        HStack {
+                                            Text(brush.name).font(.system(size: 12, weight: .semibold)).lineLimit(1)
+                                            Spacer(minLength: 4)
+                                            if store.favoriteIDs.contains(brush.id) { Image(systemName: "star.fill").font(.system(size: 10)) }
+                                            Image(systemName: "paintbrush.pointed.fill").font(.system(size: 11))
+                                        }.foregroundStyle(.white)
+                                        BrushPreview(brush: brush, lightOnDark: true).frame(height: 48).clipped()
                                     }
                                     .frame(maxWidth: .infinity, alignment: .leading)
                                     .contentShape(Rectangle())
                                 }
                                 .buttonStyle(.plain)
-                                Button { editingBrush = brush } label: { Image(systemName: "slider.horizontal.3").frame(width: 40, height: 52) }
-                                    .accessibilityLabel("Modifica \(brush.name)")
+
                             }
-                            .listRowBackground(store.selectedID == brush.id ? Color.accentColor.opacity(0.25) : Color.clear)
-                            .moveDisabled(!query.isEmpty || recents)
+                            .padding(.horizontal, 8).padding(.vertical, 6)
+                            .background(store.selectedID == brush.id ? Color(red: 0.03, green: 0.43, blue: 1) : Color.clear, in: RoundedRectangle(cornerRadius: 6))
+                            .listRowInsets(EdgeInsets(top: 2, leading: 4, bottom: 2, trailing: 4))
+                            .listRowSeparator(.hidden).listRowBackground(Color.clear)
+                            .accessibilityAddTraits(store.selectedID == brush.id ? .isSelected : [])
+                            .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                                Button("Elimina", role: .destructive) { deleteCandidate = brush }
+                                Button("Duplica") { _ = store.duplicate(brush) }.tint(.gray)
+                                Button("Esporta") { prepareExport(brush: brush) }.tint(.blue)
+                            }
+                            .moveDisabled(!query.isEmpty || recents || favorites)
                             .contextMenu {
+                                Button(store.favoriteIDs.contains(brush.id) ? "Rimuovi dai preferiti" : "Aggiungi ai preferiti", systemImage: "star") { store.toggleFavorite(brush) }
                                 Button("Modifica") { editingBrush = brush }
                                 Button("Rinomina") { name = brush.name; nameAction = .renameBrush(brush); showName = true }
                                 Button("Duplica") { _ = store.duplicate(brush) }
@@ -134,18 +159,19 @@ struct BrushLibraryView: View {
                             }
                         }
                         .onMove { offsets, destination in
-                            if query.isEmpty && !recents { store.moveBrushes(in: store.selectedSetID, from: offsets, to: destination) }
+                            if query.isEmpty && !recents && !favorites { store.moveBrushes(in: store.selectedSetID, from: offsets, to: destination) }
                         }
                         if visibleBrushes.isEmpty {
-                            Text(query.isEmpty ? "Set vuoto. Aggiungi o sposta un pennello." : "Nessun risultato.")
+                            Text(!query.isEmpty ? "Nessun risultato." : favorites ? "Nessun preferito. Tieni premuto un pennello per aggiungerlo." : recents ? "I pennelli selezionati compariranno qui." : "Set vuoto. Aggiungi o sposta un pennello.")
                                 .foregroundStyle(.secondary).padding(.vertical)
                         }
                     }
-                    .listStyle(.plain)
+                    .listStyle(.plain).scrollContentBackground(.hidden).background(Color(white: 0.1))
                 }
             }
-            .navigationTitle("Pennelli").navigationBarTitleDisplayMode(.inline)
-            .toolbar { ToolbarItem(placement: .topBarTrailing) { EditButton() } }
+            .navigationTitle("").navigationBarTitleDisplayMode(.inline)
+            .toolbar(.hidden, for: .navigationBar)
+            .environment(\.editMode, $editMode)
             .fullScreenCover(item: $editingBrush) { BrushStudioView(store: store, brush: $0) }
             .sheet(isPresented: $managingLibraries) { BrushLibrariesView(store: store) }
             .alert("Nome", isPresented: $showName) {
@@ -171,6 +197,7 @@ struct BrushLibraryView: View {
                 if case .failure(let error) = result { store.errorMessage = "Esportazione: \(error.localizedDescription)" }
             }
         }
+        .preferredColorScheme(.dark)
         .frame(minWidth: 0, idealWidth: 480, minHeight: 520, idealHeight: 650)
     }
 

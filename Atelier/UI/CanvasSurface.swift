@@ -1,3 +1,4 @@
+import CryptoKit
 import SwiftUI
 import MetalKit
 
@@ -213,6 +214,7 @@ struct CanvasSurface: UIViewRepresentable {
 
 struct BrushPreview: View {
     let brush: BrushPreset
+    var lightOnDark = false
     @State private var preview: UIImage?
     @State private var error: String?
     var body: some View {
@@ -222,23 +224,43 @@ struct BrushPreview: View {
             else { ProgressView() }
         }
         .onChange(of: brush, initial: true) { _, _ in render() }
+        .onChange(of: lightOnDark) { _, _ in render() }
         .accessibilityLabel("Anteprima di \(brush.name)")
     }
     private func render() {
-        do {
-            let painter = try MetalPainter()
-            var content = DocumentContents(width: 320, height: 90)
-            let length = Float(brush.value("previewLength", 1))
-            var samples = PencilSample.demo(width: 320 * length, height: 90, count: 60)
-            let pressure = Float(brush.value("previewPressure", 1))
-            for i in samples.indices { samples[i].pressure = min(1, samples[i].pressure * pressure) }
-            var previewBrush = brush
-            if brush.value("previewWetMix", 1) < 0.5 {
-                previewBrush.parameters["wetDilution"] = 0; previewBrush.parameters["wetPull"] = 0; previewBrush.parameters["wetCharge"] = 1
-            }
-            content.layers[0].strokes = [PaintStroke(brush: previewBrush, tool: .paint, color: SIMD4(0.08, 0.08, 0.08, 1),
-                                                   size: Float(brush.value("previewSize", 0.5)) * 64, opacity: 1, samples: samples, seed: brush.seed)]
-            preview = try painter.image(content); error = nil
-        } catch { self.error = error.localizedDescription; preview = nil }
+        do { preview = try BrushPreviewRenderer.shared.image(brush, lightOnDark: lightOnDark); error = nil }
+        catch { self.error = error.localizedDescription; preview = nil }
+    }
+}
+
+@MainActor
+private final class BrushPreviewRenderer {
+    static let shared = BrushPreviewRenderer()
+    private let cache = NSCache<NSString, UIImage>()
+    private var painter: MetalPainter?
+    private init() { cache.countLimit = 96; cache.totalCostLimit = 12 * 1024 * 1024 }
+
+    func image(_ brush: BrushPreset, lightOnDark: Bool) throws -> UIImage {
+        let encoder = JSONEncoder(); encoder.outputFormatting = [.sortedKeys]
+        let key = (SHA256.hash(data: try encoder.encode(brush)).map { String(format: "%02x", $0) }.joined() + (lightOnDark ? ":dark" : ":light")) as NSString
+        if let image = cache.object(forKey: key) { return image }
+        if painter == nil { painter = try MetalPainter() }
+        guard let painter else { throw RenderError.unavailable }
+        var content = DocumentContents(width: 320, height: 90)
+        if lightOnDark { content.background = SIMD4(0, 0, 0, 0) }
+        let length = Float(brush.value("previewLength", 1))
+        var samples = PencilSample.demo(width: 320 * length, height: 90, count: 60)
+        let pressure = Float(brush.value("previewPressure", 1))
+        for i in samples.indices { samples[i].pressure = min(1, samples[i].pressure * pressure) }
+        var previewBrush = brush
+        if brush.value("previewWetMix", 1) < 0.5 {
+            previewBrush.parameters["wetDilution"] = 0; previewBrush.parameters["wetPull"] = 0; previewBrush.parameters["wetCharge"] = 1
+        }
+        content.layers[0].strokes = [PaintStroke(brush: previewBrush, tool: .paint,
+            color: lightOnDark ? SIMD4(1, 1, 1, 1) : SIMD4(0.08, 0.08, 0.08, 1),
+            size: Float(brush.value("previewSize", 0.5)) * 64, opacity: 1, samples: samples, seed: brush.seed)]
+        let image = try painter.image(content)
+        cache.setObject(image, forKey: key, cost: 320 * 90 * 4 + key.length * 2)
+        return image
     }
 }

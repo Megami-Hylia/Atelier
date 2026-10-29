@@ -9,6 +9,29 @@ struct BrushTests {
         return BrushArchive(libraries: [BrushLibrary(id: "fixture-library", name: "Test")], sets: [BrushSet(id: "fixture-set", libraryID: "fixture-library", name: "Test")], brushes: [brush], selectedID: brush.id)
     }
 
+    @Test func favoritesSurviveReopenExportImportAndDeletion() throws {
+        let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: folder) }
+        let path = folder.appendingPathComponent("brushes.json")
+        let store = BrushStore(storageURL: path, catalog: fixture())
+        let brush = store.duplicate(store.selectedBrush)
+        store.toggleFavorite(brush)
+        let reopened = BrushStore(storageURL: path, catalog: fixture())
+        #expect(reopened.favoriteIDs == [brush.id])
+        let data = try reopened.exportData(brush: brush)
+        try reopened.importData(data)
+        let imported = try #require(reopened.brushes.last)
+        #expect(imported.id != brush.id)
+        #expect(reopened.favoriteIDs.contains(imported.id))
+        reopened.deleteBrush(brush)
+        #expect(!reopened.favoriteIDs.contains(brush.id))
+        var invalid = fixture(); invalid.favoriteIDs = ["missing"]
+        #expect(throws: (any Error).self) { try BrushStore.validate(invalid) }
+        // Old schema-1 files do not contain favoriteIDs.
+        let legacy = try JSONDecoder().decode(BrushArchive.self, from: JSONEncoder().encode(fixture()))
+        #expect(legacy.favoriteIDs == nil)
+    }
+
     @Test func customBrushSurvivesSaveReopenAndJSONRoundTrip() throws {
         let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         defer { try? FileManager.default.removeItem(at: folder) }
