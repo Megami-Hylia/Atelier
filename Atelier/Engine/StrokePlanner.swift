@@ -46,8 +46,9 @@ enum StrokePlanner {
         // Saved strokes retain the original total-length-relative dynamics.
         guard stroke.distanceDynamicsVersion == 1 else { return try legacyStamps(for: stroke, finished: finished) }
         var stream = Stream(stroke, finalDistance: finished ? pathLength(stroke) : nil)
-        let stamps = try stream.append(stroke.samples[...])
-        return stroke.samples.count == 1 ? try stream.dot() : stamps
+        var stamps = try stream.append(stroke.samples[...])
+        stamps += try stream.flushEnd()
+        return stroke.samples.count == 1 && stroke.curveVersion != 1 ? try stream.dot() : stamps
     }
 
     static func replayStream(for stroke: PaintStroke, finished: Bool = true) -> Stream {
@@ -63,10 +64,23 @@ enum StrokePlanner {
             let batch = try cursor.append(stroke.samples[start..<min(start+8, stroke.samples.count)])
             _ = try tileBins(batch, width: width, height: height)
         }
-        if stroke.samples.count == 1 { _ = try tileBins(cursor.dot(), width: width, height: height) }
+        _ = try tileBins(cursor.flushEnd(), width: width, height: height)
+        if stroke.samples.count == 1 && stroke.curveVersion != 1 { _ = try tileBins(cursor.dot(), width: width, height: height) }
     }
 
     private static func pathLength(_ stroke: PaintStroke) -> Float {
+        if stroke.curveVersion == 1 {
+            var curve = StrokeTrajectory(brush: stroke.brush, stabilization: stroke.stabilizationAmount ?? 0, screenScale: stroke.inputScale ?? 1)
+            var previous: PencilSample?; var distance: Float = 0
+            func consume(_ samples: [PencilSample]) {
+                for sample in samples {
+                    if let previous { distance += hypot(sample.x-previous.x,sample.y-previous.y) }
+                    previous = sample
+                }
+            }
+            for sample in stroke.samples { consume(curve.append(sample)) }
+            consume(curve.finish()); return distance
+        }
         var previous: PencilSample?
         var distance: Float = 0
         for raw in stroke.samples {
@@ -93,6 +107,8 @@ enum StrokePlanner {
     // The cursor retains constant-size state, never the growing sample array.
     struct Stream {
         private var secondary: [Stream] = []
+        private var trajectory: StrokeTrajectory?
+        private var lastStampPoint: SIMD2<Float>?
         private let settings: PlannedBrushSettings
         private let hsv: SIMD3<Float>
         private var context: PaintStroke
@@ -103,6 +119,7 @@ enum StrokePlanner {
         private var previous: PencilSample?
         private var distance: Float = 0
         private var nextDistance: Float = 0
+        private var firstInputTime: Double?
         private var stampCount = 0
         var strokeID: UUID { context.id }
         private(set) var sampleCount = 0
@@ -114,42 +131,85 @@ enum StrokePlanner {
             context = stroke; context.samples = []
             rng = SeededGenerator(seed: stroke.seed ^ stroke.brush.seed)
             self.finalDistance = finalDistance
+            trajectory = stroke.curveVersion == 1 ? StrokeTrajectory(brush: stroke.brush, stabilization: stroke.stabilizationAmount ?? 0, screenScale: stroke.inputScale ?? 1) : nil
             initialRotation = settings.randomRotation > 0 ? rng.unit() * .pi * 2 : 0
             strokeHue = rng.signed() * settings.strokeHue * 0.5
             if var brush = stroke.brush.secondaryBrushes?.first {
                 brush.parameters["blendMode"] = Double(stroke.brush.combineMode ?? 0)
-                var component = stroke; component.brush = brush; component.samples = []
-                secondary = [Stream(component, finalDistance: finalDistance)]
+                var component = stroke; component.brush = brush
+                let componentDistance = finalDistance == nil ? nil : StrokePlanner.pathLength(component)
+                component.samples = []
+                secondary = [Stream(component, finalDistance: componentDistance)]
             }
         }
 
         func matches(_ stroke: PaintStroke) -> Bool {
             context.id == stroke.id && context.brush == stroke.brush && context.tool == stroke.tool &&
-            context.color == stroke.color && context.size == stroke.size && context.opacity == stroke.opacity && context.seed == stroke.seed && context.distanceDynamicsVersion == stroke.distanceDynamicsVersion
+            context.color == stroke.color && context.size == stroke.size && context.opacity == stroke.opacity && context.seed == stroke.seed && context.distanceDynamicsVersion == stroke.distanceDynamicsVersion && context.curveVersion == stroke.curveVersion && context.inputScale == stroke.inputScale && context.stabilizationAmount == stroke.stabilizationAmount
         }
 
         mutating func append(_ samples: ArraySlice<PencilSample>) throws -> [GPUStamp] {
             var result: [GPUStamp] = []
             for raw in samples {
-                let value = StrokePlanner.smooth(raw, after: previous, brush: context.brush)
-                if let a = previous {
-                    let segmentLength = max(0.001, hypot(value.x - a.x, value.y - a.y))
-                    let end = distance + hypot(value.x - a.x, value.y - a.y)
-                    while nextDistance <= end {
-                        let t = min(1, max(0, (nextDistance - distance) / segmentLength))
-                        result.append(contentsOf: try makeStamps(a: a, b: value, t: t, segmentLength: segmentLength))
-                    }
-                    distance = end
-                }
-                previous = value; lastRawSample = raw; sampleCount += 1
+                if firstInputTime == nil { firstInputTime = raw.time }
+                if trajectory != nil {
+                    for value in trajectory!.append(raw) { result += try consume(value) }
+                } else { result += try consume(StrokePlanner.smooth(raw, after: previous, brush: context.brush)) }
+                lastRawSample = raw; sampleCount += 1
             }
             if !secondary.isEmpty {
                 let extra = try secondary[0].append(samples).map { stamp -> GPUStamp in var value = stamp; value.variation.y = 1; return value }
                 result += extra
-                result.sort { $0.variation.z == $1.variation.z ? $0.variation.y < $1.variation.y : $0.variation.z < $1.variation.z }
+                sortComponents(&result)
                 guard result.count <= 100_000 else { throw DocumentError.strokeBudget }
             }
             return result
+        }
+
+        private mutating func consume(_ value: PencilSample) throws -> [GPUStamp] {
+            var result: [GPUStamp] = []
+            if let a = previous {
+                let length = hypot(value.x-a.x,value.y-a.y)
+                let segmentLength = max(0.001,length), end = distance+length
+                if context.curveVersion != 1 || length > 0.00001 {
+                    while nextDistance <= end {
+                        let t = min(1,max(0,(nextDistance-distance)/segmentLength))
+                        result += try makeStamps(a: a,b: value,t: t,segmentLength: segmentLength)
+                    }
+                } else if abs(value.pressure-a.pressure) > 0.008 || abs(value.altitude-a.altitude) > 0.008 ||
+                    abs(StrokeGeometry.angleDelta(a.azimuth,value.azimuth)) > 0.015 || abs(StrokeGeometry.angleDelta(a.roll,value.roll)) > 0.015 {
+                    // Pressure/tilt can change while the tip stays still. Deposit that change
+                    // without consuming the arc-length phase of the next moving segment.
+                    let phase = nextDistance
+                    nextDistance = distance
+                    result += try makeStamps(a: a,b: value,t: 1,segmentLength: segmentLength)
+                    nextDistance = phase
+                }
+                distance = end
+            }
+            previous = value
+            return result
+        }
+
+        mutating func flushEnd() throws -> [GPUStamp] {
+            guard trajectory != nil else { return [] }
+            var result: [GPUStamp] = []
+            for value in trajectory!.finish() { result += try consume(value) }
+            if stampCount == 0, let previous { result += try makeStamps(a: previous,b: previous,t: 0,segmentLength: 0.001) }
+            if !secondary.isEmpty {
+                result += try secondary[0].flushEnd().map { stamp -> GPUStamp in var value = stamp; value.variation.y = 1; return value }
+                sortComponents(&result)
+            }
+            return result
+        }
+
+        private func sortComponents(_ stamps: inout [GPUStamp]) {
+            // Components may have different stabilization and therefore different path lengths.
+            // Input-relative time keeps their order identical across live/replay packet sizes.
+            let component = context.curveVersion == 1 ? 3 : 2
+            stamps.sort {
+                $0.variation[component] == $1.variation[component] ? $0.variation.y < $1.variation.y : $0.variation[component] < $1.variation[component]
+            }
         }
 
         mutating func dot() throws -> [GPUStamp] {
@@ -178,14 +238,15 @@ enum StrokePlanner {
             let diameter = max(0.1, min(2048, context.size * sizePressure * speedSize * (1 + tilt * settings.tiltSize * 3) *
                                    (1 - settings.sizeJitter * rng.unit()) * (1 - settings.taperSize + settings.taperSize * taper)))
             let radius = max(0.05, min(context.size * max(0.01, settings.maxSize), max(context.size * settings.minSize, diameter)) / 2)
+            let previousPoint = context.curveVersion == 1 ? lastStampPoint ?? point : SIMD2<Float>(a.x,a.y)
             let count = max(1, min(16, Int(settings.stampCount * (1 - settings.countJitter * rng.unit()))))
             for _ in 0..<count {
                 let offset = across * (rng.signed() * settings.jitterLateral * radius * 2) + along * (rng.signed() * settings.jitterLinear * radius * 2)
                 var angle = direction * settings.rotation + initialRotation + rng.signed() * settings.scatter * .pi
                 angle += direction * settings.azimuth * 0.25
                 if a.isPencil {
-                    angle += (a.azimuth + (b.azimuth - a.azimuth) * t) * settings.azimuth
-                    angle += (a.roll + (b.roll - a.roll) * t) * settings.barrelRoll
+                    angle += (a.azimuth + (context.curveVersion == 1 ? StrokeGeometry.angleDelta(a.azimuth,b.azimuth) : b.azimuth-a.azimuth) * t) * settings.azimuth
+                    angle += (a.roll + (context.curveVersion == 1 ? StrokeGeometry.angleDelta(a.roll,b.roll) : b.roll-a.roll) * t) * settings.barrelRoll
                 }
                 let rx = max(0.02, (1 - settings.roundnessJitterX * rng.unit()) * (1 - settings.pressureRoundness * (1 - pressure) * 0.9))
                 let ry = max(0.02, settings.roundness * (1 - settings.roundnessJitterY * rng.unit()) * (1 - settings.tiltRoundness * tilt * 0.95))
@@ -202,7 +263,6 @@ enum StrokePlanner {
                 let hue = hsv.x + rng.signed() * (settings.hueJitter + settings.stampHue) * 0.5 + strokeHue
                 let rgb = StrokePlanner.hsvToRGB(SIMD3<Float>(hue, min(1, max(0, hsv.y + rng.signed() * settings.saturationJitter)),
                                                min(1, max(0, hsv.z + rng.signed() * settings.brightnessJitter))))
-                let previousPoint = SIMD2<Float>(a.x, a.y)
                 var stamp = GPUStamp(
                     geometry: SIMD4(point.x + offset.x, point.y + offset.y, radius, angle),
                     color: SIMD4(rgb.x, rgb.y, rgb.z, max(0, min(1, alpha))),
@@ -213,7 +273,8 @@ enum StrokePlanner {
                                   min(1, settings.wetDilution + settings.pressureBleed * (1 - pressure)),
                                   context.tool == .smudge ? max(0.02, settings.smudge) : settings.wetPull),
                     rendering: SIMD4(settings.blendMode, context.tool == .paint ? 0 : context.tool == .smudge ? 1 : 2, settings.alphaThreshold, settings.wetGrade),
-                    variation: SIMD4(rng.unit(), 0, nextDistance, 0))
+                    variation: SIMD4(rng.unit(), 0, nextDistance,
+                                     context.curveVersion == 1 ? Float((a.time-(firstInputTime ?? a.time))+(b.time-a.time)*Double(t)) : 0))
                 stamps.append(stamp)
                 if settings.dualEnabled > 0.5 {
                     stamp.geometry.z *= max(0.1, settings.dualScale)
@@ -222,6 +283,7 @@ enum StrokePlanner {
                     stamps.append(stamp)
                 }
             }
+            lastStampPoint = point
             stampCount += stamps.count
             guard stamps.count <= 100_000 else { throw DocumentError.strokeBudget }
             let jitter = 1 + rng.signed() * settings.spacingJitter * 0.95

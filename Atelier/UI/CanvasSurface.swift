@@ -24,8 +24,9 @@ struct CanvasSurface: UIViewRepresentable {
         view.document = document; view.brush = brush; view.tool = tool; view.paintColor = color
         view.brushSize = brushSize; view.paintOpacity = opacity; view.fingerPainting = fingerPainting
         view.onToolChange = onToolChange; view.onPalette = onPalette; view.onClipboard = onClipboard; view.onQuickMenu = onQuickMenu
-        view.drawableSize = CGSize(width: document.contents.width, height: document.contents.height)
-        view.setNeedsDisplay()
+        let size = CGSize(width: document.contents.width, height: document.contents.height)
+        if view.drawableSize != size { view.drawableSize = size }
+        view.requestFrame()
     }
 }
 
@@ -47,23 +48,34 @@ struct CanvasSurface: UIViewRepresentable {
     private var active: PaintStroke?
     private weak var activeTouch: UITouch?
     private var predictions: [PencilSample] = []
+    private struct PendingSample {
+        var value: PencilSample
+        var estimateID: NSNumber?
+        var expectingUpdates: Bool
+        var force: Bool
+    }
+    private var pendingSamples: [PendingSample] = []
+    private var sampler = StrokeInputSampler()
+    private var maximumInputScale: Float = 1
+    private var inputEventRevision: UInt64 = 0
+    private var failedInputRevision: UInt64?
+    private var effectiveInputScale: Float {
+        let zoom = max(0.0001,Float(hypot(transform.a,transform.b)))
+        return max(0.0001,Float(bounds.width)/Float(document?.contents.width ?? 1)*zoom)
+    }
     private var activeSampleRevision: UInt64 = 0
     private var estimates: [NSNumber: (UUID, Int)] = [:]
-    private var pendingLiveEstimates: Set<Int> = []
-    private var stableLiveSampleCount: Int {
-        pendingLiveEstimates.min() ?? active?.samples.count ?? 0
-    }
+
     private var lastTool = PaintTool.paint
     private let cursor = CAShapeLayer()
     private var failedRevision: UInt64?
     private var failedStrokeID: UUID?
-    private var failedSampleCount = 0
 
     init(frame: CGRect) {
         super.init(frame: frame, device: MTLCreateSystemDefaultDevice())
         do { painter = try MetalPainter() } catch { accessibilityLabel = error.localizedDescription }
         colorPixelFormat = .bgra8Unorm_srgb
-        framebufferOnly = true; isPaused = true; enableSetNeedsDisplay = true; autoResizeDrawable = false
+        framebufferOnly = true; isPaused = true; enableSetNeedsDisplay = false; preferredFramesPerSecond = 60; autoResizeDrawable = false
         delegate = self; isMultipleTouchEnabled = true
         accessibilityLabel = "Canvas di pittura"; accessibilityHint = "Disegna con Apple Pencil. Due dita per spostare, pizzica per lo zoom."
         let pencil = UIPencilInteraction(); pencil.delegate = self; addInteraction(pencil)
@@ -94,15 +106,18 @@ struct CanvasSurface: UIViewRepresentable {
     deinit { NotificationCenter.default.removeObserver(self) }
     func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {}
 
+    func requestFrame() { frameRequested = true; isPaused = false }
+
     func draw(in view: MTKView) {
-        if frameInFlight { frameRequested = true; return }
+        guard frameRequested || painter?.hasPendingLiveSamples == true else { isPaused = true; return }
+        if frameInFlight { return }
         guard let document, let painter, let drawable = currentDrawable, let pass = currentRenderPassDescriptor else { return }
-        if failedRevision == document.revision, failedStrokeID == active?.id, failedSampleCount == (active?.samples.count ?? 0) { return }
+        if failedRevision == document.revision, failedStrokeID == active?.id, failedInputRevision == inputEventRevision { isPaused = true; return }
         do {
             let texture = try painter.render(document.contents, liveStroke: active, finished: false, waitForCompletion: false,
                                              documentRevision: document.revision, liveSampleRevision: activeSampleRevision,
-                                             liveStableSampleCount: stableLiveSampleCount,
-                                             predictedSamples: predictions)
+                                             liveStableSampleCount: active?.samples.count ?? 0,
+                                             predictedSamples: pendingSamples.map(\.value) + predictions)
             failedRevision = nil
             guard let command = painter.queue.makeCommandBuffer(), let encoder = command.makeRenderCommandEncoder(descriptor: pass) else { return }
             encoder.setRenderPipelineState(painter.screenPipeline); encoder.setFragmentTexture(texture, index: 0)
@@ -115,13 +130,14 @@ struct CanvasSurface: UIViewRepresentable {
                     guard let self else { return }
                     self.frameInFlight = false
                     if let error { self.painter?.invalidateCache(); self.document?.errorMessage = error }
-                    if self.frameRequested || self.painter?.hasPendingLiveSamples == true { self.setNeedsDisplay() }
+                    self.isPaused = !(self.frameRequested || self.painter?.hasPendingLiveSamples == true)
                 }
             }
             command.present(drawable); command.commit()
         } catch {
             painter.invalidateCache()
-            failedRevision = document.revision; failedStrokeID = active?.id; failedSampleCount = active?.samples.count ?? 0
+            failedRevision = document.revision; failedStrokeID = active?.id; failedInputRevision = inputEventRevision
+            isPaused = true
             document.errorMessage = error.localizedDescription
         }
     }
@@ -135,62 +151,103 @@ struct CanvasSurface: UIViewRepresentable {
                             altitude: Float(touch.altitudeAngle), azimuth: Float(touch.azimuthAngle(in: self)),
                             roll: Float(touch.rollAngle), time: touch.timestamp, isPencil: touch.type == .pencil)
     }
-    private func append(_ touches: [UITouch]) {
+    private func append(_ touches: [UITouch], finishing: Bool = false) {
         guard active != nil else { return }
-        for touch in touches {
-            let s = sample(touch)
-            if active?.samples.last?.time == s.time { continue }
-            active?.samples.append(s)
-            if let index = touch.estimationUpdateIndex, !touch.estimatedPropertiesExpectingUpdates.isEmpty {
-                if let active {
-                    let sampleIndex = active.samples.count - 1
-                    estimates[index] = (active.id, sampleIndex); pendingLiveEstimates.insert(sampleIndex)
+        inputEventRevision &+= 1
+        maximumInputScale = max(maximumInputScale,effectiveInputScale)
+        for (offset,touch) in touches.enumerated() {
+            let value = sample(touch)
+            let expects = !touch.estimatedPropertiesExpectingUpdates.isEmpty
+            let pending = PendingSample(value: value, estimateID: touch.estimationUpdateIndex,
+                                        expectingUpdates: expects, force: finishing && offset == touches.count-1)
+            if let last = pendingSamples.last, last.estimateID != nil, last.estimateID == pending.estimateID {
+                pendingSamples[pendingSamples.count-1] = pending
+            } else if pendingSamples.last?.value != value && (pendingSamples.last != nil || active?.samples.last != value) {
+                pendingSamples.append(pending)
+            }
+        }
+        flushPending(force: finishing)
+    }
+    private func flushPending(force: Bool) {
+        while let first = pendingSamples.first, force || !first.expectingUpdates || pendingSamples.count > 32 {
+            let point = pendingSamples.removeFirst()
+            // Unsettled points are retained when the bounded provisional queue must be drained.
+            if sampler.accept(point.value, screenScale: effectiveInputScale, force: point.force || point.expectingUpdates) {
+                active?.samples.append(point.value)
+                if point.expectingUpdates, let id = point.estimateID, let active {
+                    estimates[id] = (active.id,active.samples.count-1)
                 }
             }
         }
-        let firstProvisional = max(0, (active?.samples.count ?? 0) - 32)
-        pendingLiveEstimates = Set(pendingLiveEstimates.filter { $0 >= firstProvisional })
+    }
+    private func finishSamples() {
+        guard var stroke = active else { return }
+        let pinned = Set(estimates.values.filter { $0.0 == stroke.id }.map { $0.1 })
+        let components = [stroke.brush] + (stroke.brush.secondaryBrushes ?? [])
+        let sensitive = components.contains { brush in
+            ["speedSize","speedOpacity","speedSpacing","wetPull","wetDilution","pressureBleed"].contains { abs(brush.value($0)) > 0.00001 }
+        } || stroke.tool == .smudge
+        if !sensitive {
+            let result = StrokeGeometry.simplify(stroke.samples, tolerance: 0.15/maximumInputScale, pinned: pinned)
+            if components.allSatisfy({ component in
+                StrokeGeometry.equivalentTrajectory(stroke.samples,result.samples,brush: component,
+                                                   stabilization: stroke.stabilizationAmount ?? 0,scale: stroke.inputScale ?? 1,
+                                                   tolerance: 0.3/maximumInputScale)
+            }) {
+                let indices = Dictionary(uniqueKeysWithValues: result.retainedIndices.enumerated().map { ($0.element,$0.offset) })
+                for (key,value) in estimates where value.0 == stroke.id {
+                    if let index = indices[value.1] { estimates[key] = (stroke.id,index) }
+                }
+                stroke.samples = result.samples
+            }
+        }
+        active = stroke
     }
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard active == nil, let document, !document.selectedLayer.locked,
               let touch = touches.first(where: { $0.type == .pencil || (fingerPainting && touches.count == 1) }) else { return }
-        activeTouch = touch; predictions = []; activeSampleRevision = 0; pendingLiveEstimates = []
+        activeTouch = touch; predictions = []; activeSampleRevision = 0; pendingSamples = []; sampler = StrokeInputSampler(); maximumInputScale = effectiveInputScale
         active = PaintStroke(brush: brush, tool: tool, color: paintColor, size: brushSize, opacity: paintOpacity,
-                             samples: [], seed: brush.seed ^ UInt64(document.selectedLayer.strokes.count + 1), distanceDynamicsVersion: 1)
-        append(event?.coalescedTouches(for: touch) ?? [touch]); setNeedsDisplay()
+                             samples: [], seed: brush.seed ^ UInt64(document.selectedLayer.strokes.count + 1), distanceDynamicsVersion: 1, curveVersion: 1, inputScale: effectiveInputScale,
+                             stabilizationAmount: Float(UserDefaults.standard.double(forKey: "strokeStabilization")))
+        append(event?.coalescedTouches(for: touch) ?? [touch]); requestFrame()
     }
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard let touch = activeTouch, touches.contains(touch) else { return }
         append(event?.coalescedTouches(for: touch) ?? [touch])
         predictions = (event?.predictedTouches(for: touch) ?? []).map(sample)
-        setNeedsDisplay()
+        requestFrame()
     }
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard let touch = activeTouch, touches.contains(touch) else { return }
-        append(event?.coalescedTouches(for: touch) ?? [touch]); predictions = []
+        append(event?.coalescedTouches(for: touch) ?? [touch], finishing: true); predictions = []
+        finishSamples()
         if let active { document?.commit(active) }
-        active = nil; activeTouch = nil; pendingLiveEstimates = []; setNeedsDisplay()
+        active = nil; activeTouch = nil; pendingSamples = []; requestFrame()
     }
     override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard let touch = activeTouch, touches.contains(touch) else { return }
         if let id = active?.id { estimates = estimates.filter { $0.value.0 != id } }
-        active = nil; activeTouch = nil; predictions = []; pendingLiveEstimates = []; setNeedsDisplay()
+        active = nil; activeTouch = nil; predictions = []; pendingSamples = []; requestFrame()
     }
     override func touchesEstimatedPropertiesUpdated(_ touches: Set<UITouch>) {
+        inputEventRevision &+= 1
         for touch in touches {
-            guard let index = touch.estimationUpdateIndex, let (id, sampleIndex) = estimates[index] else { continue }
+            guard let index = touch.estimationUpdateIndex else { continue }
             let updated = sample(touch)
-            if active?.id == id, active!.samples.indices.contains(sampleIndex) {
-                active!.samples[sampleIndex] = updated
-                if painter?.hasBakedSample(strokeID: id, index: sampleIndex) == true { activeSampleRevision &+= 1 }
-            }
-            else { document?.refine(strokeID: id, sampleIndex: sampleIndex, sample: updated) }
-            if touch.estimatedPropertiesExpectingUpdates.isEmpty {
-                estimates.removeValue(forKey: index)
-                if active?.id == id { pendingLiveEstimates.remove(sampleIndex) }
+            if let pendingIndex = pendingSamples.firstIndex(where: { $0.estimateID == index }) {
+                pendingSamples[pendingIndex].value = updated
+                pendingSamples[pendingIndex].expectingUpdates = !touch.estimatedPropertiesExpectingUpdates.isEmpty
+            } else if let (id,sampleIndex) = estimates[index] {
+                if active?.id == id, active!.samples.indices.contains(sampleIndex) {
+                    active!.samples[sampleIndex] = updated
+                    if painter?.hasBakedSample(strokeID: id,index: sampleIndex) == true { activeSampleRevision &+= 1 }
+                } else { document?.refine(strokeID: id,sampleIndex: sampleIndex,sample: updated) }
+                if touch.estimatedPropertiesExpectingUpdates.isEmpty { estimates.removeValue(forKey: index) }
             }
         }
-        setNeedsDisplay()
+        flushPending(force: false)
+        requestFrame()
     }
     func pencilInteractionDidTap(_ interaction: UIPencilInteraction) { perform(UIPencilInteraction.preferredTapAction) }
     func pencilInteraction(_ interaction: UIPencilInteraction, didReceiveSqueeze squeeze: UIPencilInteraction.Squeeze) {

@@ -31,6 +31,22 @@ private struct TileInfo {
     private let loader: MTKTextureLoader
     private var textures: [MTLTexture] = []
     private var cachedLayer: PaintLayer?
+    private struct HistoryRaster {
+        var documentID: UUID
+        var layer: PaintLayer
+        var revision: UInt64?
+        var texture: MTLTexture
+    }
+    private var historyRasters: [UUID: HistoryRaster] = [:]
+    private var historyEligibleIDs: Set<UUID> = []
+    private(set) var cachedHistoryBytes = 0
+    private(set) var lastHistoryCacheHitCount = 0
+    var cachedHistoryLayerCount: Int { historyRasters.count }
+    var workingRasterBytes: Int {
+        textures.reduce(0) { $0 + $1.width * $1.height * 8 } +
+        (liveTexture.map { $0.width * $0.height * 8 } ?? 0) + cachedHistoryBytes
+    }
+    private static let historyCacheLimit = 32 * 1024 * 1024
     private var planCache: [UUID: (PaintStroke, [GPUStamp])] = [:]
     private var planOrder: [UUID] = []
     private var planBytes = 0
@@ -81,6 +97,44 @@ private struct TileInfo {
         }
         textures = allocated
         invalidateCache(); liveTexture = nil
+    }
+
+    private func prepareHistoryCache(_ document: DocumentContents, liveStroke: PaintStroke?) {
+        let bytes = document.width * document.height * 8
+        let baseBytes = bytes * textures.count
+        let wantsLive = liveStroke?.distanceDynamicsVersion == 1 && (liveStroke?.samples.count ?? 0) >= 2
+        let reservedLive = liveTexture != nil || (wantsLive && baseBytes + bytes <= Self.workingMemoryLimit) ? bytes : 0
+        let available = max(0, min(Self.historyCacheLimit, Self.workingMemoryLimit - baseBytes - reservedLive))
+        let capacity = min(4, available / max(1, bytes))
+        let selectedID = document.selectedLayerID ?? document.layers.first?.id
+        // Pick a stable working set before encoding. Repeated allocation/eviction in one command
+        // buffer would retain all evicted textures until GPU completion and exceed the byte budget.
+        historyEligibleIDs = Set(document.layers.lazy.filter { $0.visible && $0.id != selectedID && !$0.strokes.isEmpty }.prefix(capacity).map(\.id))
+        let discarded = historyRasters.keys.filter { id in
+            !historyEligibleIDs.contains(id) || historyRasters[id]?.documentID != document.id
+        }
+        for id in discarded {
+            if let entry = historyRasters.removeValue(forKey: id) {
+                cachedHistoryBytes -= entry.texture.width * entry.texture.height * 8
+            }
+        }
+    }
+
+    private func storeHistoryRaster(_ identity: PaintLayer, documentID: UUID, revision: UInt64?, source: MTLTexture, command: MTLCommandBuffer) throws {
+        guard historyEligibleIDs.contains(identity.id) else { return }
+        let texture: MTLTexture
+        if let existing = historyRasters[identity.id] { texture = existing.texture }
+        else {
+            let bytes = source.width * source.height * 8
+            guard cachedHistoryBytes + bytes <= Self.historyCacheLimit,
+                  workingRasterBytes + bytes <= Self.workingMemoryLimit else { return }
+            let descriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: .rgba16Float, width: source.width, height: source.height, mipmapped: false)
+            descriptor.usage = [.shaderRead, .shaderWrite]; descriptor.storageMode = .shared
+            guard let allocated = device.makeTexture(descriptor: descriptor) else { return }
+            texture = allocated; cachedHistoryBytes += bytes
+        }
+        try copy(source, to: texture, command: command)
+        historyRasters[identity.id] = HistoryRaster(documentID: documentID, layer: identity, revision: revision, texture: texture)
     }
 
     private func dispatch(_ encoder: MTLComputeCommandEncoder, pipeline: MTLComputePipelineState, width: Int, height: Int) {
@@ -135,7 +189,12 @@ private struct TileInfo {
                     try encode(stroke, finished: finished, source: initialScratch, target: target, pickup: pickup ?? source, supplied: batch, command: command)
                 }
             }
-            if stroke.samples.count == 1 {
+            let endBatch = try cursor.flushEnd()
+            if !endBatch.isEmpty {
+                try copy(target, to: initialScratch, command: command)
+                try encode(stroke, finished: finished, source: initialScratch, target: target, pickup: pickup ?? source, supplied: endBatch, command: command)
+            }
+            if stroke.samples.count == 1 && stroke.curveVersion != 1 {
                 let batch = try cursor.dot()
                 try copy(target, to: initialScratch, command: command)
                 try encode(stroke, finished: finished, source: initialScratch, target: target, pickup: pickup ?? source, supplied: batch, command: command)
@@ -210,7 +269,7 @@ private struct TileInfo {
         // An extra accumulation surface is optional; oversized existing documents retain replay support.
         if liveTexture == nil {
             let bytes = layer.width * layer.height * 8
-            guard bytes * 6 <= Self.workingMemoryLimit else { return false }
+            guard bytes * 6 + cachedHistoryBytes <= Self.workingMemoryLimit else { return false }
             let descriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: .rgba16Float, width: layer.width, height: layer.height, mipmapped: false)
             descriptor.usage = [.shaderRead, .shaderWrite]; descriptor.storageMode = .shared
             liveTexture = device.makeTexture(descriptor: descriptor)
@@ -244,6 +303,7 @@ private struct TileInfo {
             var stamps = try provisional.append(stroke.samples[end...])
             lastPlannedSampleCount += stroke.samples.count - end
             stamps += try provisional.append(predictions[...])
+            stamps += try provisional.flushEnd()
             // Neither the recent tail nor predictions enter retained ink/random-generator state.
             try encode(stroke, finished: false, source: liveTexture, target: layer, pickup: textures[4], supplied: stamps, command: command)
         }
@@ -252,6 +312,7 @@ private struct TileInfo {
 
     func render(_ document: DocumentContents, liveStroke: PaintStroke? = nil, finished: Bool = true, waitForCompletion: Bool = true, documentRevision: UInt64? = nil, liveSampleRevision: UInt64? = nil, liveStableSampleCount: Int? = nil, predictedSamples: [PencilSample] = []) throws -> MTLTexture {
         try allocate(width: document.width, height: document.height)
+        prepareHistoryCache(document, liveStroke: liveStroke)
         var submitted = false
         defer { if !submitted { invalidateCache() } }
         guard let command = queue.makeCommandBuffer() else { throw RenderError.unavailable }
@@ -262,7 +323,7 @@ private struct TileInfo {
         background.y = Self.linear(background.y) * background.w
         background.z = Self.linear(background.z) * background.w
         try clear(composite, color: background, command: command)
-        lastStampCount = 0; lastPlannedSampleCount = 0; hasPendingLiveSamples = false
+        lastStampCount = 0; lastPlannedSampleCount = 0; lastHistoryCacheHitCount = 0; hasPendingLiveSamples = false
         if liveStroke == nil { liveStream = nil; cachedLiveRevision = nil }
         for value in document.layers where value.visible {
             try clear(layer, color: .zero, command: command)
@@ -270,8 +331,16 @@ private struct TileInfo {
             var cacheIdentity = value
             cacheIdentity.adjustments = nil
             let sameRevision = documentRevision != nil && cachedDocumentRevision == documentRevision && cachedDocumentID == document.id
-            let cacheHit = selected && cachedLayer?.id == value.id && (sameRevision || cachedLayer == cacheIdentity)
-            if cacheHit { try copy(textures[4], to: layer, command: command) }
+            var cacheHit = selected && cachedLayer?.id == value.id && (sameRevision || cachedLayer == cacheIdentity)
+            if selected && cacheHit { try copy(textures[4], to: layer, command: command) }
+            if !selected, var entry = historyRasters[value.id], entry.documentID == document.id {
+                let sameHistoryRevision = documentRevision != nil && entry.revision == documentRevision
+                if sameHistoryRevision || entry.layer == cacheIdentity {
+                    try copy(entry.texture, to: layer, command: command)
+                    entry.revision = documentRevision; historyRasters[value.id] = entry
+                    cacheHit = true; lastHistoryCacheHitCount += 1
+                }
+            }
             var strokes = cacheHit ? [] : value.strokes
             if selected && !cacheHit, let cachedLayer, !cacheIdentity.strokes.isEmpty {
                 var prefix = cacheIdentity
@@ -294,6 +363,7 @@ private struct TileInfo {
                 try encode(linearStroke, finished: liveStroke?.id != stroke.id || finished, source: snapshot, target: layer, initialScratch: nextComposite, command: command)
             }
                 if selected { try copy(layer, to: textures[4], command: command); cachedLayer = cacheIdentity }
+                else { try storeHistoryRaster(cacheIdentity, documentID: document.id, revision: documentRevision, source: layer, command: command) }
             }
             if selected { cachedDocumentRevision = documentRevision; cachedDocumentID = document.id }
             strokes = selected ? liveStroke.map { [$0] } ?? [] : []
@@ -340,7 +410,7 @@ private struct TileInfo {
         return liveStream.strokeID == strokeID && index < liveStream.sampleCount
     }
 
-    func invalidateCache() { cachedLayer = nil; cachedDocumentRevision = nil; cachedDocumentID = nil; liveStream = nil; cachedLiveRevision = nil; hasPendingLiveSamples = false }
+    func invalidateCache() { historyRasters.removeAll(); historyEligibleIDs.removeAll(); cachedHistoryBytes = 0; cachedLayer = nil; cachedDocumentRevision = nil; cachedDocumentID = nil; liveStream = nil; cachedLiveRevision = nil; hasPendingLiveSamples = false }
 
     func image(_ contents: DocumentContents) throws -> UIImage {
         let texture = try render(contents)

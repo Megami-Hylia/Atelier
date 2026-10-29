@@ -10,6 +10,7 @@ struct ActionsPanel: View {
     @AppStorage("leftHanded") private var rightInterface = false
     @AppStorage("brushCursor") private var cursor = true
     @AppStorage("fingerPainting") private var fingers = false
+    @AppStorage("strokeStabilization") private var stabilization = 0.0
     @AppStorage("pencilPressureExponent") private var pressure = 1.0
     @AppStorage("selectionOverlayOpacity") private var selectionOpacity = 0.25
     private let names = ["Aggiungi", "Tela", "Condividi", "Video", "Pref.", "Aiuto"]
@@ -57,6 +58,11 @@ struct ActionsPanel: View {
                     Section("Controlli gestuali") {
                         Toggle("Disegna con le dita", isOn: $fingers)
                         Text("Due dita: annulla. Tre dita: ripeti. Scorri in basso con tre dita per Copia e Incolla, con quattro per il menu rapido.").font(.caption)
+                    }
+                    Section("Stabilizzazione tratto") {
+                        HStack { Text("Stabilizzazione"); Spacer(); Text("\(Int(stabilization*100))%") }
+                        Slider(value: $stabilization, in: 0...1).accessibilityLabel("Stabilizzazione tratto")
+                        Text("Bassa: segue la mano. Alta: attenua il tremolio; i movimenti rapidi restano reattivi.").font(.caption)
                     }
                     Section("Curva pressione") {
                         HStack { Text("Risposta Pencil"); Spacer(); Text(pressure, format: .number.precision(.fractionLength(2))) }

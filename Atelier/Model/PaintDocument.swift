@@ -35,6 +35,9 @@ struct PaintStroke: Codable, Identifiable, Equatable, Sendable {
     var samples: [PencilSample]
     var seed: UInt64
     var distanceDynamicsVersion: Int? = nil
+    var curveVersion: Int? = nil
+    var inputScale: Float? = nil
+    var stabilizationAmount: Float? = nil
 }
 
 struct PaintLayer: Codable, Identifiable, Equatable, Sendable {
@@ -71,7 +74,9 @@ struct DocumentContents: Codable, Equatable, Sendable {
         guard layers.allSatisfy({ layer in
             (layer.adjustments ?? [:]).allSatisfy({ key, value in value.isFinite && abs(value) <= 64 }) && layer.opacity.isFinite && (0...1).contains(layer.opacity) && (0...2).contains(layer.blendMode) &&
             layer.strokes.allSatisfy { stroke in
-                (0...1).contains(stroke.distanceDynamicsVersion ?? 0) && !stroke.samples.isEmpty && stroke.samples.count <= 1_000_000 &&
+                (0...1).contains(stroke.distanceDynamicsVersion ?? 0) && (0...1).contains(stroke.curveVersion ?? 0) &&
+                (stroke.inputScale == nil || (stroke.inputScale!.isFinite && stroke.inputScale! > 0 && stroke.inputScale! <= 1_000_000)) &&
+                (stroke.stabilizationAmount == nil || (stroke.stabilizationAmount!.isFinite && (0...1).contains(stroke.stabilizationAmount!))) && !stroke.samples.isEmpty && stroke.samples.count <= 1_000_000 &&
                 stroke.size.isFinite && (0.1...2048).contains(stroke.size) && stroke.opacity.isFinite && (0...1).contains(stroke.opacity) &&
                 [stroke.color.x, stroke.color.y, stroke.color.z, stroke.color.w].allSatisfy { $0.isFinite && (0...1).contains($0) } &&
                 stroke.brush.parameters.values.allSatisfy(\.isFinite) &&
