@@ -52,7 +52,7 @@ struct AtelierRoot: View {
                     TextField("Nome", text: $name)
                     TextField("Larghezza in pixel", text: $width).keyboardType(.numberPad)
                     TextField("Altezza in pixel", text: $height).keyboardType(.numberPad)
-                    Text("Canvas sRGB, 132 DPI. In questa versione: da 64 a 3547 pixel per lato, entro il budget GPU di 384 MiB.").font(.footnote)
+                    Text("Canvas sRGB, 132 DPI. In questa versione: da 64 a 3172 pixel per lato, entro il budget GPU di 384 MiB.").font(.footnote)
                     Button("Schermo 2048 × 1536") { width = "2048"; height = "1536" }
                     Button("Quadrato 2048 × 2048") { width = "2048"; height = "2048" }
                 }.navigationTitle("Nuovo canvas")
@@ -60,8 +60,8 @@ struct AtelierRoot: View {
                         ToolbarItem(placement: .cancellationAction) { Button("Annulla") { create = false } }
                         ToolbarItem(placement: .confirmationAction) {
                             Button("Crea") {
-                                guard let w = Int(width), let h = Int(height), (64...3547).contains(w), (64...3547).contains(h),
-                                      w * h * 32 <= MetalPainter.workingMemoryLimit else { error = "Dimensioni non valide o memoria richiesta oltre il limite."; return }
+                                guard let w = Int(width), let h = Int(height), (64...3172).contains(w), (64...3172).contains(h),
+                                      w * h * 40 <= MetalPainter.workingMemoryLimit else { error = "Dimensioni non valide o memoria richiesta oltre il limite."; return }
                                 do { document = try gallery.create(width: w, height: h, name: name); create = false }
                                 catch { self.error = error.localizedDescription }
                             }

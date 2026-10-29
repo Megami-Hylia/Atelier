@@ -14,6 +14,20 @@ import Metal
         contents.layers[0].strokes = strokes
         return try XCTUnwrap(try painter.image(contents).pngData())
     }
+    func testCommittedLayerCacheSkipsReplayAndInvalidatesOnEdit() throws {
+        let painter = try MetalPainter()
+        var content = DocumentContents(width: 384, height: 128)
+        content.layers[0].strokes = [stroke()]
+        let first = try painter.image(content).pngData()
+        XCTAssertGreaterThan(painter.lastStampCount, 0)
+        XCTAssertEqual(first, try painter.image(content).pngData())
+        XCTAssertEqual(painter.lastStampCount, 0)
+        content.layers[0].strokes[0].samples[0].x += 50
+        let edited = try painter.image(content).pngData()
+        XCTAssertGreaterThan(painter.lastStampCount, 0)
+        XCTAssertEqual(edited, try MetalPainter().image(content).pngData())
+    }
+
     func testDeterministicReplayAndSpacingAffectPixels() throws {
         let painter = try MetalPainter()
         let original = stroke()

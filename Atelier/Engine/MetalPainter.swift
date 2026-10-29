@@ -29,6 +29,7 @@ private struct TileInfo {
     private let compositePipeline: MTLComputePipelineState
     private let loader: MTKTextureLoader
     private var textures: [MTLTexture] = []
+    private var cachedLayer: PaintLayer?
     private var planCache: [UUID: (PaintStroke, [GPUStamp])] = [:]
     private var planOrder: [UUID] = []
     private var planBytes = 0
@@ -56,17 +57,18 @@ private struct TileInfo {
 
     private func allocate(width: Int, height: Int) throws {
         guard width > 0, height > 0, width <= 4096, height <= 4096,
-              width * height * 8 * 4 <= Self.workingMemoryLimit else { throw DocumentError.memoryBudget }
-        if textures.count == 4, textures.first?.width == width && textures.first?.height == height { return }
+              width * height * 8 * 5 <= Self.workingMemoryLimit else { throw DocumentError.memoryBudget }
+        if textures.count == 5, textures.first?.width == width && textures.first?.height == height { return }
         var allocated: [MTLTexture] = []
         let descriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: .rgba16Float, width: width, height: height, mipmapped: false)
         descriptor.usage = [.shaderRead, .shaderWrite, .renderTarget]
         descriptor.storageMode = .shared
-        for _ in 0..<4 {
+        for _ in 0..<5 {
             guard let texture = device.makeTexture(descriptor: descriptor) else { throw DocumentError.memoryBudget }
             allocated.append(texture)
         }
         textures = allocated
+        cachedLayer = nil
     }
 
     private func dispatch(_ encoder: MTLComputeCommandEncoder, pipeline: MTLComputePipelineState, width: Int, height: Int) {
@@ -143,6 +145,14 @@ private struct TileInfo {
         }
     }
 
+    private func copy(_ source: MTLTexture, to target: MTLTexture, command: MTLCommandBuffer) throws {
+        guard let blit = command.makeBlitCommandEncoder() else { throw RenderError.command("cache copy") }
+        blit.copy(from: source, sourceSlice: 0, sourceLevel: 0, sourceOrigin: MTLOrigin(x: 0,y: 0,z: 0),
+                  sourceSize: MTLSize(width: source.width,height: source.height,depth: 1), to: target,
+                  destinationSlice: 0, destinationLevel: 0, destinationOrigin: MTLOrigin(x: 0,y: 0,z: 0))
+        blit.endEncoding()
+    }
+
     func render(_ document: DocumentContents, liveStroke: PaintStroke? = nil, finished: Bool = true, waitForCompletion: Bool = true) throws -> MTLTexture {
         try allocate(width: document.width, height: document.height)
         guard let command = queue.makeCommandBuffer() else { throw RenderError.unavailable }
@@ -156,8 +166,25 @@ private struct TileInfo {
         lastStampCount = 0
         for value in document.layers where value.visible {
             try clear(layer, color: .zero, command: command)
-            var strokes = value.strokes
-            if value.id == (document.selectedLayerID ?? document.layers.first?.id), let liveStroke { strokes.append(liveStroke) }
+            let selected = value.id == (document.selectedLayerID ?? document.layers.first?.id)
+            let cacheHit = selected && cachedLayer == value
+            if cacheHit { try copy(textures[4], to: layer, command: command) }
+            var strokes = cacheHit ? [] : value.strokes
+            // Preserve committed pixels before adding the provisional live stroke.
+            if !cacheHit {
+            for stroke in strokes {
+                guard let blit = command.makeBlitCommandEncoder() else { throw RenderError.command("snapshot") }
+                blit.copy(from: layer, sourceSlice: 0, sourceLevel: 0, sourceOrigin: MTLOrigin(x: 0, y: 0, z: 0),
+                          sourceSize: MTLSize(width: layer.width, height: layer.height, depth: 1), to: snapshot, destinationSlice: 0,
+                          destinationLevel: 0, destinationOrigin: MTLOrigin(x: 0, y: 0, z: 0))
+                blit.endEncoding()
+                var linearStroke = stroke
+                linearStroke.color.x = Self.linear(stroke.color.x); linearStroke.color.y = Self.linear(stroke.color.y); linearStroke.color.z = Self.linear(stroke.color.z)
+                try encode(linearStroke, finished: liveStroke?.id != stroke.id || finished, source: snapshot, target: layer, command: command)
+            }
+                if selected { try copy(layer, to: textures[4], command: command); cachedLayer = value }
+            }
+            strokes = selected ? liveStroke.map { [$0] } ?? [] : []
             for stroke in strokes {
                 guard let blit = command.makeBlitCommandEncoder() else { throw RenderError.command("snapshot") }
                 blit.copy(from: layer, sourceSlice: 0, sourceLevel: 0, sourceOrigin: MTLOrigin(x: 0, y: 0, z: 0),
