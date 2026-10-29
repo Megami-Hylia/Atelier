@@ -1,3 +1,5 @@
+> Nuova IPA: [CURRENT_BUILD.md](CURRENT_BUILD.md). I rapporti sotto riguardano la precedente revisione 5871e5d.
+
 # Stato build e criteri distinti
 
 Aggiornamento: 29 ottobre 2026. L’artefatto di consegna corrente proviene dal **run #6**, commit **5871e5dfe7a1da879806fd86e737598ec242bb3a**. Il workflow è concluso con successo: build device, packaging verificato e **15 test nativi superati, zero falliti e zero saltati** sul simulatore iPad.

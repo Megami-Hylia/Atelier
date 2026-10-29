@@ -1,3 +1,5 @@
+> Nuova IPA: [CURRENT_BUILD.md](CURRENT_BUILD.md). I rapporti sotto riguardano la precedente revisione 5871e5d.
+
 # Atelier per iPad
 
 **IPA device realmente compilata e verificata; progetto funzionalmente incompleto.** La consegna corrente `Atelier-unsigned.ipa` proviene dal [run #6](https://github.com/Megami-Hylia/Atelier/actions/runs/40763569979), commit `5871e5dfe7a1da879806fd86e737598ec242bb3a`, con Xcode 26.2 e SDK iOS 26.2. Il controllo del file scaricato su Windows conferma eseguibile arm64 per iOS device, famiglia solo iPad, libreria Metal, 192 preset/asset inclusi e assenza di firma/provisioning. Dimensione: **703.220 byte**; SHA-256: `f2d751ebae647943589f4524cca8393da98c637dfabee11b2153c62b8825f4ae`.
