@@ -47,6 +47,7 @@ struct CanvasSurface: UIViewRepresentable {
     private var active: PaintStroke?
     private weak var activeTouch: UITouch?
     private var predictions: [PencilSample] = []
+    private var activeSampleRevision: UInt64 = 0
     private var estimates: [NSNumber: (UUID, Int)] = [:]
     private var lastTool = PaintTool.paint
     private let cursor = CAShapeLayer()
@@ -94,9 +95,9 @@ struct CanvasSurface: UIViewRepresentable {
         guard let document, let painter, let drawable = currentDrawable, let pass = currentRenderPassDescriptor else { return }
         if failedRevision == document.revision, failedStrokeID == active?.id, failedSampleCount == (active?.samples.count ?? 0) { return }
         do {
-            var temporary = active
-            temporary?.samples.append(contentsOf: predictions)
-            let texture = try painter.render(document.contents, liveStroke: temporary, finished: false, waitForCompletion: false)
+            let texture = try painter.render(document.contents, liveStroke: active, finished: false, waitForCompletion: false,
+                                             documentRevision: document.revision, liveSampleRevision: activeSampleRevision,
+                                             predictedSamples: predictions)
             failedRevision = nil
             guard let command = painter.queue.makeCommandBuffer(), let encoder = command.makeRenderCommandEncoder(descriptor: pass) else { return }
             encoder.setRenderPipelineState(painter.screenPipeline); encoder.setFragmentTexture(texture, index: 0)
@@ -114,6 +115,7 @@ struct CanvasSurface: UIViewRepresentable {
             }
             command.present(drawable); command.commit()
         } catch {
+            painter.invalidateCache()
             failedRevision = document.revision; failedStrokeID = active?.id; failedSampleCount = active?.samples.count ?? 0
             document.errorMessage = error.localizedDescription
         }
@@ -129,23 +131,22 @@ struct CanvasSurface: UIViewRepresentable {
                             roll: Float(touch.rollAngle), time: touch.timestamp, isPencil: touch.type == .pencil)
     }
     private func append(_ touches: [UITouch]) {
-        guard var active else { return }
+        guard active != nil else { return }
         for touch in touches {
             let s = sample(touch)
-            if active.samples.last?.time == s.time { continue }
-            active.samples.append(s)
+            if active?.samples.last?.time == s.time { continue }
+            active?.samples.append(s)
             if let index = touch.estimationUpdateIndex, !touch.estimatedPropertiesExpectingUpdates.isEmpty {
-                estimates[index] = (active.id, active.samples.count - 1)
+                if let active { estimates[index] = (active.id, active.samples.count - 1) }
             }
         }
-        self.active = active
     }
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard active == nil, let document, !document.selectedLayer.locked,
               let touch = touches.first(where: { $0.type == .pencil || (fingerPainting && touches.count == 1) }) else { return }
-        activeTouch = touch; predictions = []
+        activeTouch = touch; predictions = []; activeSampleRevision = 0
         active = PaintStroke(brush: brush, tool: tool, color: paintColor, size: brushSize, opacity: paintOpacity,
-                             samples: [], seed: brush.seed ^ UInt64(document.selectedLayer.strokes.count + 1))
+                             samples: [], seed: brush.seed ^ UInt64(document.selectedLayer.strokes.count + 1), distanceDynamicsVersion: 1)
         append(event?.coalescedTouches(for: touch) ?? [touch]); setNeedsDisplay()
     }
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -169,7 +170,7 @@ struct CanvasSurface: UIViewRepresentable {
         for touch in touches {
             guard let index = touch.estimationUpdateIndex, let (id, sampleIndex) = estimates[index] else { continue }
             let updated = sample(touch)
-            if active?.id == id, active!.samples.indices.contains(sampleIndex) { active!.samples[sampleIndex] = updated }
+            if active?.id == id, active!.samples.indices.contains(sampleIndex) { active!.samples[sampleIndex] = updated; activeSampleRevision &+= 1 }
             else { document?.refine(strokeID: id, sampleIndex: sampleIndex, sample: updated) }
             if touch.estimatedPropertiesExpectingUpdates.isEmpty { estimates.removeValue(forKey: index) }
         }

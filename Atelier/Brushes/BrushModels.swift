@@ -3,7 +3,7 @@ import Combine
 import SwiftUI
 import ImageIO
 
-struct BrushPreset: Codable, Identifiable, Equatable {
+struct BrushPreset: Codable, Identifiable, Equatable, Sendable {
     var id: String
     var name: String
     var setID: String

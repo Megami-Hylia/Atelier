@@ -30,6 +30,7 @@ kernel void paintTile(texture2d<float, access::read> source [[texture(0)]],
                       texture2d<float, access::write> target [[texture(1)]],
                       texture2d<float, access::sample> shapeSource [[texture(2)]],
                       texture2d<float, access::sample> grainSource [[texture(3)]],
+                      texture2d<float, access::read> pickupSource [[texture(4)]],
                       constant Stamp *stamps [[buffer(0)]], constant TileInfo &tile [[buffer(1)]],
                       uint2 local [[thread_position_in_grid]]) {
     if (any(local >= tile.size)) return;
@@ -57,7 +58,7 @@ kernel void paintTile(texture2d<float, access::read> source [[texture(0)]],
         int tool = int(s.rendering.y);
         if (tool == 2) { color *= 1 - alpha; continue; }
         int2 pickupPixel = clamp(int2(position - s.pickup.xy), int2(0), int2(source.get_width() - 1, source.get_height() - 1));
-        float4 pickup = source.read(uint2(pickupPixel));
+        float4 pickup = pickupSource.read(uint2(pickupPixel));
         if (tool == 1) {
             // shortcut: pickup uses pre-stroke pixels; evaluate per-stamp ping-pong for self-advection parity.
             color = mix(color, pickup, alpha * s.pickup.w);

@@ -34,7 +34,16 @@ private struct TileInfo {
     private var planCache: [UUID: (PaintStroke, [GPUStamp])] = [:]
     private var planOrder: [UUID] = []
     private var planBytes = 0
-    private var assetCache: [String: MTLTexture] = [:]
+    private struct AssetKey: Hashable { var name: String; var data: Data? }
+    private var assetCache: [AssetKey: MTLTexture] = [:]
+    private var assetOrder: [AssetKey] = []
+    private var assetBytes = 0
+    private var liveTexture: MTLTexture?
+    private var liveStream: StrokePlanner.Stream?
+    private var cachedLiveRevision: UInt64?
+    private var cachedDocumentRevision: UInt64?
+    private var cachedDocumentID: UUID?
+    private(set) var lastPlannedSampleCount = 0
     private(set) var lastStampCount = 0
     static let workingMemoryLimit = 384 * 1024 * 1024
 
@@ -70,7 +79,7 @@ private struct TileInfo {
             allocated.append(texture)
         }
         textures = allocated
-        cachedLayer = nil
+        invalidateCache(); liveTexture = nil
     }
 
     private func dispatch(_ encoder: MTLComputeCommandEncoder, pipeline: MTLComputePipelineState, width: Int, height: Int) {
@@ -91,7 +100,8 @@ private struct TileInfo {
     private func asset(_ brush: BrushPreset, shape: Bool) throws -> MTLTexture {
         let data = shape ? brush.shapeData : brush.grainData
         let key = shape ? "BrushShape-\(brush.shape)" : "BrushGrain-\(brush.grain)"
-        if data == nil, let texture = assetCache[key] { return texture }
+        let identity = AssetKey(name: key, data: data)
+        if let texture = assetCache[identity] { return texture }
         let texture: MTLTexture
         if let data {
             guard let image = UIImage(data: data), image.size.width <= 2048, image.size.height <= 2048,
@@ -100,18 +110,26 @@ private struct TileInfo {
         } else {
             guard let url = Bundle.main.url(forResource: key, withExtension: "png") else { throw RenderError.asset(key) }
             texture = try loader.newTexture(URL: url, options: [.SRGB: false, .generateMipmaps: false])
-            assetCache[key] = texture
         }
+        let bytes = texture.width * texture.height * 4
+        while assetOrder.count >= 64 || assetBytes + bytes > 32 * 1024 * 1024 {
+            guard !assetOrder.isEmpty else { break }
+            let oldest = assetOrder.removeFirst()
+            if let removed = assetCache.removeValue(forKey: oldest) { assetBytes -= removed.width * removed.height * 4 }
+        }
+        assetCache[identity] = texture; assetOrder.append(identity); assetBytes += bytes
         return texture
     }
 
     // The CPU bins stamps into 256-pixel tiles; pixels remain in global canvas coordinates.
     // No texture coordinate restarts at tile borders, including pickup and grain.
-    private func encode(_ stroke: PaintStroke, finished: Bool, source: MTLTexture, target: MTLTexture, command: MTLCommandBuffer) throws {
+    private func encode(_ stroke: PaintStroke, finished: Bool, source: MTLTexture, target: MTLTexture, pickup: MTLTexture? = nil, supplied: [GPUStamp]? = nil, command: MTLCommandBuffer) throws {
         let stamps: [GPUStamp]
-        if finished, let cached = planCache[stroke.id], cached.0 == stroke {
+        if let supplied { stamps = supplied }
+        else if finished, let cached = planCache[stroke.id], cached.0 == stroke {
             stamps = cached.1
         } else {
+            lastPlannedSampleCount += stroke.samples.count
             stamps = try StrokePlanner.stamps(for: stroke, finished: finished)
             let bytes = stamps.count * MemoryLayout<GPUStamp>.stride
             if finished, bytes <= 16 * 1024 * 1024 {
@@ -136,11 +154,21 @@ private struct TileInfo {
             guard let values = bins[key], let encoder = command.makeComputeCommandEncoder() else { throw RenderError.command("tile encoder") }
             let buffer = values.withUnsafeBytes { device.makeBuffer(bytes: $0.baseAddress!, length: $0.count, options: .storageModeShared) }
             guard let buffer else { encoder.endEncoding(); throw DocumentError.memoryBudget }
-            let x = (key % columns) * tileSize, y = (key / columns) * tileSize
+            let tileX = (key % columns) * tileSize, tileY = (key / columns) * tileSize
+            var x = min(source.width, tileX + tileSize), y = min(source.height, tileY + tileSize)
+            var right = tileX, bottom = tileY
+            for stamp in values {
+                let extent = stamp.geometry.z * 1.5
+                x = min(x, max(tileX, Int(floor(stamp.geometry.x - extent))))
+                y = min(y, max(tileY, Int(floor(stamp.geometry.y - extent))))
+                right = max(right, min(min(source.width, tileX + tileSize), Int(ceil(stamp.geometry.x + extent))))
+                bottom = max(bottom, min(min(source.height, tileY + tileSize), Int(ceil(stamp.geometry.y + extent))))
+            }
+            guard right > x, bottom > y else { encoder.endEncoding(); continue }
             var tile = TileInfo(origin: SIMD2(UInt32(x), UInt32(y)),
-                                size: SIMD2(UInt32(min(tileSize, source.width - x)), UInt32(min(tileSize, source.height - y))), count: UInt32(values.count))
+                                size: SIMD2(UInt32(right - x), UInt32(bottom - y)), count: UInt32(values.count))
             encoder.setTexture(source, index: 0); encoder.setTexture(target, index: 1)
-            encoder.setTexture(shape, index: 2); encoder.setTexture(grain, index: 3)
+            encoder.setTexture(shape, index: 2); encoder.setTexture(grain, index: 3); encoder.setTexture(pickup ?? source, index: 4)
             encoder.setBuffer(buffer, offset: 0, index: 0); encoder.setBytes(&tile, length: MemoryLayout<TileInfo>.stride, index: 1)
             dispatch(encoder, pipeline: paintPipeline, width: Int(tile.size.x), height: Int(tile.size.y))
             encoder.endEncoding()
@@ -155,8 +183,48 @@ private struct TileInfo {
         blit.endEncoding()
     }
 
-    func render(_ document: DocumentContents, liveStroke: PaintStroke? = nil, finished: Bool = true, waitForCompletion: Bool = true) throws -> MTLTexture {
+    private func encodeLive(_ stroke: PaintStroke, revision: UInt64, predictions: [PencilSample], baseUnchanged: Bool,
+                            layer: MTLTexture, command: MTLCommandBuffer) throws -> Bool {
+        // An extra accumulation surface is optional; oversized existing documents retain replay support.
+        if liveTexture == nil {
+            let bytes = layer.width * layer.height * 8
+            guard bytes * 6 <= Self.workingMemoryLimit else { return false }
+            let descriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: .rgba16Float, width: layer.width, height: layer.height, mipmapped: false)
+            descriptor.usage = [.shaderRead, .shaderWrite]; descriptor.storageMode = .shared
+            liveTexture = device.makeTexture(descriptor: descriptor)
+        }
+        guard let liveTexture else { return false }
+        let reusable: Bool
+        if let stream = liveStream, baseUnchanged, cachedLiveRevision == revision, stream.matches(stroke),
+           stream.sampleCount <= stroke.samples.count, stream.sampleCount > 0 {
+            reusable = stroke.samples[stream.sampleCount - 1] == stream.lastRawSample
+        } else { reusable = false }
+        if !reusable {
+            liveStream = StrokePlanner.Stream(stroke)
+            try copy(textures[4], to: liveTexture, command: command)
+        }
+        guard var stream = liveStream else { return false }
+        let count = stream.sampleCount
+        let stamps = try stream.append(stroke.samples.dropFirst(count))
+        lastPlannedSampleCount += stroke.samples.count - count
+        // The immutable pre-stroke layer supplies wet pickup, while new stamps accumulate on previous ink.
+        try copy(liveTexture, to: layer, command: command)
+        try encode(stroke, finished: false, source: layer, target: liveTexture, pickup: textures[4], supplied: stamps, command: command)
+        try copy(liveTexture, to: layer, command: command)
+        liveStream = stream; cachedLiveRevision = revision
+        if !predictions.isEmpty {
+            var predicted = stream
+            let stamps = try predicted.append(predictions[...])
+            // Predictions never enter the retained ink or the retained random-generator state.
+            try encode(stroke, finished: false, source: liveTexture, target: layer, pickup: textures[4], supplied: stamps, command: command)
+        }
+        return true
+    }
+
+    func render(_ document: DocumentContents, liveStroke: PaintStroke? = nil, finished: Bool = true, waitForCompletion: Bool = true, documentRevision: UInt64? = nil, liveSampleRevision: UInt64? = nil, predictedSamples: [PencilSample] = []) throws -> MTLTexture {
         try allocate(width: document.width, height: document.height)
+        var submitted = false
+        defer { if !submitted { invalidateCache() } }
         guard let command = queue.makeCommandBuffer() else { throw RenderError.unavailable }
         var composite = textures[0], nextComposite = textures[1]
         var layer = textures[2], snapshot = textures[3]
@@ -165,15 +233,25 @@ private struct TileInfo {
         background.y = Self.linear(background.y) * background.w
         background.z = Self.linear(background.z) * background.w
         try clear(composite, color: background, command: command)
-        lastStampCount = 0
+        lastStampCount = 0; lastPlannedSampleCount = 0
+        if liveStroke == nil { liveStream = nil; cachedLiveRevision = nil }
         for value in document.layers where value.visible {
             try clear(layer, color: .zero, command: command)
             let selected = value.id == (document.selectedLayerID ?? document.layers.first?.id)
             var cacheIdentity = value
             cacheIdentity.adjustments = nil
-            let cacheHit = selected && cachedLayer == cacheIdentity
+            let sameRevision = documentRevision != nil && cachedDocumentRevision == documentRevision && cachedDocumentID == document.id
+            let cacheHit = selected && cachedLayer?.id == value.id && (sameRevision || cachedLayer == cacheIdentity)
             if cacheHit { try copy(textures[4], to: layer, command: command) }
             var strokes = cacheHit ? [] : value.strokes
+            if selected && !cacheHit, let cachedLayer, !cacheIdentity.strokes.isEmpty {
+                var prefix = cacheIdentity
+                let appended = prefix.strokes.removeLast()
+                if prefix == cachedLayer {
+                    try copy(textures[4], to: layer, command: command)
+                    strokes = [appended]
+                }
+            }
             // Preserve committed pixels before adding the provisional live stroke.
             if !cacheHit {
             for stroke in strokes {
@@ -188,16 +266,22 @@ private struct TileInfo {
             }
                 if selected { try copy(layer, to: textures[4], command: command); cachedLayer = cacheIdentity }
             }
+            if selected { cachedDocumentRevision = documentRevision; cachedDocumentID = document.id }
             strokes = selected ? liveStroke.map { [$0] } ?? [] : []
-            for stroke in strokes {
+            for original in strokes {
+                var stroke = original
+                stroke.color.x = Self.linear(stroke.color.x); stroke.color.y = Self.linear(stroke.color.y); stroke.color.z = Self.linear(stroke.color.z)
+                if !finished, let liveSampleRevision, stroke.distanceDynamicsVersion == 1, stroke.samples.count >= 2,
+                   try encodeLive(stroke, revision: liveSampleRevision, predictions: predictedSamples,
+                                  baseUnchanged: cacheHit, layer: layer, command: command) { continue }
+                liveStream = nil; cachedLiveRevision = nil
+                stroke.samples.append(contentsOf: predictedSamples)
                 guard let blit = command.makeBlitCommandEncoder() else { throw RenderError.command("snapshot") }
                 blit.copy(from: layer, sourceSlice: 0, sourceLevel: 0, sourceOrigin: MTLOrigin(x: 0, y: 0, z: 0),
                           sourceSize: MTLSize(width: layer.width, height: layer.height, depth: 1), to: snapshot, destinationSlice: 0,
                           destinationLevel: 0, destinationOrigin: MTLOrigin(x: 0, y: 0, z: 0))
                 blit.endEncoding()
-                var linearStroke = stroke
-                linearStroke.color.x = Self.linear(stroke.color.x); linearStroke.color.y = Self.linear(stroke.color.y); linearStroke.color.z = Self.linear(stroke.color.z)
-                try encode(linearStroke, finished: liveStroke?.id != stroke.id || finished, source: snapshot, target: layer, command: command)
+                try encode(stroke, finished: finished, source: snapshot, target: layer, command: command)
             }
             var filteredLayer = layer
             if let values = value.adjustments, !values.isEmpty {
@@ -211,13 +295,18 @@ private struct TileInfo {
             dispatch(encoder, pipeline: compositePipeline, width: document.width, height: document.height); encoder.endEncoding()
             swap(&composite, &nextComposite)
         }
-        command.commit()
+        if !waitForCompletion {
+            command.addCompletedHandler { [weak self] result in
+                if result.status == .error { Task { @MainActor [weak self] in self?.invalidateCache() } }
+            }
+        }
+        command.commit(); submitted = true
         if waitForCompletion { command.waitUntilCompleted() }
-        if command.status == .error { throw RenderError.command(command.error?.localizedDescription ?? "GPU") }
+        if command.status == .error { invalidateCache(); throw RenderError.command(command.error?.localizedDescription ?? "GPU") }
         return composite
     }
 
-    func invalidateCache() { cachedLayer = nil }
+    func invalidateCache() { cachedLayer = nil; cachedDocumentRevision = nil; cachedDocumentID = nil; liveStream = nil; cachedLiveRevision = nil }
 
     func image(_ contents: DocumentContents) throws -> UIImage {
         let texture = try render(contents)

@@ -2,9 +2,9 @@ import Foundation
 import Combine
 import simd
 
-enum PaintTool: String, Codable, CaseIterable { case paint, smudge, erase }
+enum PaintTool: String, Codable, CaseIterable, Sendable { case paint, smudge, erase }
 
-struct PencilSample: Codable, Equatable {
+struct PencilSample: Codable, Equatable, Sendable {
     var x: Float
     var y: Float
     var pressure: Float = 1
@@ -25,7 +25,7 @@ struct PencilSample: Codable, Equatable {
     }
 }
 
-struct PaintStroke: Codable, Identifiable, Equatable {
+struct PaintStroke: Codable, Identifiable, Equatable, Sendable {
     var id = UUID()
     var brush: BrushPreset
     var tool: PaintTool
@@ -34,9 +34,10 @@ struct PaintStroke: Codable, Identifiable, Equatable {
     var opacity: Float
     var samples: [PencilSample]
     var seed: UInt64
+    var distanceDynamicsVersion: Int? = nil
 }
 
-struct PaintLayer: Codable, Identifiable, Equatable {
+struct PaintLayer: Codable, Identifiable, Equatable, Sendable {
     var id = UUID()
     var name: String
     var visible = true
@@ -47,7 +48,7 @@ struct PaintLayer: Codable, Identifiable, Equatable {
     var strokes: [PaintStroke] = []
 }
 
-struct DocumentContents: Codable, Equatable {
+struct DocumentContents: Codable, Equatable, Sendable {
     var formatVersion = 1
     var id = UUID()
     var name = "Senza titolo"
@@ -70,7 +71,7 @@ struct DocumentContents: Codable, Equatable {
         guard layers.allSatisfy({ layer in
             (layer.adjustments ?? [:]).allSatisfy({ key, value in value.isFinite && abs(value) <= 64 }) && layer.opacity.isFinite && (0...1).contains(layer.opacity) && (0...2).contains(layer.blendMode) &&
             layer.strokes.allSatisfy { stroke in
-                !stroke.samples.isEmpty && stroke.samples.count <= 1_000_000 &&
+                (0...1).contains(stroke.distanceDynamicsVersion ?? 0) && !stroke.samples.isEmpty && stroke.samples.count <= 1_000_000 &&
                 stroke.size.isFinite && (0.1...2048).contains(stroke.size) && stroke.opacity.isFinite && (0...1).contains(stroke.opacity) &&
                 [stroke.color.x, stroke.color.y, stroke.color.z, stroke.color.w].allSatisfy { $0.isFinite && (0...1).contains($0) } &&
                 stroke.brush.parameters.values.allSatisfy(\.isFinite) &&
@@ -103,6 +104,7 @@ enum DocumentError: LocalizedError {
     @Published var errorMessage: String?
     private var undoStates: [DocumentContents] = []
     private var redoStates: [DocumentContents] = []
+    private var pendingAutosave: DispatchWorkItem?
     var storageURL: URL?
     var canUndo: Bool { !undoStates.isEmpty }
     var canRedo: Bool { !redoStates.isEmpty }
@@ -193,19 +195,15 @@ enum DocumentError: LocalizedError {
     }
 
     func save(to url: URL) throws {
-        try contents.validate()
-        let encoder = JSONEncoder(); encoder.outputFormatting = [.sortedKeys]
-        let data = try encoder.encode(contents)
-        guard data.count <= 128 * 1024 * 1024 else { throw DocumentError.tooLarge }
-        try FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
-        if FileManager.default.fileExists(atPath: url.path) {
-            let old = try Data(contentsOf: url)
-            try old.write(to: url.appendingPathExtension("recovery"), options: .atomic)
-        }
-        try data.write(to: url, options: .atomic)
+        pendingAutosave?.cancel(); pendingAutosave = nil
+        let snapshot = contents
+        // Explicit save drains prior writes before returning; an older autosave cannot overwrite it.
+        try DocumentFileIO.queue.sync { try DocumentFileIO.write(snapshot, to: url) }
         storageURL = url
     }
     func load(from url: URL) throws {
+        if pendingAutosave != nil, let storageURL { try save(to: storageURL) }
+        DocumentFileIO.queue.sync {}
         let size = try url.resourceValues(forKeys: [.fileSizeKey]).fileSize ?? 0
         guard size <= 128 * 1024 * 1024 else { throw DocumentError.tooLarge }
         let loaded = try JSONDecoder().decode(DocumentContents.self, from: Data(contentsOf: url))
@@ -217,7 +215,20 @@ enum DocumentError: LocalizedError {
     }
     private func autosave() {
         guard let storageURL else { return }
-        do { try save(to: storageURL) } catch { errorMessage = "Salvataggio fallito: \(error.localizedDescription)" }
+        pendingAutosave?.cancel()
+        let snapshot = contents, savedRevision = revision
+        let work = DispatchWorkItem { [weak self] in
+            do { try DocumentFileIO.write(snapshot, to: storageURL) }
+            catch {
+                let message = error.localizedDescription
+                Task { @MainActor [weak self] in
+                    guard let self, self.revision == savedRevision else { return }
+                    self.errorMessage = "Salvataggio fallito: \(message)"
+                }
+            }
+        }
+        pendingAutosave = work
+        DocumentFileIO.queue.asyncAfter(deadline: .now() + .milliseconds(350), execute: work)
     }
 }
 
@@ -241,5 +252,21 @@ enum DocumentError: LocalizedError {
         document.change { $0.name = name.isEmpty ? "Senza titolo" : name }
         try document.save(to: folder.appendingPathComponent(document.contents.id.uuidString).appendingPathExtension("atelier"))
         refresh(); return document
+    }
+}
+
+private enum DocumentFileIO {
+    static let queue = DispatchQueue(label: "org.atelier.document-writer", qos: .utility)
+    static func write(_ contents: DocumentContents, to url: URL) throws {
+        try contents.validate()
+        let encoder = JSONEncoder(); encoder.outputFormatting = [.sortedKeys]
+        let data = try encoder.encode(contents)
+        guard data.count <= 128 * 1024 * 1024 else { throw DocumentError.tooLarge }
+        try FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
+        if FileManager.default.fileExists(atPath: url.path) {
+            let old = try Data(contentsOf: url)
+            try old.write(to: url.appendingPathExtension("recovery"), options: .atomic)
+        }
+        try data.write(to: url, options: .atomic)
     }
 }
