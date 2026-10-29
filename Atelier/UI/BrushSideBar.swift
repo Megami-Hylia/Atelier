@@ -55,7 +55,7 @@ struct BrushSideBar: View {
             }.onEnded { _ in adjusting = nil })
         .overlay(alignment: onRight ? .trailing : .leading) {
             if adjusting == id {
-                preview(id: id).offset(x: onRight ? -150 : 50).allowsHitTesting(false)
+                preview(id: id).offset(x: onRight ? -50 : 50).allowsHitTesting(false)
             }
         }
         .accessibilityElement(children: .ignore).accessibilityLabel(name)
