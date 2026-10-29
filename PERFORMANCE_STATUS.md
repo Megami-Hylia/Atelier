@@ -8,7 +8,7 @@ Il tratto attivo veniva ripianificato e ridisegnato dall’inizio a ogni frame. 
 
 - Cursore di pianificazione incrementale a stato costante: conserva filtro, distanza e generatore casuale senza conservare l’array crescente.
 - Superficie Metal persistente per il tratto attivo. Si aggiungono le nuove impronte, usando sempre lo sfondo precedente al tratto per il pickup di gomma/sfumino/impasto.
-- Al massimo 32 nuovi campioni consolidati per frame; i frame successivi drenano gli arretrati senza eliminare punti. Una coda recente di 32 campioni è riprodotta provvisoriamente per assorbire le correzioni Pencil. Previsioni e coda provvisoria non entrano nella superficie permanente.
+- Al massimo 32 nuovi campioni consolidati per frame; i frame successivi drenano gli arretrati senza eliminare punti. Solo la coda con stime Pencil ancora in attesa (al massimo 32 campioni) è riprodotta provvisoriamente; senza stime pendenti tutti i campioni nuovi vengono consolidati subito. Previsioni e coda provvisoria non entrano nella superficie permanente.
 - Correzioni a campioni già consolidati invalidano il cursore per correttezza; la ricostruzione viene comunque suddivisa in frame.
 - Append dei campioni in posizione, senza copiare l’intero tratto per aggiungere le previsioni.
 - Il livello selezionato usa la revisione del documento durante il disegno e, quando viene aggiunto un tratto, riusa lo storico già renderizzato.

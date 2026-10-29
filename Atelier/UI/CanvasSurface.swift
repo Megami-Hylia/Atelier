@@ -49,6 +49,10 @@ struct CanvasSurface: UIViewRepresentable {
     private var predictions: [PencilSample] = []
     private var activeSampleRevision: UInt64 = 0
     private var estimates: [NSNumber: (UUID, Int)] = [:]
+    private var pendingLiveEstimates: Set<Int> = []
+    private var stableLiveSampleCount: Int {
+        pendingLiveEstimates.min() ?? active?.samples.count ?? 0
+    }
     private var lastTool = PaintTool.paint
     private let cursor = CAShapeLayer()
     private var failedRevision: UInt64?
@@ -97,7 +101,7 @@ struct CanvasSurface: UIViewRepresentable {
         do {
             let texture = try painter.render(document.contents, liveStroke: active, finished: false, waitForCompletion: false,
                                              documentRevision: document.revision, liveSampleRevision: activeSampleRevision,
-                                             liveStableSampleCount: max(0, (active?.samples.count ?? 0) - 32),
+                                             liveStableSampleCount: stableLiveSampleCount,
                                              predictedSamples: predictions)
             failedRevision = nil
             guard let command = painter.queue.makeCommandBuffer(), let encoder = command.makeRenderCommandEncoder(descriptor: pass) else { return }
@@ -138,14 +142,19 @@ struct CanvasSurface: UIViewRepresentable {
             if active?.samples.last?.time == s.time { continue }
             active?.samples.append(s)
             if let index = touch.estimationUpdateIndex, !touch.estimatedPropertiesExpectingUpdates.isEmpty {
-                if let active { estimates[index] = (active.id, active.samples.count - 1) }
+                if let active {
+                    let sampleIndex = active.samples.count - 1
+                    estimates[index] = (active.id, sampleIndex); pendingLiveEstimates.insert(sampleIndex)
+                }
             }
         }
+        let firstProvisional = max(0, (active?.samples.count ?? 0) - 32)
+        pendingLiveEstimates = Set(pendingLiveEstimates.filter { $0 >= firstProvisional })
     }
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard active == nil, let document, !document.selectedLayer.locked,
               let touch = touches.first(where: { $0.type == .pencil || (fingerPainting && touches.count == 1) }) else { return }
-        activeTouch = touch; predictions = []; activeSampleRevision = 0
+        activeTouch = touch; predictions = []; activeSampleRevision = 0; pendingLiveEstimates = []
         active = PaintStroke(brush: brush, tool: tool, color: paintColor, size: brushSize, opacity: paintOpacity,
                              samples: [], seed: brush.seed ^ UInt64(document.selectedLayer.strokes.count + 1), distanceDynamicsVersion: 1)
         append(event?.coalescedTouches(for: touch) ?? [touch]); setNeedsDisplay()
@@ -160,12 +169,12 @@ struct CanvasSurface: UIViewRepresentable {
         guard let touch = activeTouch, touches.contains(touch) else { return }
         append(event?.coalescedTouches(for: touch) ?? [touch]); predictions = []
         if let active { document?.commit(active) }
-        active = nil; activeTouch = nil; setNeedsDisplay()
+        active = nil; activeTouch = nil; pendingLiveEstimates = []; setNeedsDisplay()
     }
     override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard let touch = activeTouch, touches.contains(touch) else { return }
         if let id = active?.id { estimates = estimates.filter { $0.value.0 != id } }
-        active = nil; activeTouch = nil; predictions = []; setNeedsDisplay()
+        active = nil; activeTouch = nil; predictions = []; pendingLiveEstimates = []; setNeedsDisplay()
     }
     override func touchesEstimatedPropertiesUpdated(_ touches: Set<UITouch>) {
         for touch in touches {
@@ -176,7 +185,10 @@ struct CanvasSurface: UIViewRepresentable {
                 if painter?.hasBakedSample(strokeID: id, index: sampleIndex) == true { activeSampleRevision &+= 1 }
             }
             else { document?.refine(strokeID: id, sampleIndex: sampleIndex, sample: updated) }
-            if touch.estimatedPropertiesExpectingUpdates.isEmpty { estimates.removeValue(forKey: index) }
+            if touch.estimatedPropertiesExpectingUpdates.isEmpty {
+                estimates.removeValue(forKey: index)
+                if active?.id == id { pendingLiveEstimates.remove(sampleIndex) }
+            }
         }
         setNeedsDisplay()
     }
