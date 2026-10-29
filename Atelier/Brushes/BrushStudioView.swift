@@ -327,4 +327,3 @@ struct BrushStudioView: View {
     }
 
 }
-

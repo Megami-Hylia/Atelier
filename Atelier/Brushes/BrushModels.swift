@@ -196,6 +196,16 @@ final class BrushStore: ObservableObject {
         }
     }
 
+    func deleteBrushes(_ ids: [String]) {
+        let deleting = Set(ids)
+        guard brushes.contains(where: { !deleting.contains($0.id) }) else { errorMessage = "Conserva almeno un pennello."; return }
+        brushes.removeAll { deleting.contains($0.id) }
+        recentIDs.removeAll { deleting.contains($0) }; favoriteIDs.removeAll { deleting.contains($0) }
+        resetPoints = resetPoints.filter { !deleting.contains($0.key) }
+        if deleting.contains(selectedID) { selectedID = brushes[0].id }
+        persist()
+    }
+
     @discardableResult func combine(_ ids: [String]) -> BrushPreset? {
         guard ids.count == 2, ids[0] != ids[1],
               let primary = brushes.first(where: { $0.id == ids[0] }),

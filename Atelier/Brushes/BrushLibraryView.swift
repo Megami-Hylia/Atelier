@@ -13,6 +13,7 @@ struct BrushLibraryView: View {
     @ObservedObject var store: BrushStore
     @State private var query = ""
     @State private var selection: [String] = []
+    @State private var deletingSelection = false
     @State private var recents = false
     @State private var favorites = false
     @State private var searching = false
@@ -62,6 +63,7 @@ struct BrushLibraryView: View {
                     Spacer()
                     if !selection.isEmpty {
                         Button("Combina") { if let combined = store.combine(selection) { selection = []; editingBrush = combined } }.disabled(selection.count != 2)
+                        Button("Elimina", role: .destructive) { deletingSelection = true }
                         Button("Fine") { selection = [] }
                     }
                     Button { searching.toggle(); if !searching { query = "" } } label: { Image(systemName: "magnifyingglass").frame(width: 32, height: 44) }
@@ -191,6 +193,9 @@ struct BrushLibraryView: View {
             }
             .confirmationDialog("Ripristinare tutti i preset originali Atelier? I pennelli personali vengono conservati.", isPresented: $confirmingReset, titleVisibility: .visible) {
                 Button("Ripristina preset", role: .destructive) { store.restoreFactoryPresets() }
+            }
+            .confirmationDialog("Eliminare i pennelli selezionati?", isPresented: $deletingSelection, titleVisibility: .visible) {
+                Button("Elimina selezionati", role: .destructive) { store.deleteBrushes(selection); selection = [] }
             }
             .confirmationDialog("Eliminare questo pennello?", isPresented: Binding(get: { deleteCandidate != nil }, set: { if !$0 { deleteCandidate = nil } }), titleVisibility: .visible) {
                 Button("Elimina", role: .destructive) { if let brush = deleteCandidate { store.deleteBrush(brush) }; deleteCandidate = nil }
