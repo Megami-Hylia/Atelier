@@ -3,6 +3,25 @@ import UIKit
 @testable import Atelier
 
 @MainActor final class LayerCommandTests: XCTestCase {
+    func testCopySelectionOnlyCopiesChosenStrokes() throws {
+        let previous = UIPasteboard.general.items
+        defer { UIPasteboard.general.items = previous }
+        let document = PaintDocument(width: 384, height: 128)
+        let first = PaintStroke(brush: .fallback, tool: .paint, color: SIMD4(1,0,0,1), size: 16, opacity: 1,
+            samples: [PencilSample(x: 40,y: 50,time: 0)], seed: 42)
+        var second = first; second.id = UUID(); second.color = SIMD4(0,0,1,1)
+        document.commit(first); document.commit(second)
+        document.copySelectedStrokes([second.id])
+        XCTAssertNil(document.errorMessage)
+        document.pasteLayers()
+        XCTAssertNil(document.errorMessage)
+        XCTAssertEqual(document.selectedLayer.strokes.count, 1)
+        XCTAssertEqual(document.selectedLayer.strokes.first?.color, second.color)
+        XCTAssertNotEqual(document.selectedLayer.strokes.first?.id, second.id)
+        document.undo()
+        XCTAssertEqual(document.selectedLayer.strokes.count, 2)
+    }
+
     func testCopyPasteAndCutPreserveStrokeData() throws {
         let previous = UIPasteboard.general.items
         defer { UIPasteboard.general.items = previous }
