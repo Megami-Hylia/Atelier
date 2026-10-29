@@ -116,7 +116,7 @@ struct BrushStudioView: View {
                 .frame(height: wide ? nil : min(300, geometry.size.height * 0.4))
             }
             }
-            .navigationTitle("Laboratorio Pennelli · " + draft.name).navigationBarTitleDisplayMode(.inline)
+            .navigationTitle("Laboratorio Pennelli Â· " + draft.name).navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) { Button("Annulla") { dismiss() } }
                 ToolbarItemGroup(placement: .topBarTrailing) {
