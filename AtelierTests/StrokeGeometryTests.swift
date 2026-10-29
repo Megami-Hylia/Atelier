@@ -26,28 +26,38 @@ struct StrokeGeometryTests {
     @Test func duplicateGeometryIsDiscardedButStationaryPressureAndTiltRemain() {
         var sampler = StrokeInputSampler()
         let first = sample(10,20,0,pressure: 0.2)
-        #expect(sampler.accept(first,screenScale: 1))
-        #expect(!sampler.accept(first,screenScale: 1))
+        let initialAccepted = sampler.accept(first,screenScale: 1)
+        #expect(initialAccepted)
+        let duplicateAccepted = sampler.accept(first,screenScale: 1)
+        #expect(!duplicateAccepted)
         var stationary = first; stationary.time = 3
-        #expect(!sampler.accept(stationary,screenScale: 1), "Holding still must not accumulate identical points.")
+        let stationaryAccepted = sampler.accept(stationary,screenScale: 1)
+        #expect(!stationaryAccepted, "Holding still must not accumulate identical points.")
         stationary.pressure = 0.9
-        #expect(sampler.accept(stationary,screenScale: 1))
+        let pressureAccepted = sampler.accept(stationary,screenScale: 1)
+        #expect(pressureAccepted)
         stationary.altitude = 0.4; stationary.time += 0.001
-        #expect(sampler.accept(stationary,screenScale: 1))
+        let tiltAccepted = sampler.accept(stationary,screenScale: 1)
+        #expect(tiltAccepted)
         stationary.azimuth = 0.3; stationary.time += 0.001
-        #expect(sampler.accept(stationary,screenScale: 1))
+        let azimuthAccepted = sampler.accept(stationary,screenScale: 1)
+        #expect(azimuthAccepted)
         stationary.roll = 0.3; stationary.time += 0.001
-        #expect(sampler.accept(stationary,screenScale: 1))
+        let rollAccepted = sampler.accept(stationary,screenScale: 1)
+        #expect(rollAccepted)
     }
 
     @Test func nearDuplicateFilteringAndPenUpPreserveTheExactEndpoint() {
         var sampler = StrokeInputSampler()
         let first = sample(0,0,0)
-        #expect(sampler.accept(first,screenScale: 1))
+        let initialAccepted = sampler.accept(first,screenScale: 1)
+        #expect(initialAccepted)
         let near = sample(0.000001,0,0.001)
-        #expect(!sampler.accept(near,screenScale: 1))
+        let nearAccepted = sampler.accept(near,screenScale: 1)
+        #expect(!nearAccepted)
         let final = sample(0.0001,0,0.002)
-        #expect(sampler.accept(final,screenScale: 1,force: true))
+        let endpointAccepted = sampler.accept(final,screenScale: 1,force: true)
+        #expect(endpointAccepted)
     }
 
     @Test func acquisitionHasTheSameDisplayedDensityAcrossZoomLevels() {
@@ -96,9 +106,10 @@ struct StrokeGeometryTests {
     @Test func tapsShortAndFastStrokesRemainFiniteAndEndAtThePenUpPoint() {
         var dot = StrokeTrajectory(brush: .fallback,stabilization: 0,screenScale: 1)
         let point = sample(12,24,0)
-        #expect(dot.append(point) == [point])
-        #expect(dot.finish().isEmpty)
-        #expect(dot.finish().isEmpty)
+        let dotStart = dot.append(point), dotEnd = dot.finish(), repeatedEnd = dot.finish()
+        #expect(dotStart == [point])
+        #expect(dotEnd.isEmpty)
+        #expect(repeatedEnd.isEmpty)
         for raw in [
             [sample(0,0,0),sample(0.001,0.002,0.001)],
             [sample(0,0,0),sample(2000,1000,0.001)],
@@ -197,7 +208,8 @@ struct StrokeGeometryTests {
                 }
                 actual += try stream.flushEnd()
                 #expect(actual == expected,"Packet boundaries must not change a curved brush or component ordering.")
-                #expect((try stream.flushEnd()).isEmpty)
+                let repeatedEnd = try stream.flushEnd()
+                #expect(repeatedEnd.isEmpty)
                 #expect(stream.sampleCount == raw.count)
             }
         }
