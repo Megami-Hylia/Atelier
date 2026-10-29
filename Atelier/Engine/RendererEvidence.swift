@@ -19,7 +19,7 @@ import CryptoKit
                 do {
                     var document = DocumentContents(width: width, height: 96)
                     document.layers[0].strokes = [PaintStroke(brush: brush, tool: .paint, color: SIMD4(0.16, 0.35, 0.65, 1), size: 32,
-                                                            opacity: 1, samples: PencilSample.demo(width: Float(width), height: 96), seed: 42)]
+                                                            opacity: 1, samples: PencilSample.demo(width: Float(width), height: 96), seed: 42, distanceDynamicsVersion: 1)]
                     let image = try painter.image(document)
                     guard let data = image.pngData() else { throw RenderError.command("evidence PNG") }
                     let x = (index % columns) * width, y = (index / columns) * height

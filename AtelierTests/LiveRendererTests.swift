@@ -39,9 +39,50 @@ final class LiveRendererTests: XCTestCase {
                     "Incremental half-float rounding must not visibly alter replay.")
             }
             live.samples[3].pressure = 0.1
-            _ = try painter.render(document, liveStroke: live, finished: false, documentRevision: 0, liveSampleRevision: 1)
-            XCTAssertEqual(painter.lastPlannedSampleCount, live.samples.count, "Estimated-property corrections must invalidate stale ink.")
+            var replanned = 0
+            for _ in 0..<4 {
+                _ = try painter.render(document, liveStroke: live, finished: false, documentRevision: 0, liveSampleRevision: 1)
+                XCTAssertLessThanOrEqual(painter.lastPlannedSampleCount, 32)
+                replanned += painter.lastPlannedSampleCount
+                if !painter.hasPendingLiveSamples { break }
+            }
+            XCTAssertEqual(replanned, live.samples.count, "Estimated-property corrections must invalidate stale ink.")
         }
+    }
+
+    func testInputBurstIsDrainedInBoundedFramesWithoutRevisitingPrefixes() throws {
+        let painter = try MetalPainter()
+        var document = DocumentContents(width: 384, height: 128)
+        document.selectedLayerID = document.layers[0].id
+        let live = PaintStroke(brush: .fallback, tool: .paint, color: SIMD4(0.3, 0.2, 0.8, 1), size: 24, opacity: 1,
+            samples: PencilSample.demo(width: 384, height: 128, count: 256), seed: 2, distanceDynamicsVersion: 1)
+        var processed = 0
+        for _ in 0..<10 {
+            _ = try painter.render(document, liveStroke: live, finished: false, documentRevision: 0, liveSampleRevision: 0)
+            XCTAssertLessThanOrEqual(painter.lastPlannedSampleCount, 32)
+            processed += painter.lastPlannedSampleCount
+            if !painter.hasPendingLiveSamples { break }
+        }
+        XCTAssertFalse(painter.hasPendingLiveSamples)
+        XCTAssertEqual(processed, 256)
+    }
+
+    func testRecentPencilCorrectionsOnlyReplanTheProvisionalTail() throws {
+        let painter = try MetalPainter()
+        var document = DocumentContents(width: 384, height: 128)
+        document.selectedLayerID = document.layers[0].id
+        var live = PaintStroke(brush: .fallback, tool: .paint, color: SIMD4(0.3, 0.2, 0.8, 1), size: 24, opacity: 1,
+            samples: PencilSample.demo(width: 384, height: 128, count: 80), seed: 2, distanceDynamicsVersion: 1)
+        for _ in 0..<2 {
+            _ = try painter.render(document, liveStroke: live, finished: false, documentRevision: 0,
+                liveSampleRevision: 0, liveStableSampleCount: 48)
+        }
+        XCTAssertTrue(painter.hasBakedSample(strokeID: live.id, index: 3))
+        XCTAssertFalse(painter.hasBakedSample(strokeID: live.id, index: 70))
+        live.samples[70].pressure = 0.2
+        _ = try painter.render(document, liveStroke: live, finished: false, documentRevision: 0,
+            liveSampleRevision: 0, liveStableSampleCount: 48)
+        XCTAssertEqual(painter.lastPlannedSampleCount, 32, "Only the bounded provisional tail needs replanning.")
     }
 
     func testAppendingFinishedStrokeDoesNotReplayCommittedHistory() throws {

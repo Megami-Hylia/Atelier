@@ -97,6 +97,7 @@ struct CanvasSurface: UIViewRepresentable {
         do {
             let texture = try painter.render(document.contents, liveStroke: active, finished: false, waitForCompletion: false,
                                              documentRevision: document.revision, liveSampleRevision: activeSampleRevision,
+                                             liveStableSampleCount: max(0, (active?.samples.count ?? 0) - 32),
                                              predictedSamples: predictions)
             failedRevision = nil
             guard let command = painter.queue.makeCommandBuffer(), let encoder = command.makeRenderCommandEncoder(descriptor: pass) else { return }
@@ -110,7 +111,7 @@ struct CanvasSurface: UIViewRepresentable {
                     guard let self else { return }
                     self.frameInFlight = false
                     if let error { self.painter?.invalidateCache(); self.document?.errorMessage = error }
-                    if self.frameRequested { self.setNeedsDisplay() }
+                    if self.frameRequested || self.painter?.hasPendingLiveSamples == true { self.setNeedsDisplay() }
                 }
             }
             command.present(drawable); command.commit()
@@ -170,7 +171,10 @@ struct CanvasSurface: UIViewRepresentable {
         for touch in touches {
             guard let index = touch.estimationUpdateIndex, let (id, sampleIndex) = estimates[index] else { continue }
             let updated = sample(touch)
-            if active?.id == id, active!.samples.indices.contains(sampleIndex) { active!.samples[sampleIndex] = updated; activeSampleRevision &+= 1 }
+            if active?.id == id, active!.samples.indices.contains(sampleIndex) {
+                active!.samples[sampleIndex] = updated
+                if painter?.hasBakedSample(strokeID: id, index: sampleIndex) == true { activeSampleRevision &+= 1 }
+            }
             else { document?.refine(strokeID: id, sampleIndex: sampleIndex, sample: updated) }
             if touch.estimatedPropertiesExpectingUpdates.isEmpty { estimates.removeValue(forKey: index) }
         }
@@ -259,7 +263,7 @@ private final class BrushPreviewRenderer {
         }
         content.layers[0].strokes = [PaintStroke(brush: previewBrush, tool: .paint,
             color: lightOnDark ? SIMD4(1, 1, 1, 1) : SIMD4(0.08, 0.08, 0.08, 1),
-            size: Float(brush.value("previewSize", 0.5)) * 64, opacity: 1, samples: samples, seed: brush.seed)]
+            size: Float(brush.value("previewSize", 0.5)) * 64, opacity: 1, samples: samples, seed: brush.seed, distanceDynamicsVersion: 1)]
         let image = try painter.image(content)
         cache.setObject(image, forKey: key, cost: 320 * 90 * 4 + key.length * 2)
         return image

@@ -44,6 +44,7 @@ private struct TileInfo {
     private var cachedDocumentRevision: UInt64?
     private var cachedDocumentID: UUID?
     private(set) var lastPlannedSampleCount = 0
+    private(set) var hasPendingLiveSamples = false
     private(set) var lastStampCount = 0
     static let workingMemoryLimit = 384 * 1024 * 1024
 
@@ -183,7 +184,7 @@ private struct TileInfo {
         blit.endEncoding()
     }
 
-    private func encodeLive(_ stroke: PaintStroke, revision: UInt64, predictions: [PencilSample], baseUnchanged: Bool,
+    private func encodeLive(_ stroke: PaintStroke, revision: UInt64, stableSampleCount: Int?, predictions: [PencilSample], baseUnchanged: Bool,
                             layer: MTLTexture, command: MTLCommandBuffer) throws -> Bool {
         // An extra accumulation surface is optional; oversized existing documents retain replay support.
         if liveTexture == nil {
@@ -194,10 +195,11 @@ private struct TileInfo {
             liveTexture = device.makeTexture(descriptor: descriptor)
         }
         guard let liveTexture else { return false }
+        let stableCount = min(stroke.samples.count, max(0, stableSampleCount ?? stroke.samples.count))
         let reusable: Bool
         if let stream = liveStream, baseUnchanged, cachedLiveRevision == revision, stream.matches(stroke),
-           stream.sampleCount <= stroke.samples.count, stream.sampleCount > 0 {
-            reusable = stroke.samples[stream.sampleCount - 1] == stream.lastRawSample
+           stream.sampleCount <= stableCount {
+            reusable = stream.sampleCount == 0 || stroke.samples[stream.sampleCount - 1] == stream.lastRawSample
         } else { reusable = false }
         if !reusable {
             liveStream = StrokePlanner.Stream(stroke)
@@ -205,23 +207,29 @@ private struct TileInfo {
         }
         guard var stream = liveStream else { return false }
         let count = stream.sampleCount
-        let stamps = try stream.append(stroke.samples.dropFirst(count))
-        lastPlannedSampleCount += stroke.samples.count - count
+        // Bound catch-up work per frame instead of allowing input backlog to make each frame slower.
+        let end = min(stableCount, count + 32)
+        let stamps = try stream.append(stroke.samples[count..<end])
+        lastPlannedSampleCount += end - count
+        hasPendingLiveSamples = end < stableCount
         // The immutable pre-stroke layer supplies wet pickup, while new stamps accumulate on previous ink.
         try copy(liveTexture, to: layer, command: command)
         try encode(stroke, finished: false, source: layer, target: liveTexture, pickup: textures[4], supplied: stamps, command: command)
         try copy(liveTexture, to: layer, command: command)
         liveStream = stream; cachedLiveRevision = revision
-        if !predictions.isEmpty {
-            var predicted = stream
-            let stamps = try predicted.append(predictions[...])
-            // Predictions never enter the retained ink or the retained random-generator state.
+        if !hasPendingLiveSamples {
+            var provisional = stream
+            // A bounded recent tail can receive Pencil estimation updates without rebuilding old ink.
+            var stamps = try provisional.append(stroke.samples[end...])
+            lastPlannedSampleCount += stroke.samples.count - end
+            stamps += try provisional.append(predictions[...])
+            // Neither the recent tail nor predictions enter retained ink/random-generator state.
             try encode(stroke, finished: false, source: liveTexture, target: layer, pickup: textures[4], supplied: stamps, command: command)
         }
         return true
     }
 
-    func render(_ document: DocumentContents, liveStroke: PaintStroke? = nil, finished: Bool = true, waitForCompletion: Bool = true, documentRevision: UInt64? = nil, liveSampleRevision: UInt64? = nil, predictedSamples: [PencilSample] = []) throws -> MTLTexture {
+    func render(_ document: DocumentContents, liveStroke: PaintStroke? = nil, finished: Bool = true, waitForCompletion: Bool = true, documentRevision: UInt64? = nil, liveSampleRevision: UInt64? = nil, liveStableSampleCount: Int? = nil, predictedSamples: [PencilSample] = []) throws -> MTLTexture {
         try allocate(width: document.width, height: document.height)
         var submitted = false
         defer { if !submitted { invalidateCache() } }
@@ -233,7 +241,7 @@ private struct TileInfo {
         background.y = Self.linear(background.y) * background.w
         background.z = Self.linear(background.z) * background.w
         try clear(composite, color: background, command: command)
-        lastStampCount = 0; lastPlannedSampleCount = 0
+        lastStampCount = 0; lastPlannedSampleCount = 0; hasPendingLiveSamples = false
         if liveStroke == nil { liveStream = nil; cachedLiveRevision = nil }
         for value in document.layers where value.visible {
             try clear(layer, color: .zero, command: command)
@@ -272,7 +280,7 @@ private struct TileInfo {
                 var stroke = original
                 stroke.color.x = Self.linear(stroke.color.x); stroke.color.y = Self.linear(stroke.color.y); stroke.color.z = Self.linear(stroke.color.z)
                 if !finished, let liveSampleRevision, stroke.distanceDynamicsVersion == 1, stroke.samples.count >= 2,
-                   try encodeLive(stroke, revision: liveSampleRevision, predictions: predictedSamples,
+                   try encodeLive(stroke, revision: liveSampleRevision, stableSampleCount: liveStableSampleCount, predictions: predictedSamples,
                                   baseUnchanged: cacheHit, layer: layer, command: command) { continue }
                 liveStream = nil; cachedLiveRevision = nil
                 stroke.samples.append(contentsOf: predictedSamples)
@@ -306,7 +314,12 @@ private struct TileInfo {
         return composite
     }
 
-    func invalidateCache() { cachedLayer = nil; cachedDocumentRevision = nil; cachedDocumentID = nil; liveStream = nil; cachedLiveRevision = nil }
+    func hasBakedSample(strokeID: UUID, index: Int) -> Bool {
+        guard let liveStream else { return false }
+        return liveStream.strokeID == strokeID && index < liveStream.sampleCount
+    }
+
+    func invalidateCache() { cachedLayer = nil; cachedDocumentRevision = nil; cachedDocumentID = nil; liveStream = nil; cachedLiveRevision = nil; hasPendingLiveSamples = false }
 
     func image(_ contents: DocumentContents) throws -> UIImage {
         let texture = try render(contents)

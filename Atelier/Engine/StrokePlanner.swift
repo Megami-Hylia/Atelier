@@ -85,6 +85,7 @@ enum StrokePlanner {
         private var distance: Float = 0
         private var nextDistance: Float = 0
         private var stampCount = 0
+        var strokeID: UUID { context.id }
         private(set) var sampleCount = 0
         private(set) var lastRawSample: PencilSample?
 

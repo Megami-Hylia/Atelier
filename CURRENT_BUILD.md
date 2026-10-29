@@ -1,5 +1,8 @@
 # Build corrente
 
+**Le correzioni del lag nei sorgenti non sono ancora compilate: la IPA sottostante rimane la build precedente.** Vedere PERFORMANCE_STATUS.md.
+
+
 IPA compilata da `93606114aace0e7f6f2af9a2c446e9349a68c680`.
 Workflow: https://github.com/Megami-Hylia/Atelier/actions/runs/40872119383
 SHA256: `b094b1fd756fd725bfea35232c1fcc5bcd13a90c185f00f2600045c4adae4957`.
