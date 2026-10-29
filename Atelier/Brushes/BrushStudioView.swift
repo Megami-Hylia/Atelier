@@ -66,7 +66,7 @@ struct BrushStudioView: View {
 
                         if category == "Shape" {
 
-                            Picker("Forma", selection: $componentDraft.shape) {
+                            Picker("Forma", selection: Binding(get: { componentDraft.shape }, set: { componentDraft.shape = $0 })) {
 
                                 ForEach(["round", "soft", "flat", "bristle", "fleck", "chisel"], id: \.self) { Text($0).tag($0) }
 
@@ -82,7 +82,7 @@ struct BrushStudioView: View {
 
                         if category == "Grain" {
 
-                            Picker("Grana", selection: $componentDraft.grain) {
+                            Picker("Grana", selection: Binding(get: { componentDraft.grain }, set: { componentDraft.grain = $0 })) {
 
                                 ForEach(["none", "paper", "canvas", "charcoal", "wash", "noise"], id: \.self) { Text($0).tag($0) }
 
