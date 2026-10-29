@@ -133,7 +133,7 @@ enum DocumentError: LocalizedError {
         guard !stroke.samples.isEmpty else { return }
         guard !selectedLayer.locked else { errorMessage = DocumentError.lockedLayer.localizedDescription; return }
         do {
-            _ = try StrokePlanner.tileBins(StrokePlanner.stamps(for: stroke), width: contents.width, height: contents.height)
+            try StrokePlanner.validateForRendering(stroke, width: contents.width, height: contents.height)
         } catch { errorMessage = error.localizedDescription; return }
         let id = selectedLayer.id
         change { value in
@@ -209,7 +209,7 @@ enum DocumentError: LocalizedError {
         let loaded = try JSONDecoder().decode(DocumentContents.self, from: Data(contentsOf: url))
         try loaded.validate()
         for layer in loaded.layers { for stroke in layer.strokes {
-            _ = try StrokePlanner.tileBins(StrokePlanner.stamps(for: stroke), width: loaded.width, height: loaded.height)
+            try StrokePlanner.validateForRendering(stroke, width: loaded.width, height: loaded.height)
         } }
         contents = loaded; storageURL = url; undoStates = []; redoStates = []; revision &+= 1
     }

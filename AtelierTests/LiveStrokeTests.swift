@@ -4,6 +4,27 @@ import Testing
 
 @MainActor
 struct LiveStrokeTests {
+    @Test func longDenseStrokeCanExceedOldLifetimeBudgetAndStillSave() throws {
+        var brush = BrushPreset.fallback
+        brush.parameters["stampCount"] = 16; brush.parameters["spacing"] = 0.08
+        brush.parameters["pressureSize"] = 0
+        let samples = (0..<2400).map { i in PencilSample(x: i % 2 == 0 ? 20 : 100, y: 64, time: Double(i)/240) }
+        let stroke = PaintStroke(brush: brush, tool: .paint, color: SIMD4(0,0,0,1), size: 32, opacity: 1,
+            samples: samples, seed: 8, distanceDynamicsVersion: 1)
+        var cursor = StrokePlanner.Stream(stroke); var total = 0
+        for start in stride(from: 0, to: samples.count, by: 8) { total += try cursor.append(samples[start..<min(start+8,samples.count)]).count }
+        #expect(total > 100_000)
+        let document = PaintDocument(width: 384,height: 128)
+        document.commit(stroke)
+        #expect(document.errorMessage == nil)
+        #expect(document.selectedLayer.strokes.count == 1)
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: url); try? FileManager.default.removeItem(at: url.appendingPathExtension("recovery")) }
+        try document.save(to: url)
+        let reopened = PaintDocument(); try reopened.load(from: url)
+        #expect(reopened.contents == document.contents)
+    }
+
     @Test func chunkedPlanningMatchesWholePlanningForEveryBundledBrush() throws {
         let url = try #require(Bundle.main.url(forResource: "BrushCatalog", withExtension: "json"))
         let catalog = try JSONDecoder().decode(BrushArchive.self, from: Data(contentsOf: url))

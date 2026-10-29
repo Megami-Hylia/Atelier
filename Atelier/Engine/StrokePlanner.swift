@@ -50,6 +50,22 @@ enum StrokePlanner {
         return stroke.samples.count == 1 ? try stream.dot() : stamps
     }
 
+    static func replayStream(for stroke: PaintStroke, finished: Bool = true) -> Stream {
+        Stream(stroke, finalDistance: finished ? pathLength(stroke) : nil)
+    }
+
+    static func validateForRendering(_ stroke: PaintStroke, width: Int, height: Int) throws {
+        guard stroke.distanceDynamicsVersion == 1 else {
+            _ = try tileBins(stamps(for: stroke), width: width, height: height); return
+        }
+        var cursor = replayStream(for: stroke)
+        for start in stride(from: 0, to: stroke.samples.count, by: 8) {
+            let batch = try cursor.append(stroke.samples[start..<min(start+8, stroke.samples.count)])
+            _ = try tileBins(batch, width: width, height: height)
+        }
+        if stroke.samples.count == 1 { _ = try tileBins(cursor.dot(), width: width, height: height) }
+    }
+
     private static func pathLength(_ stroke: PaintStroke) -> Float {
         var previous: PencilSample?
         var distance: Float = 0
@@ -132,7 +148,7 @@ enum StrokePlanner {
                 let extra = try secondary[0].append(samples).map { stamp -> GPUStamp in var value = stamp; value.variation.y = 1; return value }
                 result += extra
                 result.sort { $0.variation.z == $1.variation.z ? $0.variation.y < $1.variation.y : $0.variation.z < $1.variation.z }
-                guard stampCount + secondary[0].stampCount <= 100_000 else { throw DocumentError.strokeBudget }
+                guard result.count <= 100_000 else { throw DocumentError.strokeBudget }
             }
             return result
         }
@@ -209,7 +225,7 @@ enum StrokePlanner {
                 }
             }
             stampCount += stamps.count
-            guard stampCount <= 100_000 else { throw DocumentError.strokeBudget }
+            guard stamps.count <= 100_000 else { throw DocumentError.strokeBudget }
             let jitter = 1 + rng.signed() * p("spacingJitter") * 0.95
             nextDistance += max(0.15, radius * 2 * max(0.01, p("spacing", 0.08)) * jitter * (1 + p("speedSpacing") * speed))
             return stamps

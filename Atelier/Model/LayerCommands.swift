@@ -59,7 +59,7 @@ import UIKit
             guard imported.width == contents.width, imported.height == contents.height,
                   contents.layers.count + imported.layers.count <= 32 else { throw DocumentError.invalidData }
             for layer in imported.layers { for stroke in layer.strokes {
-                _ = try StrokePlanner.tileBins(StrokePlanner.stamps(for: stroke), width: contents.width, height: contents.height)
+                try StrokePlanner.validateForRendering(stroke, width: contents.width, height: contents.height)
             } }
             change { value in
                 for var layer in imported.layers {

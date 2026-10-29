@@ -124,7 +124,24 @@ private struct TileInfo {
 
     // The CPU bins stamps into 256-pixel tiles; pixels remain in global canvas coordinates.
     // No texture coordinate restarts at tile borders, including pickup and grain.
-    private func encode(_ stroke: PaintStroke, finished: Bool, source: MTLTexture, target: MTLTexture, pickup: MTLTexture? = nil, supplied: [GPUStamp]? = nil, command: MTLCommandBuffer) throws {
+    private func encode(_ stroke: PaintStroke, finished: Bool, source: MTLTexture, target: MTLTexture, pickup: MTLTexture? = nil, initialScratch: MTLTexture? = nil, supplied: [GPUStamp]? = nil, command: MTLCommandBuffer) throws {
+        if supplied == nil, stroke.distanceDynamicsVersion == 1, let initialScratch {
+            var cursor = StrokePlanner.replayStream(for: stroke, finished: finished)
+            lastPlannedSampleCount += stroke.samples.count
+            for start in stride(from: 0, to: stroke.samples.count, by: 8) {
+                let batch = try cursor.append(stroke.samples[start..<min(start+8,stroke.samples.count)])
+                if !batch.isEmpty {
+                    try copy(target, to: initialScratch, command: command)
+                    try encode(stroke, finished: finished, source: initialScratch, target: target, pickup: pickup ?? source, supplied: batch, command: command)
+                }
+            }
+            if stroke.samples.count == 1 {
+                let batch = try cursor.dot()
+                try copy(target, to: initialScratch, command: command)
+                try encode(stroke, finished: finished, source: initialScratch, target: target, pickup: pickup ?? source, supplied: batch, command: command)
+            }
+            return
+        }
         let stamps: [GPUStamp]
         if let supplied { stamps = supplied }
         else if finished, let cached = planCache[stroke.id], cached.0 == stroke {
@@ -274,7 +291,7 @@ private struct TileInfo {
                 blit.endEncoding()
                 var linearStroke = stroke
                 linearStroke.color.x = Self.linear(stroke.color.x); linearStroke.color.y = Self.linear(stroke.color.y); linearStroke.color.z = Self.linear(stroke.color.z)
-                try encode(linearStroke, finished: liveStroke?.id != stroke.id || finished, source: snapshot, target: layer, command: command)
+                try encode(linearStroke, finished: liveStroke?.id != stroke.id || finished, source: snapshot, target: layer, initialScratch: nextComposite, command: command)
             }
                 if selected { try copy(layer, to: textures[4], command: command); cachedLayer = cacheIdentity }
             }
@@ -293,7 +310,7 @@ private struct TileInfo {
                           sourceSize: MTLSize(width: layer.width, height: layer.height, depth: 1), to: snapshot, destinationSlice: 0,
                           destinationLevel: 0, destinationOrigin: MTLOrigin(x: 0, y: 0, z: 0))
                 blit.endEncoding()
-                try encode(stroke, finished: finished, source: snapshot, target: layer, command: command)
+                try encode(stroke, finished: finished, source: snapshot, target: layer, initialScratch: nextComposite, command: command)
             }
             var filteredLayer = layer
             if let values = value.adjustments, !values.isEmpty {
