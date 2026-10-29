@@ -32,6 +32,33 @@ struct BrushTests {
         #expect(legacy.favoriteIDs == nil)
     }
 
+    @Test func personalResetPointPreservesSourcesAfterMovingAndReopening() throws {
+        let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: folder) }
+        let path = folder.appendingPathComponent("brushes.json")
+        let store = BrushStore(storageURL: path, catalog: fixture())
+        var original = store.duplicate(store.selectedBrush)
+        original.parameters["spacing"] = 0.36; original.notes = "My original"
+        store.save(original); store.saveResetPoint(original)
+        var changed = original; changed.parameters["spacing"] = 0.8; changed.notes = "Modified"
+        store.save(changed)
+        let destination = store.createSet(name: "Moved", libraryID: "fixture-library")
+        store.moveBrush(changed, to: destination.id)
+        let reopened = BrushStore(storageURL: path, catalog: fixture())
+        reopened.restoreResetPoint(changed)
+        let restored = try #require(reopened.brushes.first { $0.id == original.id })
+        #expect(restored.parameters == original.parameters)
+        #expect(restored.notes == original.notes)
+        #expect(restored.setID == destination.id)
+        let data = try reopened.exportData(brush: restored)
+        try reopened.importData(data)
+        let imported = try #require(reopened.brushes.last)
+        #expect(reopened.resetPoints[imported.id]?.parameters == original.parameters)
+        reopened.deleteBrush(restored)
+        #expect(reopened.resetPoints[restored.id] == nil)
+        #expect(reopened.errorMessage == nil)
+    }
+
     @Test func customBrushSurvivesSaveReopenAndJSONRoundTrip() throws {
         let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         defer { try? FileManager.default.removeItem(at: folder) }

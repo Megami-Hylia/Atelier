@@ -42,6 +42,7 @@ struct BrushArchive: Codable, Equatable {
     var recentIDs: [String] = []
     var selectedID: String? = nil
     var favoriteIDs: [String]? = nil
+    var resetPoints: [String: BrushPreset]? = nil
 }
 
 enum BrushArchiveError: LocalizedError {
@@ -57,6 +58,7 @@ final class BrushStore: ObservableObject {
     @Published private(set) var sets: [BrushSet] = []
     @Published private(set) var brushes: [BrushPreset] = []
     @Published private(set) var recentIDs: [String] = []
+    @Published private(set) var resetPoints: [String: BrushPreset] = [:]
     @Published private(set) var favoriteIDs: [String] = []
     @Published var selectedID: String = ""
     @Published var selectedLibraryID: String = "atelier"
@@ -104,6 +106,7 @@ final class BrushStore: ObservableObject {
 
     private func apply(_ archive: BrushArchive) {
         libraries = archive.libraries; sets = archive.sets; brushes = archive.brushes
+        resetPoints = archive.resetPoints ?? [:]
         favoriteIDs = (archive.favoriteIDs ?? []).filter { id in brushes.contains { $0.id == id } }
         recentIDs = archive.recentIDs.filter { id in brushes.contains { $0.id == id } }
         selectedID = archive.selectedID.flatMap { id in brushes.contains { $0.id == id } ? id : nil } ?? brushes.first?.id ?? ""
@@ -113,7 +116,7 @@ final class BrushStore: ObservableObject {
     }
 
     var archive: BrushArchive {
-        BrushArchive(libraries: libraries, sets: sets, brushes: brushes, recentIDs: recentIDs, selectedID: selectedID, favoriteIDs: favoriteIDs)
+        BrushArchive(libraries: libraries, sets: sets, brushes: brushes, recentIDs: recentIDs, selectedID: selectedID, favoriteIDs: favoriteIDs, resetPoints: resetPoints)
     }
 
     static func validate(_ archive: BrushArchive) throws {
@@ -123,6 +126,15 @@ final class BrushStore: ObservableObject {
         guard Set(archive.brushes.map(\.id)).count == archive.brushes.count,
               Set(archive.sets.map(\.id)).count == archive.sets.count,
               Set(archive.libraries.map(\.id)).count == archive.libraries.count else { throw BrushArchiveError.invalid("Identificatori duplicati nella libreria.") }
+        let points = archive.resetPoints ?? [:]
+        guard points.count <= archive.brushes.count else { throw BrushArchiveError.invalid("Troppi punti di ripristino.") }
+        for (id, point) in points {
+            guard id == point.id, let current = archive.brushes.first(where: { $0.id == id }) else {
+                throw BrushArchiveError.invalid("Punto di ripristino senza pennello valido.")
+            }
+            var candidate = point; candidate.setID = current.setID
+            try validate(BrushArchive(libraries: archive.libraries, sets: archive.sets, brushes: [candidate]))
+        }
         let favorites = archive.favoriteIDs ?? []
         guard favorites.count <= archive.brushes.count, Set(favorites).count == favorites.count,
               favorites.allSatisfy({ id in archive.brushes.contains { $0.id == id } }) else {
@@ -176,6 +188,16 @@ final class BrushStore: ObservableObject {
         }
     }
 
+    func saveResetPoint(_ brush: BrushPreset) {
+        guard let current = brushes.first(where: { $0.id == brush.id }) else { return }
+        resetPoints[brush.id] = current; persist()
+    }
+
+    func restoreResetPoint(_ brush: BrushPreset) {
+        guard var point = resetPoints[brush.id], let current = brushes.first(where: { $0.id == brush.id }) else { return }
+        point.setID = current.setID; save(point)
+    }
+
     func toggleFavorite(_ brush: BrushPreset) {
         guard brushes.contains(where: { $0.id == brush.id }) else { return }
         if favoriteIDs.contains(brush.id) { favoriteIDs.removeAll { $0 == brush.id } }
@@ -225,6 +247,7 @@ final class BrushStore: ObservableObject {
     func deleteBrush(_ brush: BrushPreset) {
         guard brushes.count > 1 else { errorMessage = "Conserva almeno un pennello."; return }
         brushes.removeAll { $0.id == brush.id }; recentIDs.removeAll { $0 == brush.id }; favoriteIDs.removeAll { $0 == brush.id }
+        resetPoints.removeValue(forKey: brush.id)
         if selectedID == brush.id { selectedID = brushes[0].id }; persist()
     }
 
@@ -320,6 +343,7 @@ final class BrushStore: ObservableObject {
             result.libraries = libraries.filter { $0.id == libraryID }; result.sets = sets.filter { $0.libraryID == libraryID }
             result.brushes = brushes.filter { brush in result.sets.contains { $0.id == brush.setID } }
         }
+        result.resetPoints = resetPoints.filter { id, _ in result.brushes.contains { $0.id == id } }
         result.favoriteIDs = favoriteIDs.filter { id in result.brushes.contains { $0.id == id } }
         result.recentIDs = []; result.selectedID = result.brushes.first?.id
         try Self.validate(result)
@@ -334,8 +358,10 @@ final class BrushStore: ObservableObject {
         for library in imported.libraries { let id = UUID().uuidString; libraryMap[library.id] = id; combined.libraries.append(BrushLibrary(id: id, name: library.name)) }
         for set in imported.sets { let id = UUID().uuidString; setMap[set.id] = id; combined.sets.append(BrushSet(id: id, libraryID: libraryMap[set.libraryID]!, name: set.name)) }
         for var brush in imported.brushes {
+            let point = imported.resetPoints?[brush.id]
             let favorite = (imported.favoriteIDs ?? []).contains(brush.id)
             brush.id = UUID().uuidString; brush.setID = setMap[brush.setID]!; combined.brushes.append(brush)
+            if var restored = point { restored.id = brush.id; restored.setID = brush.setID; var points = combined.resetPoints ?? [:]; points[brush.id] = restored; combined.resetPoints = points }
             if favorite { combined.favoriteIDs = (combined.favoriteIDs ?? []) + [brush.id] }
         }
         try Self.validate(combined)

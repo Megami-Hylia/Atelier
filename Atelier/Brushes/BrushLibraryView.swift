@@ -147,6 +147,8 @@ struct BrushLibraryView: View {
                             .moveDisabled(!query.isEmpty || recents || favorites)
                             .contextMenu {
                                 Button(store.favoriteIDs.contains(brush.id) ? "Rimuovi dai preferiti" : "Aggiungi ai preferiti", systemImage: "star") { store.toggleFavorite(brush) }
+                                Button("Crea punto di ripristino", systemImage: "bookmark") { store.saveResetPoint(brush) }
+                                if store.resetPoints[brush.id] != nil { Button("Ripristina versione personale", systemImage: "arrow.counterclockwise") { store.restoreResetPoint(brush) } }
                                 Button("Modifica") { editingBrush = brush }
                                 Button("Rinomina") { name = brush.name; nameAction = .renameBrush(brush); showName = true }
                                 Button("Duplica") { _ = store.duplicate(brush) }
