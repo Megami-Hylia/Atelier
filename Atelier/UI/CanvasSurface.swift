@@ -93,7 +93,7 @@ struct CanvasSurface: UIViewRepresentable {
                 Task { @MainActor [weak self] in
                     guard let self else { return }
                     self.frameInFlight = false
-                    if let error { self.document?.errorMessage = error }
+                    if let error { self.painter?.invalidateCache(); self.document?.errorMessage = error }
                     if self.frameRequested { self.setNeedsDisplay() }
                 }
             }

@@ -208,6 +208,8 @@ private struct TileInfo {
         return composite
     }
 
+    func invalidateCache() { cachedLayer = nil }
+
     func image(_ contents: DocumentContents) throws -> UIImage {
         let texture = try render(contents)
         var bytes = [UInt16](repeating: 0, count: texture.width * texture.height * 4)
