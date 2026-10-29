@@ -123,7 +123,7 @@ struct CanvasSurface: UIViewRepresentable {
         let width = Float(document?.contents.width ?? 1), height = Float(document?.contents.height ?? 1)
         return PencilSample(x: Float(point.x / max(1, bounds.width)) * width,
                             y: Float(point.y / max(1, bounds.height)) * height,
-                            pressure: touch.type == .pencil && touch.maximumPossibleForce > 0 ? Float(min(1, max(0, touch.force / touch.maximumPossibleForce))) : 1,
+                            pressure: touch.type == .pencil && touch.maximumPossibleForce > 0 ? pow(Float(min(1, max(0, touch.force / touch.maximumPossibleForce))), Float(UserDefaults.standard.object(forKey: "pencilPressureExponent") as? Double ?? 1)) : 1,
                             altitude: Float(touch.altitudeAngle), azimuth: Float(touch.azimuthAngle(in: self)),
                             roll: Float(touch.rollAngle), time: touch.timestamp, isPencil: touch.type == .pencil)
     }
@@ -200,7 +200,7 @@ struct CanvasSurface: UIViewRepresentable {
     @objc private func undoTap() { document?.undo() }
     @objc private func redoTap() { document?.redo() }
     @objc private func hover(_ gesture: UIHoverGestureRecognizer) {
-        cursor.isHidden = gesture.state == .ended || gesture.state == .cancelled
+        cursor.isHidden = (UserDefaults.standard.object(forKey: "brushCursor") as? Bool == false) || gesture.state == .ended || gesture.state == .cancelled
         let p = gesture.location(in: self)
         let radius = CGFloat(brushSize) * bounds.width / CGFloat(document?.contents.width ?? 1) / 2
         cursor.path = UIBezierPath(ovalIn: CGRect(x: p.x - radius, y: p.y - radius, width: radius * 2, height: radius * 2)).cgPath

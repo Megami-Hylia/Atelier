@@ -3,6 +3,7 @@ import SwiftUI
 struct TransformSelectionView: View {
     @ObservedObject var document: PaintDocument
     var close: () -> Void
+    @AppStorage("selectionOverlayOpacity") private var overlayOpacity = 0.25
     @State private var selected = Set<UUID>()
     @State private var marquee: CGRect?
     @State private var moving = false
@@ -83,7 +84,7 @@ struct TransformSelectionView: View {
     }
     private func outline(_ rect: CGRect, ellipse: Bool) -> some View {
         Path { path in if ellipse { path.addEllipse(in: rect) } else { path.addRect(rect) } }
-            .stroke(.blue, style: StrokeStyle(lineWidth: 1.5, dash: [4,4])).allowsHitTesting(false)
+            .stroke(Color.blue.opacity(overlayOpacity), style: StrokeStyle(lineWidth: 1.5, dash: [4,4])).allowsHitTesting(false)
     }
     private func scale(_ factor: CGFloat) {
         transform(scale: Float(factor)) { point, center in CGPoint(x: center.x + (point.x-center.x)*factor, y: center.y + (point.y-center.y)*factor) }

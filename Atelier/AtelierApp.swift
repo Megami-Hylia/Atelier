@@ -3,8 +3,9 @@ import UniformTypeIdentifiers
 
 @main struct AtelierApp: App {
     @StateObject private var brushes = BrushStore()
+    @AppStorage("lightInterface") private var light = false
     var body: some Scene {
-        WindowGroup { AtelierRoot(brushes: brushes).preferredColorScheme(.dark) }
+        WindowGroup { AtelierRoot(brushes: brushes).preferredColorScheme(light ? .light : .dark) }
     }
 }
 
@@ -195,7 +196,7 @@ struct PaintingWorkspace: View {
                 .popover(isPresented: presented("layers"), arrowEdge: .top) { layers.frame(width: 360, height: 540) }
             Button { panel = "color" } label: { Circle().fill(color).overlay(Circle().stroke(.gray)).frame(width: 30, height: 30) }.accessibilityLabel("Colore")
                 .popover(isPresented: presented("color"), arrowEdge: .top) { AtelierColors(color: $color).frame(width: 350, height: 650) }
-        }.font(.system(size: 20)).buttonStyle(.plain).padding(.horizontal, 16).frame(height: 48).background(Color(white: 0.075))
+        }.font(.system(size: 20)).buttonStyle(.plain).padding(.horizontal, 16).frame(height: 48).background(Color(uiColor: .systemBackground))
     }
     private func toolButton(_ item: PaintTool, _ icon: String, _ label: String) -> some View {
         Button {
@@ -214,23 +215,7 @@ struct PaintingWorkspace: View {
         }.padding(10).background(Color(white: 0.12)).padding(.vertical, 30)
     }
     private var actions: some View {
-        Form {
-            Section("Condividi") {
-                Button("Esporta PNG") { exportPNG() }
-                if let url = document.storageURL { ShareLink("Condividi documento Atelier", item: url) }
-                Button("Tavola comparativa dei pennelli") { contactSheet() }
-            }
-            Section("Canvas") {
-                Text(document.contents.name)
-                Text("\(document.contents.width) × \(document.contents.height) · \(document.contents.dpi) DPI · sRGB").font(.caption)
-                Toggle("Sfondo trasparente", isOn: Binding(get: { document.contents.background.w == 0 }, set: { v in document.change { $0.background.w = v ? 0 : 1 } }))
-            }
-            Section("Preferenze") {
-                Toggle("Interfaccia per mancini", isOn: $leftHanded)
-                Toggle("Disegna con le dita", isOn: $fingerPainting)
-                Button("Nascondi interfaccia") { panel = nil; immersive = true }
-            }
-        }
+        ActionsPanel(document: document, exportPNG: { exportPNG() }, comparison: { contactSheet() }, hideInterface: { panel = nil; immersive = true }).frame(height: 600)
     }
     private var layers: some View { LayerPanel(document: document) }
     private func layerBinding<T>(_ id: UUID, _ keyPath: WritableKeyPath<PaintLayer, T>) -> Binding<T> {
