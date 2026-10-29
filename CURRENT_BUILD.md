@@ -1,7 +1,7 @@
 # Build corrente
 
-IPA compilata da `c5e5d9673285af13ab35019b42fb7eafb52748c7`.
-Workflow: https://github.com/Megami-Hylia/Atelier/actions/runs/40886601251
-SHA256: `ce7f9cdc4fcb61cabd8838eb57d010666fe56ae8f2ec80f6b54f3cb238485c5d`.
+Commit compilato: `bb2b2bf2a50f7bcaa5b30529ed45af40a9368505`.
+Workflow: https://github.com/Megami-Hylia/Atelier/actions/runs/40927865434
+SHA256: `3f46e99f51ca27ce2979d76e003f669b1df4d9a35b6102a89e13970d3c258352`.
 
-Questa IPA contiene le correzioni del rallentamento progressivo: pianificazione e pittura incrementali, lavoro limitato per frame, stime Pencil provvisorie, cache delle texture e autosave in background. Compilazione arm64 iPad e verifica strutturale superate. Test simulatore ancora in corso. Nessuna misura di latenza su hardware reale.
+Stile comune dei widget e correzioni del lag inclusi. Compilazione iPad arm64 e verifica strutturale superate. Test simulatore e controllo grafico ancora da confermare. Corretto l’errore dello script Bash che aveva impedito i test del run precedente; nessun risultato di quel run viene dichiarato superato.
