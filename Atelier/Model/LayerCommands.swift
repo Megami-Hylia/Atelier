@@ -30,6 +30,7 @@ import UIKit
             var item: [String: Any] = [Self.clipboardType: data]
             if let png = try MetalPainter().image(value).pngData() { item["public.png"] = png }
             UIPasteboard.general.setItems([item])
+            errorMessage = nil
             if cut { clearLayer() }
         } catch { errorMessage = error.localizedDescription }
     }

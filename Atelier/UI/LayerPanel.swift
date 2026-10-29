@@ -3,9 +3,10 @@ import SwiftUI
 struct LayerPanel: View {
     @ObservedObject var document: PaintDocument
     @State private var optionsID: UUID?
+    @State private var editMode = EditMode.inactive
     var body: some View {
         VStack(spacing: 0) {
-            HStack { Text("Livelli").font(.title2.bold()); Spacer(); Button { document.addLayer() } label: { Image(systemName: "plus").font(.title2) }.accessibilityLabel("Nuovo livello") }.padding(18)
+            HStack { Text("Livelli").font(.title2.bold()).contextMenu { Button("Riordina livelli") { editMode = .active }; Button("Fine riordino") { editMode = .inactive } }; Spacer(); Button { document.addLayer() } label: { Image(systemName: "plus").font(.title2) }.accessibilityLabel("Nuovo livello") }.padding(18)
             List {
                 ForEach(Array(document.contents.layers.reversed())) { layer in
                     HStack(spacing: 12) {
@@ -31,12 +32,19 @@ struct LayerPanel: View {
                         layerOptions(layer).frame(width: 260, height: 390)
                     }
                 }
+                .onMove { source, destination in
+                    document.change { value in
+                        var order = Array(value.layers.reversed())
+                        order.move(fromOffsets: source, toOffset: destination)
+                        value.layers = Array(order.reversed())
+                    }
+                }
                 HStack {
                     Rectangle().fill(Color(red: Double(document.contents.background.x), green: Double(document.contents.background.y), blue: Double(document.contents.background.z))).frame(width: 58, height: 48)
                     Text("Colore di sfondo").font(.subheadline.bold()); Spacer()
                     Button { document.change { $0.background.w = $0.background.w == 0 ? 1 : 0 } } label: { Image(systemName: document.contents.background.w > 0 ? "checkmark.square.fill" : "square") }.buttonStyle(.plain).accessibilityLabel("Visibilità sfondo")
                 }.listRowBackground(Color(white: 0.1))
-            }.listStyle(.plain).scrollContentBackground(.hidden)
+            }.listStyle(.plain).scrollContentBackground(.hidden).environment(\.editMode, $editMode)
         }.background(Color(white: 0.11))
     }
     private func layerOptions(_ layer: PaintLayer) -> some View {
