@@ -127,7 +127,7 @@ struct StrokeTrajectory {
     private var ended = false
 
     init(brush: BrushPreset, stabilization: Float, screenScale: Float) {
-        let local = Float(brush.value("streamline"))*0.6 + Float(brush.value("stabilization"))*0.35 + Float(brush.value("motionFiltering"))*0.2
+        let local = Float(brush.value("streamline"))*0.6 + Float(brush.value("stabilization"))*0.35 + Float(brush.value("motionFiltering"))*(1-Float(brush.value("motionExpression"))*0.5)*0.2
         strength = min(1,max(0,max(stabilization,local)))
         pressureSmoothing = min(1,max(0,Float(brush.value("pressureSmoothing"))))
         scale = max(0.0001,screenScale)

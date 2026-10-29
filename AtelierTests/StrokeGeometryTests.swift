@@ -162,6 +162,38 @@ struct StrokeGeometryTests {
         #expect(high < low*0.95)
     }
 
+    @Test func motionExpressionPreservesMoreSmallHandMovementWhenMotionFilteringIsActive() {
+        // Subpixel legs stay below the corner-reset threshold for both settings.
+        let raw = (0..<256).map { i in sample(Float(i)*0.25,64+sin(Float(i)*0.4)*0.1,Double(i)/240) }
+        func filtered(expression: Double) -> [PencilSample] {
+            var brush = BrushPreset.fallback
+            brush.parameters["streamline"] = 0
+            brush.parameters["stabilization"] = 0
+            brush.parameters["motionFiltering"] = 1
+            brush.parameters["motionExpression"] = expression
+            var curve = StrokeTrajectory(brush: brush,stabilization: 0,screenScale: 1)
+            var output: [PencilSample] = []
+            for point in raw { output += curve.append(point) }
+            output += curve.finish()
+            return output
+        }
+        func errorFromRaw(_ output: [PencilSample]) -> Float {
+            let middle = output.filter { $0.time > 40.0/240 && $0.time < 200.0/240 }
+            return middle.reduce(Float(0)) { total,point in
+                let rawY = 64+sin(Float(point.time*240)*0.4)*0.1
+                return total+abs(point.y-rawY)
+            }/Float(max(1,middle.count))
+        }
+        let restrained = filtered(expression: 0)
+        let expressive = filtered(expression: 1)
+        #expect(errorFromRaw(expressive) < errorFromRaw(restrained)*0.98)
+        for output in [restrained,expressive] {
+            #expect(output.first == raw.first)
+            #expect(output.last?.x == raw.last?.x)
+            #expect(output.last?.y == raw.last?.y)
+        }
+    }
+
     @Test func provisionalClonesCannotChangePersistentTrajectoryOrDuplicateTheTail() {
         let raw = (0..<100).map { i in sample(Float(i),sin(Float(i)*0.08)*4,Double(i)/240) }
         var curve = StrokeTrajectory(brush: .fallback,stabilization: 0.5,screenScale: 1)
