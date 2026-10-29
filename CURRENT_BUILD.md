@@ -1,9 +1,9 @@
 # Build corrente
 
-IPA compilata da `f287d86d12a8d4df8b43178e1a337c873a8c103a`.
-Workflow: https://github.com/Megami-Hylia/Atelier/actions/runs/40865199165
-SHA256: `039056e1bed3af6d339b8abcedff4135182327a8222ed639b1c2a0f51a0214eb`.
+IPA compilata da `93606114aace0e7f6f2af9a2c446e9349a68c680`.
+Workflow: https://github.com/Megami-Hylia/Atelier/actions/runs/40872119383
+SHA256: `b094b1fd756fd725bfea35232c1fcc5bcd13a90c185f00f2600045c4adae4957`.
 
-Compilazione iPad arm64 e verifica strutturale superate. Contiene la barra pennello compatta con anteprima durante il trascinamento, oltre alle precedenti modifiche di colori, livelli, gesti, selezione, regolazioni e Azioni.
+Compilazione iPad arm64 e verifica strutturale superate. La libreria pennelli riprende il riferimento fotografico e aggiunge preferiti, punti di ripristino personali, azioni swipe e cache delle anteprime. Catalogo: 192 preset originali Atelier, non l’intera libreria Procreate. Dettagli e limiti in BRUSH_LIBRARY_STATUS.md.
 
-Test simulatore della revisione precedente 12b613a: 19 superati, zero falliti o saltati. Test di questa revisione ancora in corso. Nessuna verifica grafica su iPad fisico o misura di latenza.
+Test della revisione corrente e cattura del widget in corso. Nessuna prova su iPad fisico o misura di latenza. Il report DELIVERY_REPORT.json contiene il commit e lo stato preciso delle prove.
