@@ -29,6 +29,9 @@ private struct TileInfo {
     private let compositePipeline: MTLComputePipelineState
     private let loader: MTKTextureLoader
     private var textures: [MTLTexture] = []
+    private var planCache: [UUID: (PaintStroke, [GPUStamp])] = [:]
+    private var planOrder: [UUID] = []
+    private var planBytes = 0
     private var assetCache: [String: MTLTexture] = [:]
     private(set) var lastStampCount = 0
     static let workingMemoryLimit = 384 * 1024 * 1024
@@ -101,7 +104,25 @@ private struct TileInfo {
     // The CPU bins stamps into 256-pixel tiles; pixels remain in global canvas coordinates.
     // No texture coordinate restarts at tile borders, including pickup and grain.
     private func encode(_ stroke: PaintStroke, finished: Bool, source: MTLTexture, target: MTLTexture, command: MTLCommandBuffer) throws {
-        let stamps = try StrokePlanner.stamps(for: stroke, finished: finished)
+        let stamps: [GPUStamp]
+        if finished, let cached = planCache[stroke.id], cached.0 == stroke {
+            stamps = cached.1
+        } else {
+            stamps = try StrokePlanner.stamps(for: stroke, finished: finished)
+            let bytes = stamps.count * MemoryLayout<GPUStamp>.stride
+            if finished, bytes <= 16 * 1024 * 1024 {
+                if let previous = planCache.removeValue(forKey: stroke.id) {
+                    planBytes -= previous.1.count * MemoryLayout<GPUStamp>.stride
+                    planOrder.removeAll { $0 == stroke.id }
+                }
+                while planBytes + bytes > 16 * 1024 * 1024 || planOrder.count >= 64 {
+                    guard !planOrder.isEmpty else { break }
+                    let id = planOrder.removeFirst()
+                    if let old = planCache.removeValue(forKey: id) { planBytes -= old.1.count * MemoryLayout<GPUStamp>.stride }
+                }
+                planCache[stroke.id] = (stroke, stamps); planOrder.append(stroke.id); planBytes += bytes
+            }
+        }
         lastStampCount += stamps.count
         guard !stamps.isEmpty else { return }
         let tileSize = 256, columns = (source.width + tileSize - 1) / tileSize
@@ -122,7 +143,7 @@ private struct TileInfo {
         }
     }
 
-    func render(_ document: DocumentContents, liveStroke: PaintStroke? = nil, finished: Bool = true) throws -> MTLTexture {
+    func render(_ document: DocumentContents, liveStroke: PaintStroke? = nil, finished: Bool = true, waitForCompletion: Bool = true) throws -> MTLTexture {
         try allocate(width: document.width, height: document.height)
         guard let command = queue.makeCommandBuffer() else { throw RenderError.unavailable }
         var composite = textures[0], nextComposite = textures[1]
@@ -154,7 +175,8 @@ private struct TileInfo {
             dispatch(encoder, pipeline: compositePipeline, width: document.width, height: document.height); encoder.endEncoding()
             swap(&composite, &nextComposite)
         }
-        command.commit(); command.waitUntilCompleted()
+        command.commit()
+        if waitForCompletion { command.waitUntilCompleted() }
         if command.status == .error { throw RenderError.command(command.error?.localizedDescription ?? "GPU") }
         return composite
     }

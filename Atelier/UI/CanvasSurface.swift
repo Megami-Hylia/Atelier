@@ -36,6 +36,8 @@ struct CanvasSurface: UIViewRepresentable {
     var fingerPainting = false
     var onToolChange: ((PaintTool) -> Void)?
     var onPalette: (() -> Void)?
+    private var frameInFlight = false
+    private var frameRequested = false
     private var painter: MetalPainter?
     private var active: PaintStroke?
     private weak var activeTouch: UITouch?
@@ -73,16 +75,28 @@ struct CanvasSurface: UIViewRepresentable {
     func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {}
 
     func draw(in view: MTKView) {
+        if frameInFlight { frameRequested = true; return }
         guard let document, let painter, let drawable = currentDrawable, let pass = currentRenderPassDescriptor else { return }
         if failedRevision == document.revision, failedStrokeID == active?.id, failedSampleCount == (active?.samples.count ?? 0) { return }
         do {
             var temporary = active
             temporary?.samples.append(contentsOf: predictions)
-            let texture = try painter.render(document.contents, liveStroke: temporary, finished: false)
+            let texture = try painter.render(document.contents, liveStroke: temporary, finished: false, waitForCompletion: false)
             failedRevision = nil
             guard let command = painter.queue.makeCommandBuffer(), let encoder = command.makeRenderCommandEncoder(descriptor: pass) else { return }
             encoder.setRenderPipelineState(painter.screenPipeline); encoder.setFragmentTexture(texture, index: 0)
             encoder.drawPrimitives(type: .triangleStrip, vertexStart: 0, vertexCount: 4); encoder.endEncoding()
+            frameInFlight = true
+            frameRequested = false
+            command.addCompletedHandler { [weak self] completed in
+                let error = completed.error?.localizedDescription
+                Task { @MainActor [weak self] in
+                    guard let self else { return }
+                    self.frameInFlight = false
+                    if let error { self.document?.errorMessage = error }
+                    if self.frameRequested { self.setNeedsDisplay() }
+                }
+            }
             command.present(drawable); command.commit()
         } catch {
             failedRevision = document.revision; failedStrokeID = active?.id; failedSampleCount = active?.samples.count ?? 0
