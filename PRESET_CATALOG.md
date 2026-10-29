@@ -1,6 +1,6 @@
 # Catalogo preset originali Atelier
 
-Generato deterministicamente da `scripts/generate_catalog.py`. 180 preset in 18 set e 12 basi funzionali separate; non costituiscono la libreria Classic completa. Configurazioni e 12 texture PNG incluse nel bundle e disponibili offline. Ogni riga corrisponde a una configurazione distinta. La [tavola Metal dei 192 preset](docs/verification/BRUSH_COMPARISON.png), generata nel test nativo del 28 ottobre 2026, mostra 192 hash PNG distinti per lo stesso percorso sintetico. La [revisione visiva del 29 ottobre](BRUSH_VISUAL_REVIEW.md) conferma differenze osservabili ma rileva silhouette condivise e lacune di caratterizzazione dei materiali: quantità e hash non dimostrano qualità completa né parità. Nessuna prova Pencil reale è stata svolta.
+Generato deterministicamente da `scripts/generate_catalog.py`. 180 preset in 18 set e 12 basi funzionali separate; non costituiscono la libreria Classic completa. Configurazioni e 12 texture PNG incluse nel bundle e disponibili offline. Ogni riga corrisponde a una configurazione distinta; la differenza visiva richiede ancora la tavola prodotta dal renderer Metal.
 
 | Set | Preset | Forma / grana | Comportamento configurato |
 |---|---|---|---|
@@ -105,7 +105,7 @@ Generato deterministicamente da `scripts/generate_catalog.py`. 180 preset in 18 
 | Charcoals | Coal Dust | fleck / noise | Charcoals: spruzzi separati con impronte multiple e jitter deterministico. |
 | Charcoals | Tinted Coal | fleck / charcoal | Charcoals: variazioni cromatiche e prelievo del pigmento preesistente. |
 | Basics | Hard Round | round / none | Basics: deposito di base del materiale; risposta progressiva alla pressione. |
-| Basics | Soft Air | chisel / none | Basics: bordo schiacciato e ombreggiatura sensibile a inclinazione e azimut. |
+| Basics | Soft Air | soft / none | Basics: aerografo morbido rotondo; elimina l’impronta a scalpello incoerente con il nome. |
 | Basics | Fine Round | round / none | Basics: punta fine continua con uscita rastremata. |
 | Basics | Soft Round | soft / none | Basics: deposito morbido e trasparente per velature. |
 | Basics | Textured Round | fleck / paper | Basics: grana marcata con interruzioni del deposito. |

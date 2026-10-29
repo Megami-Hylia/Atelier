@@ -90,6 +90,11 @@ VARIANTS = [
 # near-duplicates. IDs remain stable; pressure curves are not used as cosmetic
 # differentiators when a max-size clamp makes the curve inert.
 SPECIAL_PROFILES = {
+    ("basics", 1): dict(shape="soft", grain="none",
+        parameters=dict(flow=.07, opacity=1, spacing=.04, roundness=1,
+                        tiltSize=0, tiltRoundness=0, azimuth=0, barrelRoll=0,
+                        pressureOpacity=.8, grainDepth=0),
+        reason="aerografo morbido rotondo; elimina l’impronta a scalpello incoerente con il nome"),
     ("basics", 6): dict(
         shape="flat", grain="none",
         parameters=dict(roundness=.65, pressureSize=.55, maxSize=.9, minSize=.02,

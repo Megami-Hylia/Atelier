@@ -203,7 +203,7 @@ struct PaintingWorkspace: View {
             if tool == item { panel = "brush-\(item.rawValue)" } else { tool = item }
         } label: { Image(systemName: icon).foregroundStyle(tool == item ? Color.blue : Color.primary).frame(width: 30, height: 40) }
             .accessibilityLabel(label)
-            .popover(isPresented: presented("brush-\(item.rawValue)"), arrowEdge: .top) { BrushLibraryView(store: brushes).frame(width: 480, height: 650) }
+            .popover(isPresented: presented("brush-\(item.rawValue)"), arrowEdge: .top) { BrushLibraryView(store: brushes).frame(width: 420, height: 650) }
     }
     private func presented(_ value: String) -> Binding<Bool> { Binding(get: { panel == value }, set: { if !$0 && panel == value { panel = nil } }) }
     private var sideControls: some View {

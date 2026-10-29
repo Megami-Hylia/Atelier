@@ -200,7 +200,7 @@ struct BrushLibraryView: View {
             }
         }
         .preferredColorScheme(.dark)
-        .frame(minWidth: 0, idealWidth: 480, minHeight: 520, idealHeight: 650)
+        .frame(minWidth: 0, idealWidth: 420, minHeight: 520, idealHeight: 650)
     }
 
     private func applyName() {
