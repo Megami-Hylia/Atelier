@@ -25,3 +25,7 @@ Il controllo sintattico dei 24 file Swift e il confronto del planner legacy sono
 Non sono disponibili nuova compilazione, IPA con queste correzioni, tempi GPU o misure su iPad. I precedenti test 22/22 non attestano queste modifiche. L’IPA presente nella cartella resta quella di 9360611 e non contiene il nuovo motore.
 
 La superficie aggiuntiva viene usata solo entro il budget di lavoro di 384 MiB. Per documenti molto grandi (quando sei superfici RGBA16 superano il budget) resta il replay tradizionale. I livelli non selezionati e le regolazioni possono ancora comportare replay e filtri completi. Il numero di campioni per frame non garantisce un tempo GPU fisso: dimensioni, distanza tra punti, conteggio, densità e impasto del pennello incidono ancora sul costo. Nessuna promessa di FPS o eliminazione totale del lag senza prova sull’hardware.
+
+## Nuova compilazione disponibile
+
+Dopo il passaggio del repository a pubblico, il run 40886601251 ha compilato con successo i sorgenti c5e5d96. La nuova IPA contiene le correzioni sopra descritte e ha superato la verifica strutturale su Windows. I paragrafi precedenti sul blocco di compilazione descrivono il tentativo storico; non si applicano più alla consegna corrente. Test del simulatore ancora in corso, nessuna prova hardware.
