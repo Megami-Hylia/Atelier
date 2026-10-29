@@ -23,12 +23,22 @@ struct BrushStudioView: View {
 
     var body: some View {
         NavigationStack {
-            HStack(spacing: 0) {
+            GeometryReader { geometry in
+            let wide = geometry.size.width >= 950
+            let layout = wide ? AnyLayout(HStackLayout(spacing: 0)) : AnyLayout(VStackLayout(spacing: 0))
+            layout {
+                if wide {
                 List(BrushParameter.categories, id: \.self) { title in
                     Button { category = title } label: { Text(title).foregroundStyle(.primary).padding(.vertical, 8) }
                         .listRowBackground(category == title ? Color.accentColor.opacity(0.25) : Color.clear)
                 }
                 .listStyle(.plain).frame(width: 185)
+                } else {
+                    Picker("Categoria", selection: $category) {
+                        ForEach(BrushParameter.categories, id: \.self) { Text($0).tag($0) }
+                    }
+                    .pickerStyle(.menu).padding(.horizontal).frame(minHeight: 44)
+                }
                 Divider()
                 Form {
                     Section(category) {
@@ -84,7 +94,7 @@ struct BrushStudioView: View {
                             .font(.caption).foregroundStyle(.secondary)
                     }
                 }
-                .frame(minWidth: 290)
+                .frame(minWidth: 0, maxWidth: .infinity, maxHeight: .infinity)
                 Divider()
                 VStack(spacing: 12) {
                     if let message = store.errorMessage {
@@ -98,7 +108,9 @@ struct BrushStudioView: View {
                     Text("Area di prova e miniatura usano lo stesso renderer Metal del canvas. I tratti già disegnati restano invariati quando modifichi i parametri; i successivi usano la bozza corrente.")
                         .font(.caption).foregroundStyle(.secondary)
                 }
-                .padding().frame(minWidth: 300, maxWidth: 440)
+                .padding().frame(minWidth: 0, maxWidth: wide ? 440 : .infinity)
+                .frame(height: wide ? nil : min(300, geometry.size.height * 0.4))
+            }
             }
             .navigationTitle(draft.name).navigationBarTitleDisplayMode(.inline)
             .toolbar {

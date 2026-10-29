@@ -146,7 +146,7 @@ struct BrushLibraryView: View {
             }
             .navigationTitle("Pennelli").navigationBarTitleDisplayMode(.inline)
             .toolbar { ToolbarItem(placement: .topBarTrailing) { EditButton() } }
-            .sheet(item: $editingBrush) { BrushStudioView(store: store, brush: $0) }
+            .fullScreenCover(item: $editingBrush) { BrushStudioView(store: store, brush: $0) }
             .sheet(isPresented: $managingLibraries) { BrushLibrariesView(store: store) }
             .alert("Nome", isPresented: $showName) {
                 TextField("Nome", text: $name)
