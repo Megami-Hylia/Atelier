@@ -207,12 +207,9 @@ struct PaintingWorkspace: View {
     }
     private func presented(_ value: String) -> Binding<Bool> { Binding(get: { panel == value }, set: { if !$0 && panel == value { panel = nil } }) }
     private var sideControls: some View {
-        VStack(spacing: 28) {
-            VStack { Text("\(Int(size)) px").font(.caption2).monospacedDigit(); Slider(value: $size, in: 1...256).frame(width: 130).rotationEffect(.degrees(-90)).frame(width: 32, height: 140) }.accessibilityLabel("Dimensione pennello")
-            VStack { Text("\(Int(opacity * 100)) %").font(.caption2).monospacedDigit(); Slider(value: $opacity, in: 0.01...1).frame(width: 130).rotationEffect(.degrees(-90)).frame(width: 32, height: 140) }.accessibilityLabel("Opacità pennello")
-            Button { document.undo() } label: { Image(systemName: "arrow.uturn.backward") }.disabled(!document.canUndo).keyboardShortcut("z", modifiers: .command).accessibilityLabel("Annulla")
-            Button { document.redo() } label: { Image(systemName: "arrow.uturn.forward") }.disabled(!document.canRedo).keyboardShortcut("z", modifiers: [.command, .shift]).accessibilityLabel("Ripeti")
-        }.padding(10).background(Color(uiColor: .secondarySystemBackground)).padding(.vertical, 30)
+        BrushSideBar(size: $size, opacity: $opacity, onRight: leftHanded,
+                     canUndo: document.canUndo, canRedo: document.canRedo,
+                     undo: { document.undo() }, redo: { document.redo() }, colors: { panel = "color" })
     }
     private var actions: some View {
         ActionsPanel(document: document, exportPNG: { exportPNG() }, comparison: { contactSheet() }, hideInterface: { panel = nil; immersive = true }).frame(height: 600)
