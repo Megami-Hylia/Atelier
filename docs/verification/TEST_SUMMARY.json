@@ -1,0 +1,46 @@
+{
+  "devicesAndConfigurations" : [
+    {
+      "device" : {
+        "architecture" : "x86_64",
+        "deviceId" : "D8DF5C1E-79A7-4CAB-80A1-80BE6D2AECBA",
+        "deviceName" : "AtelierCI-40763569979-a3e44053",
+        "modelName" : "iPad (A16)",
+        "osBuildNumber" : "23C54",
+        "osVersion" : "26.2",
+        "platform" : "iOS Simulator"
+      },
+      "expectedFailures" : 0,
+      "failedTests" : 0,
+      "passedTests" : 15,
+      "skippedTests" : 0,
+      "testPlanConfiguration" : {
+        "configurationId" : "1",
+        "configurationName" : "Test Scheme Action"
+      }
+    }
+  ],
+  "environmentDescription" : "Atelier · Built with macOS 26.6.1",
+  "expectedFailures" : 0,
+  "failedTests" : 0,
+  "finishTime" : 1793220344.425,
+  "passedTests" : 15,
+  "result" : "Passed",
+  "skippedTests" : 0,
+  "startTime" : 1793220017.912,
+  "statistics" : [
+
+  ],
+  "testFailures" : [
+
+  ],
+  "title" : "Test - Atelier",
+  "topInsights" : [
+    {
+      "category" : "Longest Test Runs",
+      "impact" : "73% of duration",
+      "text" : "1 longest test run with outlier durations exceeding 20.87s (three standard deviations)"
+    }
+  ],
+  "totalTestCount" : 15
+}

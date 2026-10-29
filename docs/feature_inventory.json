@@ -11,7 +11,7 @@
       "interaction": "Documento, selezione strumenti, orientamento",
       "id": "UI-01",
       "implementation": "AtelierApp.swift — AtelierRoot/PaintingWorkspace; Model/PaintDocument.swift",
-      "test": "test native definiti ove presenti; non eseguiti in Windows",
+      "test": "nessuna prova pertinente registrata per questa funzione; la suite15/15 copre solo i casi di docs/NATIVE_TEST_RESULTS.md",
       "differences": "UI nativa dell’incremento; sottoinsieme operativo, dimensioni/DPI/profili/gesti completi e fedeltà geometrica non verificati",
       "status": "parziale"
     },
@@ -24,7 +24,7 @@
       "interaction": "Documento, selezione strumenti, orientamento",
       "id": "UI-02",
       "implementation": "AtelierApp.swift — AtelierRoot/PaintingWorkspace; Model/PaintDocument.swift",
-      "test": "test native definiti ove presenti; non eseguiti in Windows",
+      "test": "nessuna prova pertinente registrata per questa funzione; la suite15/15 copre solo i casi di docs/NATIVE_TEST_RESULTS.md",
       "differences": "UI nativa dell’incremento; sottoinsieme operativo, dimensioni/DPI/profili/gesti completi e fedeltà geometrica non verificati",
       "status": "parziale"
     },
@@ -37,7 +37,7 @@
       "interaction": "Documento, selezione strumenti, orientamento",
       "id": "UI-03",
       "implementation": "AtelierApp.swift — AtelierRoot/PaintingWorkspace; Model/PaintDocument.swift",
-      "test": "test native definiti ove presenti; non eseguiti in Windows",
+      "test": "nessuna prova pertinente registrata per questa funzione; la suite15/15 copre solo i casi di docs/NATIVE_TEST_RESULTS.md",
       "differences": "UI nativa dell’incremento; sottoinsieme operativo, dimensioni/DPI/profili/gesti completi e fedeltà geometrica non verificati",
       "status": "parziale"
     },
@@ -50,7 +50,7 @@
       "interaction": "Documento, selezione strumenti, orientamento",
       "id": "UI-04",
       "implementation": "AtelierApp.swift — AtelierRoot/PaintingWorkspace; Model/PaintDocument.swift",
-      "test": "test native definiti ove presenti; non eseguiti in Windows",
+      "test": "nessuna prova pertinente registrata per questa funzione; la suite15/15 copre solo i casi di docs/NATIVE_TEST_RESULTS.md",
       "differences": "UI nativa dell’incremento; sottoinsieme operativo, dimensioni/DPI/profili/gesti completi e fedeltà geometrica non verificati",
       "status": "parziale"
     },
@@ -63,7 +63,7 @@
       "interaction": "Documento, selezione strumenti, orientamento",
       "id": "UI-05",
       "implementation": "UI/CanvasSurface.swift — gesture su transform della vista",
-      "test": "test native definiti ove presenti; non eseguiti in Windows",
+      "test": "nessuna prova pertinente registrata per questa funzione; la suite15/15 copre solo i casi di docs/NATIVE_TEST_RESULTS.md",
       "differences": "pivot, fit, vincoli, contemporaneità e confronto geometrico non verificati",
       "status": "parziale"
     },
@@ -76,7 +76,7 @@
       "interaction": "Documento, selezione strumenti, orientamento",
       "id": "UI-06",
       "implementation": "UI/CanvasSurface.swift — gesture su transform della vista",
-      "test": "test native definiti ove presenti; non eseguiti in Windows",
+      "test": "nessuna prova pertinente registrata per questa funzione; la suite15/15 copre solo i casi di docs/NATIVE_TEST_RESULTS.md",
       "differences": "pivot, fit, vincoli, contemporaneità e confronto geometrico non verificati",
       "status": "parziale"
     },
@@ -89,7 +89,7 @@
       "interaction": "Documento, selezione strumenti, orientamento",
       "id": "UI-07",
       "implementation": "UI/CanvasSurface.swift — gesture su transform della vista",
-      "test": "test native definiti ove presenti; non eseguiti in Windows",
+      "test": "nessuna prova pertinente registrata per questa funzione; la suite15/15 copre solo i casi di docs/NATIVE_TEST_RESULTS.md",
       "differences": "pivot, fit, vincoli, contemporaneità e confronto geometrico non verificati",
       "status": "parziale"
     },
@@ -128,7 +128,7 @@
       "interaction": "Documento, selezione strumenti, orientamento",
       "id": "UI-10",
       "implementation": "AtelierApp.swift — AtelierRoot/PaintingWorkspace; Model/PaintDocument.swift",
-      "test": "test native definiti ove presenti; non eseguiti in Windows",
+      "test": "nessuna prova pertinente registrata per questa funzione; la suite15/15 copre solo i casi di docs/NATIVE_TEST_RESULTS.md",
       "differences": "UI nativa dell’incremento; sottoinsieme operativo, dimensioni/DPI/profili/gesti completi e fedeltà geometrica non verificati",
       "status": "parziale"
     },
@@ -141,7 +141,7 @@
       "interaction": "Documento, selezione strumenti, orientamento",
       "id": "UI-11",
       "implementation": "AtelierApp.swift — AtelierRoot/PaintingWorkspace; Model/PaintDocument.swift",
-      "test": "test native definiti ove presenti; non eseguiti in Windows",
+      "test": "nessuna prova pertinente registrata per questa funzione; la suite15/15 copre solo i casi di docs/NATIVE_TEST_RESULTS.md",
       "differences": "UI nativa dell’incremento; sottoinsieme operativo, dimensioni/DPI/profili/gesti completi e fedeltà geometrica non verificati",
       "status": "parziale"
     },
@@ -154,7 +154,7 @@
       "interaction": "Documento, selezione strumenti, orientamento",
       "id": "UI-12",
       "implementation": "AtelierApp.swift — AtelierRoot/PaintingWorkspace; Model/PaintDocument.swift",
-      "test": "test native definiti ove presenti; non eseguiti in Windows",
+      "test": "nessuna prova pertinente registrata per questa funzione; la suite15/15 copre solo i casi di docs/NATIVE_TEST_RESULTS.md",
       "differences": "UI nativa dell’incremento; sottoinsieme operativo, dimensioni/DPI/profili/gesti completi e fedeltà geometrica non verificati",
       "status": "parziale"
     },
@@ -167,7 +167,7 @@
       "interaction": "Documento, selezione strumenti, orientamento",
       "id": "UI-13",
       "implementation": "AtelierApp.swift — AtelierRoot/PaintingWorkspace; Model/PaintDocument.swift",
-      "test": "test native definiti ove presenti; non eseguiti in Windows",
+      "test": "nessuna prova pertinente registrata per questa funzione; la suite15/15 copre solo i casi di docs/NATIVE_TEST_RESULTS.md",
       "differences": "UI nativa dell’incremento; sottoinsieme operativo, dimensioni/DPI/profili/gesti completi e fedeltà geometrica non verificati",
       "status": "parziale"
     },
@@ -180,7 +180,7 @@
       "interaction": "Documento, selezione strumenti, orientamento",
       "id": "UI-14",
       "implementation": "AtelierApp.swift — AtelierRoot/PaintingWorkspace; Model/PaintDocument.swift",
-      "test": "test native definiti ove presenti; non eseguiti in Windows",
+      "test": "nessuna prova pertinente registrata per questa funzione; la suite15/15 copre solo i casi di docs/NATIVE_TEST_RESULTS.md",
       "differences": "UI nativa dell’incremento; sottoinsieme operativo, dimensioni/DPI/profili/gesti completi e fedeltà geometrica non verificati",
       "status": "parziale"
     },
@@ -193,7 +193,7 @@
       "interaction": "Documento, selezione strumenti, orientamento",
       "id": "UI-15",
       "implementation": "AtelierApp.swift — AtelierRoot/PaintingWorkspace; Model/PaintDocument.swift",
-      "test": "test native definiti ove presenti; non eseguiti in Windows",
+      "test": "nessuna prova pertinente registrata per questa funzione; la suite15/15 copre solo i casi di docs/NATIVE_TEST_RESULTS.md",
       "differences": "UI nativa dell’incremento; sottoinsieme operativo, dimensioni/DPI/profili/gesti completi e fedeltà geometrica non verificati",
       "status": "parziale"
     },
@@ -219,8 +219,8 @@
       "interaction": "Pennello, colore, livello attivo, undo, preview",
       "id": "INK-01",
       "implementation": "Engine/StrokePlanner.swift + MetalPainter.swift + Paint.metal; UI/CanvasSurface.swift",
-      "test": "test native definiti ove presenti; non eseguiti in Windows",
-      "differences": "modello indipendente; qualità, continuità, sensori e confronto 5.4.14 non verificati",
+      "test": "RendererTests: replay, variazioni parametri e catalogo192 passati; run #6 40763569979, commit 5871e5dfe7a1da879806fd86e737598ec242bb3a; iOS Simulator26.2 x86_64, input sintetico",
+      "differences": "deposito sintetico verificato in casi selezionati; intero comportamento, hardware e confronto 5.4.14 non verificati",
       "status": "parziale"
     },
     {
@@ -232,8 +232,8 @@
       "interaction": "Pennello, colore, livello attivo, undo, preview",
       "id": "INK-02",
       "implementation": "Engine/StrokePlanner.swift + MetalPainter.swift + Paint.metal; UI/CanvasSurface.swift",
-      "test": "test native definiti ove presenti; non eseguiti in Windows",
-      "differences": "modello indipendente; qualità, continuità, sensori e confronto 5.4.14 non verificati",
+      "test": "testEraserChangesAlphaAndSmudgeMovesExistingPigment passato: pigmento trasportato da zona opaca a zona prima trasparente; run #6 40763569979, commit 5871e5dfe7a1da879806fd86e737598ec242bb3a; iOS Simulator26.2 x86_64, input sintetico",
+      "differences": "un caso sintetico; pickup pre-tratto semplificato, tutte le famiglie e parità originale non verificati",
       "status": "parziale"
     },
     {
@@ -245,8 +245,8 @@
       "interaction": "Pennello, colore, livello attivo, undo, preview",
       "id": "INK-03",
       "implementation": "Engine/StrokePlanner.swift + MetalPainter.swift + Paint.metal; UI/CanvasSurface.swift",
-      "test": "test native definiti ove presenti; non eseguiti in Windows",
-      "differences": "modello indipendente; qualità, continuità, sensori e confronto 5.4.14 non verificati",
+      "test": "testEraserChangesAlphaAndSmudgeMovesExistingPigment passato: alpha nel punto ridotto oltre il50%; run #6 40763569979, commit 5871e5dfe7a1da879806fd86e737598ec242bb3a; iOS Simulator26.2 x86_64, input sintetico",
+      "differences": "un caso con impronta fallback; altre famiglie, UI/hardware e parità non verificati",
       "status": "parziale"
     },
     {
@@ -258,8 +258,8 @@
       "interaction": "Pennello, colore, livello attivo, undo, preview",
       "id": "INK-04",
       "implementation": "Engine/StrokePlanner.swift + MetalPainter.swift + Paint.metal; UI/CanvasSurface.swift",
-      "test": "test native definiti ove presenti; non eseguiti in Windows",
-      "differences": "modello indipendente; qualità, continuità, sensori e confronto 5.4.14 non verificati",
+      "test": "testOpaqueStrokeHasNoTransparentTileSeam passato: alpha>0.95 ai pixel x255/256/257; run #6 40763569979, commit 5871e5dfe7a1da879806fd86e737598ec242bb3a; iOS Simulator26.2 x86_64, input sintetico",
+      "differences": "solo giunto opaco senza grana; interpolazione completa, coordinate grana/pickup ai bordi e hardware non verificati",
       "status": "parziale"
     },
     {
@@ -271,8 +271,8 @@
       "interaction": "Pennello, colore, livello attivo, undo, preview",
       "id": "INK-05",
       "implementation": "Engine/StrokePlanner.swift + MetalPainter.swift + Paint.metal; UI/CanvasSurface.swift",
-      "test": "test native definiti ove presenti; non eseguiti in Windows",
-      "differences": "modello indipendente; qualità, continuità, sensori e confronto 5.4.14 non verificati",
+      "test": "testDeterministicReplayAndSpacingAffectPixels passato: PNG cambia con pressureSize/pressureCurve; run #6 40763569979, commit 5871e5dfe7a1da879806fd86e737598ec242bb3a; iOS Simulator26.2 x86_64, input sintetico",
+      "differences": "pressione sintetica; sensori Pencil reali, grafici a nodi e tutte le risposte non verificati",
       "status": "parziale"
     },
     {
@@ -284,7 +284,7 @@
       "interaction": "Pennello, colore, livello attivo, undo, preview",
       "id": "INK-06",
       "implementation": "Engine/StrokePlanner.swift + MetalPainter.swift + Paint.metal; UI/CanvasSurface.swift",
-      "test": "test native definiti ove presenti; non eseguiti in Windows",
+      "test": "nessuna prova pertinente registrata per questa funzione; la suite15/15 copre solo i casi di docs/NATIVE_TEST_RESULTS.md",
       "differences": "modello indipendente; qualità, continuità, sensori e confronto 5.4.14 non verificati",
       "status": "parziale"
     },
@@ -297,7 +297,7 @@
       "interaction": "Pennello, colore, livello attivo, undo, preview",
       "id": "INK-07",
       "implementation": "Engine/StrokePlanner.swift + MetalPainter.swift + Paint.metal; UI/CanvasSurface.swift",
-      "test": "test native definiti ove presenti; non eseguiti in Windows",
+      "test": "nessuna prova pertinente registrata per questa funzione; la suite15/15 copre solo i casi di docs/NATIVE_TEST_RESULTS.md",
       "differences": "modello indipendente; qualità, continuità, sensori e confronto 5.4.14 non verificati",
       "status": "parziale"
     },
@@ -310,7 +310,7 @@
       "interaction": "Pennello, colore, livello attivo, undo, preview",
       "id": "INK-08",
       "implementation": "Engine/StrokePlanner.swift + MetalPainter.swift + Paint.metal; UI/CanvasSurface.swift",
-      "test": "test native definiti ove presenti; non eseguiti in Windows",
+      "test": "nessuna prova pertinente registrata per questa funzione; la suite15/15 copre solo i casi di docs/NATIVE_TEST_RESULTS.md",
       "differences": "modello indipendente; qualità, continuità, sensori e confronto 5.4.14 non verificati",
       "status": "parziale"
     },
@@ -323,7 +323,7 @@
       "interaction": "Pennello, colore, livello attivo, undo, preview",
       "id": "INK-09",
       "implementation": "UI/CanvasSurface.swift",
-      "test": "test native definiti ove presenti; non eseguiti in Windows",
+      "test": "nessuna prova pertinente registrata per questa funzione; la suite15/15 copre solo i casi di docs/NATIVE_TEST_RESULTS.md",
       "differences": "handler UIKit presenti; semantiche complete e capacità hardware non verificate; hover circolare semplificato",
       "status": "parziale"
     },
@@ -336,7 +336,7 @@
       "interaction": "Pennello, colore, livello attivo, undo, preview",
       "id": "INK-10",
       "implementation": "UI/CanvasSurface.swift",
-      "test": "test native definiti ove presenti; non eseguiti in Windows",
+      "test": "nessuna prova pertinente registrata per questa funzione; la suite15/15 copre solo i casi di docs/NATIVE_TEST_RESULTS.md",
       "differences": "handler UIKit presenti; semantiche complete e capacità hardware non verificate; hover circolare semplificato",
       "status": "parziale"
     },
@@ -349,7 +349,7 @@
       "interaction": "Pennello, colore, livello attivo, undo, preview",
       "id": "INK-11",
       "implementation": "UI/CanvasSurface.swift",
-      "test": "test native definiti ove presenti; non eseguiti in Windows",
+      "test": "nessuna prova pertinente registrata per questa funzione; la suite15/15 copre solo i casi di docs/NATIVE_TEST_RESULTS.md",
       "differences": "handler UIKit presenti; semantiche complete e capacità hardware non verificate; hover circolare semplificato",
       "status": "parziale"
     },
@@ -362,7 +362,7 @@
       "interaction": "Pennello, colore, livello attivo, undo, preview",
       "id": "INK-12",
       "implementation": "UI/CanvasSurface.swift",
-      "test": "test native definiti ove presenti; non eseguiti in Windows",
+      "test": "nessuna prova pertinente registrata per questa funzione; la suite15/15 copre solo i casi di docs/NATIVE_TEST_RESULTS.md",
       "differences": "handler UIKit presenti; semantiche complete e capacità hardware non verificate; hover circolare semplificato",
       "status": "parziale"
     },
@@ -375,7 +375,7 @@
       "interaction": "Pennello, colore, livello attivo, undo, preview",
       "id": "INK-13",
       "implementation": "UI/CanvasSurface.swift",
-      "test": "test native definiti ove presenti; non eseguiti in Windows",
+      "test": "nessuna prova pertinente registrata per questa funzione; la suite15/15 copre solo i casi di docs/NATIVE_TEST_RESULTS.md",
       "differences": "handler UIKit presenti; semantiche complete e capacità hardware non verificate; hover circolare semplificato",
       "status": "parziale"
     },
@@ -388,7 +388,7 @@
       "interaction": "Pennello, colore, livello attivo, undo, preview",
       "id": "INK-14",
       "implementation": "UI/CanvasSurface.swift",
-      "test": "test native definiti ove presenti; non eseguiti in Windows",
+      "test": "nessuna prova pertinente registrata per questa funzione; la suite15/15 copre solo i casi di docs/NATIVE_TEST_RESULTS.md",
       "differences": "handler UIKit presenti; semantiche complete e capacità hardware non verificate; hover circolare semplificato",
       "status": "parziale"
     },
@@ -401,7 +401,7 @@
       "interaction": "Pennello, colore, livello attivo, undo, preview",
       "id": "INK-15",
       "implementation": "UI/CanvasSurface.swift",
-      "test": "test native definiti ove presenti; non eseguiti in Windows",
+      "test": "nessuna prova pertinente registrata per questa funzione; la suite15/15 copre solo i casi di docs/NATIVE_TEST_RESULTS.md",
       "differences": "handler UIKit presenti; semantiche complete e capacità hardware non verificate; hover circolare semplificato",
       "status": "parziale"
     },
@@ -414,7 +414,7 @@
       "interaction": "Pennello, colore, livello attivo, undo, preview",
       "id": "INK-16",
       "implementation": "UI/CanvasSurface.swift",
-      "test": "test native definiti ove presenti; non eseguiti in Windows",
+      "test": "nessuna prova pertinente registrata per questa funzione; la suite15/15 copre solo i casi di docs/NATIVE_TEST_RESULTS.md",
       "differences": "handler UIKit presenti; semantiche complete e capacità hardware non verificate; hover circolare semplificato",
       "status": "parziale"
     },
@@ -427,7 +427,7 @@
       "interaction": "Pennello, colore, livello attivo, undo, preview",
       "id": "INK-17",
       "implementation": "UI/CanvasSurface.swift",
-      "test": "test native definiti ove presenti; non eseguiti in Windows",
+      "test": "nessuna prova pertinente registrata per questa funzione; la suite15/15 copre solo i casi di docs/NATIVE_TEST_RESULTS.md",
       "differences": "handler UIKit presenti; semantiche complete e capacità hardware non verificate; hover circolare semplificato",
       "status": "parziale"
     },
@@ -440,7 +440,7 @@
       "interaction": "Renderer comune, Studio, Files, persistenza",
       "id": "BR-01",
       "implementation": "Brushes/BrushModels.swift + BrushLibraryView.swift",
-      "test": "AtelierTests/BrushTests.swift definito; esecuzione nativa non effettuata in Windows",
+      "test": "nessun test UI pertinente registrato per questo controllo; suite BrushTests7/7 passata sui casi modello documentati",
       "differences": "modello e UI presenti; formato JSON Atelier originale, gestione completa set/librerie e flussi UI da verificare",
       "status": "parziale"
     },
@@ -453,7 +453,7 @@
       "interaction": "Renderer comune, Studio, Files, persistenza",
       "id": "BR-02",
       "implementation": "Brushes/BrushModels.swift + BrushLibraryView.swift",
-      "test": "AtelierTests/BrushTests.swift definito; esecuzione nativa non effettuata in Windows",
+      "test": "nessun test UI pertinente registrato per questo controllo; suite BrushTests7/7 passata sui casi modello documentati",
       "differences": "modello e UI presenti; formato JSON Atelier originale, gestione completa set/librerie e flussi UI da verificare",
       "status": "parziale"
     },
@@ -466,7 +466,7 @@
       "interaction": "Renderer comune, Studio, Files, persistenza",
       "id": "BR-03",
       "implementation": "Brushes/BrushModels.swift + BrushLibraryView.swift",
-      "test": "AtelierTests/BrushTests.swift definito; esecuzione nativa non effettuata in Windows",
+      "test": "nessun test UI pertinente registrato per questo controllo; suite BrushTests7/7 passata sui casi modello documentati",
       "differences": "modello e UI presenti; formato JSON Atelier originale, gestione completa set/librerie e flussi UI da verificare",
       "status": "parziale"
     },
@@ -492,8 +492,8 @@
       "interaction": "Renderer comune, Studio, Files, persistenza",
       "id": "BR-05",
       "implementation": "Brushes/BrushModels.swift + BrushLibraryView.swift",
-      "test": "AtelierTests/BrushTests.swift definito; esecuzione nativa non effettuata in Windows",
-      "differences": "modello e UI presenti; formato JSON Atelier originale, gestione completa set/librerie e flussi UI da verificare",
+      "test": "customBrushSurvivesSaveReopenAndJSONRoundTrip + movingAndRestoringPresetsKeepsPersonalWork passati; run #6 40763569979, commit 5871e5dfe7a1da879806fd86e737598ec242bb3a; iOS Simulator26.2 x86_64, input sintetico",
+      "differences": "operazioni di modello in casi selezionati; flusso UI, riavvio del processo e parità 5.4.14 non verificati",
       "status": "parziale"
     },
     {
@@ -505,8 +505,8 @@
       "interaction": "Renderer comune, Studio, Files, persistenza",
       "id": "BR-06",
       "implementation": "Brushes/BrushModels.swift + BrushLibraryView.swift",
-      "test": "AtelierTests/BrushTests.swift definito; esecuzione nativa non effettuata in Windows",
-      "differences": "modello e UI presenti; formato JSON Atelier originale, gestione completa set/librerie e flussi UI da verificare",
+      "test": "customBrushSurvivesSaveReopenAndJSONRoundTrip + movingAndRestoringPresetsKeepsPersonalWork passati; run #6 40763569979, commit 5871e5dfe7a1da879806fd86e737598ec242bb3a; iOS Simulator26.2 x86_64, input sintetico",
+      "differences": "operazioni di modello in casi selezionati; flusso UI, riavvio del processo e parità 5.4.14 non verificati",
       "status": "parziale"
     },
     {
@@ -518,8 +518,8 @@
       "interaction": "Renderer comune, Studio, Files, persistenza",
       "id": "BR-07",
       "implementation": "Brushes/BrushModels.swift + BrushLibraryView.swift",
-      "test": "AtelierTests/BrushTests.swift definito; esecuzione nativa non effettuata in Windows",
-      "differences": "modello e UI presenti; formato JSON Atelier originale, gestione completa set/librerie e flussi UI da verificare",
+      "test": "customBrushSurvivesSaveReopenAndJSONRoundTrip + movingAndRestoringPresetsKeepsPersonalWork passati; run #6 40763569979, commit 5871e5dfe7a1da879806fd86e737598ec242bb3a; iOS Simulator26.2 x86_64, input sintetico",
+      "differences": "operazioni di modello in casi selezionati; flusso UI, riavvio del processo e parità 5.4.14 non verificati",
       "status": "parziale"
     },
     {
@@ -531,7 +531,7 @@
       "interaction": "Renderer comune, Studio, Files, persistenza",
       "id": "BR-08",
       "implementation": "Brushes/BrushModels.swift + BrushLibraryView.swift",
-      "test": "AtelierTests/BrushTests.swift definito; esecuzione nativa non effettuata in Windows",
+      "test": "nessun test UI pertinente registrato per questo controllo; suite BrushTests7/7 passata sui casi modello documentati",
       "differences": "modello e UI presenti; formato JSON Atelier originale, gestione completa set/librerie e flussi UI da verificare",
       "status": "parziale"
     },
@@ -544,8 +544,8 @@
       "interaction": "Renderer comune, Studio, Files, persistenza",
       "id": "BR-09",
       "implementation": "Brushes/BrushModels.swift + BrushLibraryView.swift",
-      "test": "AtelierTests/BrushTests.swift definito; esecuzione nativa non effettuata in Windows",
-      "differences": "modello e UI presenti; formato JSON Atelier originale, gestione completa set/librerie e flussi UI da verificare",
+      "test": "setAndLibraryOperationsKeepOrderAndBrushData passato: libreria vuota, ordine, set duplicato/rinominato e conservazione pennelli; run #6 40763569979, commit 5871e5dfe7a1da879806fd86e737598ec242bb3a; iOS Simulator26.2 x86_64, input sintetico",
+      "differences": "sottoinsieme delle operazioni di modello; flussi UI, sincronizzazione Files e casi completi non verificati",
       "status": "parziale"
     },
     {
@@ -557,8 +557,8 @@
       "interaction": "Renderer comune, Studio, Files, persistenza",
       "id": "BR-10",
       "implementation": "Brushes/BrushModels.swift + BrushLibraryView.swift",
-      "test": "AtelierTests/BrushTests.swift definito; esecuzione nativa non effettuata in Windows",
-      "differences": "modello e UI presenti; formato JSON Atelier originale, gestione completa set/librerie e flussi UI da verificare",
+      "test": "customBrushSurvivesSaveReopenAndJSONRoundTrip + movingAndRestoringPresetsKeepsPersonalWork passati; run #6 40763569979, commit 5871e5dfe7a1da879806fd86e737598ec242bb3a; iOS Simulator26.2 x86_64, input sintetico",
+      "differences": "operazioni di modello in casi selezionati; flusso UI, riavvio del processo e parità 5.4.14 non verificati",
       "status": "parziale"
     },
     {
@@ -570,8 +570,8 @@
       "interaction": "Renderer comune, Studio, Files, persistenza",
       "id": "BR-11",
       "implementation": "Brushes/BrushModels.swift + BrushLibraryView.swift",
-      "test": "AtelierTests/BrushTests.swift definito; esecuzione nativa non effettuata in Windows",
-      "differences": "modello e UI presenti; formato JSON Atelier originale, gestione completa set/librerie e flussi UI da verificare",
+      "test": "setAndLibraryOperationsKeepOrderAndBrushData passato: libreria vuota, ordine, set duplicato/rinominato e conservazione pennelli; run #6 40763569979, commit 5871e5dfe7a1da879806fd86e737598ec242bb3a; iOS Simulator26.2 x86_64, input sintetico",
+      "differences": "sottoinsieme delle operazioni di modello; flussi UI, sincronizzazione Files e casi completi non verificati",
       "status": "parziale"
     },
     {
@@ -583,8 +583,8 @@
       "interaction": "Renderer comune, Studio, Files, persistenza",
       "id": "BR-12",
       "implementation": "Brushes/BrushModels.swift + BrushLibraryView.swift",
-      "test": "AtelierTests/BrushTests.swift definito; esecuzione nativa non effettuata in Windows",
-      "differences": "modello e UI presenti; formato JSON Atelier originale, gestione completa set/librerie e flussi UI da verificare",
+      "test": "setAndLibraryOperationsKeepOrderAndBrushData passato: libreria vuota, ordine, set duplicato/rinominato e conservazione pennelli; run #6 40763569979, commit 5871e5dfe7a1da879806fd86e737598ec242bb3a; iOS Simulator26.2 x86_64, input sintetico",
+      "differences": "sottoinsieme delle operazioni di modello; flussi UI, sincronizzazione Files e casi completi non verificati",
       "status": "parziale"
     },
     {
@@ -596,8 +596,8 @@
       "interaction": "Renderer comune, Studio, Files, persistenza",
       "id": "BR-13",
       "implementation": "Brushes/BrushModels.swift + BrushLibraryView.swift",
-      "test": "AtelierTests/BrushTests.swift definito; esecuzione nativa non effettuata in Windows",
-      "differences": "modello e UI presenti; formato JSON Atelier originale, gestione completa set/librerie e flussi UI da verificare",
+      "test": "customBrushSurvivesSaveReopenAndJSONRoundTrip + importRejectsInvalidReferencesAndParametersWithoutMutation passati; libreria vuota esportata; run #6 40763569979, commit 5871e5dfe7a1da879806fd86e737598ec242bb3a; iOS Simulator26.2 x86_64, input sintetico",
+      "differences": "JSON pennello e casi modello verificati; round trip end-to-end completo di set/librerie/Files non verificato; formati proprietari non implementati",
       "status": "parziale"
     },
     {
@@ -609,8 +609,8 @@
       "interaction": "Renderer comune, Studio, Files, persistenza",
       "id": "BR-14",
       "implementation": "Brushes/BrushModels.swift + BrushLibraryView.swift",
-      "test": "AtelierTests/BrushTests.swift definito; esecuzione nativa non effettuata in Windows",
-      "differences": "modello e UI presenti; formato JSON Atelier originale, gestione completa set/librerie e flussi UI da verificare",
+      "test": "customBrushSurvivesSaveReopenAndJSONRoundTrip + importRejectsInvalidReferencesAndParametersWithoutMutation passati; libreria vuota esportata; run #6 40763569979, commit 5871e5dfe7a1da879806fd86e737598ec242bb3a; iOS Simulator26.2 x86_64, input sintetico",
+      "differences": "JSON pennello e casi modello verificati; round trip end-to-end completo di set/librerie/Files non verificato; formati proprietari non implementati",
       "status": "parziale"
     },
     {
@@ -622,8 +622,8 @@
       "interaction": "Renderer comune, Studio, Files, persistenza",
       "id": "BR-15",
       "implementation": "Brushes/BrushModels.swift + BrushLibraryView.swift",
-      "test": "AtelierTests/BrushTests.swift definito; esecuzione nativa non effettuata in Windows",
-      "differences": "modello e UI presenti; formato JSON Atelier originale, gestione completa set/librerie e flussi UI da verificare",
+      "test": "customBrushSurvivesSaveReopenAndJSONRoundTrip + movingAndRestoringPresetsKeepsPersonalWork passati; run #6 40763569979, commit 5871e5dfe7a1da879806fd86e737598ec242bb3a; iOS Simulator26.2 x86_64, input sintetico",
+      "differences": "operazioni di modello in casi selezionati; flusso UI, riavvio del processo e parità 5.4.14 non verificati",
       "status": "parziale"
     },
     {
@@ -635,8 +635,8 @@
       "interaction": "Renderer comune, Studio, Files, persistenza",
       "id": "BR-16",
       "implementation": "Brushes/BrushModels.swift + BrushLibraryView.swift",
-      "test": "AtelierTests/BrushTests.swift definito; esecuzione nativa non effettuata in Windows",
-      "differences": "modello e UI presenti; formato JSON Atelier originale, gestione completa set/librerie e flussi UI da verificare",
+      "test": "customBrushSurvivesSaveReopenAndJSONRoundTrip passato: parametri/seed/asset/metadati conservati con nuova istanza store; run #6 40763569979, commit 5871e5dfe7a1da879806fd86e737598ec242bb3a; iOS Simulator26.2 x86_64, input sintetico",
+      "differences": "persistenza di modello provata; bozza/annulla/conferma UI e riavvio completo del processo non verificati",
       "status": "parziale"
     },
     {
@@ -648,8 +648,8 @@
       "interaction": "Renderer comune, Studio, Files, persistenza",
       "id": "BR-17",
       "implementation": "Resources/BrushCatalog.json; BrushShape-*.png; BrushGrain-*.png; scripts/generate_catalog.py",
-      "test": "validatore IPA Windows:18x10 preset nuovi+12 basi,12 PNG128x128 incluse; run #4 40760299865, commit f10dfb4b05c82b17bbef5a9bbeb1fa4d4d80a558",
-      "differences": "inclusione offline delle risorse provata; primo avvio, comportamento e differenze qualitative non verificati; modifiche successive richiedono nuova build",
+      "test": "validatore IPA e bundledCatalogContainsDistinctConfigurations passati:18x10+12basi; testCatalogComparisonFromActualMetalRenderer:192hash distinti; run #6 40763569979, commit 5871e5dfe7a1da879806fd86e737598ec242bb3a; iOS Simulator26.2 x86_64, input sintetico",
+      "differences": "risorse incluse e renderer eseguito; primo avvio offline e qualità completa della dotazione non verificati",
       "status": "parziale"
     },
     {
@@ -661,7 +661,7 @@
       "interaction": "Renderer comune, Studio, Files, persistenza",
       "id": "BR-18",
       "implementation": "dodici basi originali separate nel catalogo; BRUSH_PARITY.md",
-      "test": "test native definiti ove presenti; non eseguiti in Windows",
+      "test": "nessuna prova pertinente registrata per questa funzione; la suite15/15 copre solo i casi di docs/NATIVE_TEST_RESULTS.md",
       "differences": "inventario individuale Classic completo assente; nessuna pretesa di equivalenza proprietaria",
       "status": "parziale"
     },
@@ -674,8 +674,8 @@
       "interaction": "Renderer comune, Studio, Files, persistenza",
       "id": "BR-19",
       "implementation": "Resources/BrushCatalog.json; BrushShape-*.png; BrushGrain-*.png; scripts/generate_catalog.py",
-      "test": "controlli catalogo nel generatore; consultare rapporto locale, prove qualitative non eseguite",
-      "differences": "180 configurazioni originali +12 basi; differenze JSON non certificano segni distinti; tavola GPU e confronto mancanti",
+      "test": "testCatalogComparisonFromActualMetalRenderer passato: tavola PNG reale192preset,192hash distinti; allegati xcresult estratti; run #6 40763569979, commit 5871e5dfe7a1da879806fd86e737598ec242bb3a; iOS Simulator26.2 x86_64, input sintetico",
+      "differences": "differenze fra famiglie visibili ma molte varianti simili; hash unici non dimostrano qualità sufficiente o confronto con l’originale",
       "status": "parziale"
     },
     {
@@ -700,8 +700,8 @@
       "interaction": "Preview e canvas devono usare lo stesso motore",
       "id": "BS-01",
       "implementation": "Brushes/BrushParameters.swift + BrushStudioView.swift; Engine/StrokePlanner.swift + Paint.metal; UI/CanvasSurface.swift",
-      "test": "test native definiti ove presenti; non eseguiti in Windows",
-      "differences": "sottoinsieme collegato al motore; controlli mancanti e approssimazioni in BRUSH_PARAMETERS.md; prove pertinenti ancora da svolgere",
+      "test": "testDeterministicReplayAndSpacingAffectPixels passato: PNG cambia con spacing; run #6 40763569979, commit 5871e5dfe7a1da879806fd86e737598ec242bb3a; iOS Simulator26.2 x86_64, input sintetico",
+      "differences": "spacing provato in un caso; jitter, falloff e tutti i sottoparametri non verificati",
       "status": "parziale"
     },
     {
@@ -713,7 +713,7 @@
       "interaction": "Preview e canvas devono usare lo stesso motore",
       "id": "BS-02",
       "implementation": "Brushes/BrushParameters.swift + BrushStudioView.swift; Engine/StrokePlanner.swift + Paint.metal; UI/CanvasSurface.swift",
-      "test": "test native definiti ove presenti; non eseguiti in Windows",
+      "test": "nessuna prova pertinente registrata per questa funzione; la suite15/15 copre solo i casi di docs/NATIVE_TEST_RESULTS.md",
       "differences": "sottoinsieme collegato al motore; controlli mancanti e approssimazioni in BRUSH_PARAMETERS.md; prove pertinenti ancora da svolgere",
       "status": "parziale"
     },
@@ -726,8 +726,8 @@
       "interaction": "Preview e canvas devono usare lo stesso motore",
       "id": "BS-03",
       "implementation": "Brushes/BrushParameters.swift + BrushStudioView.swift; Engine/StrokePlanner.swift + Paint.metal; UI/CanvasSurface.swift",
-      "test": "test native definiti ove presenti; non eseguiti in Windows",
-      "differences": "sottoinsieme collegato al motore; controlli mancanti e approssimazioni in BRUSH_PARAMETERS.md; prove pertinenti ancora da svolgere",
+      "test": "testDeterministicReplayAndSpacingAffectPixels passato: PNG cambia con taperStart/taperSize; run #6 40763569979, commit 5871e5dfe7a1da879806fd86e737598ec242bb3a; iOS Simulator26.2 x86_64, input sintetico",
+      "differences": "un caso di variazione combinata; taper completo dito/Pencil e parità originale non verificati",
       "status": "parziale"
     },
     {
@@ -739,7 +739,7 @@
       "interaction": "Preview e canvas devono usare lo stesso motore",
       "id": "BS-04",
       "implementation": "Brushes/BrushParameters.swift + BrushStudioView.swift; Engine/StrokePlanner.swift + Paint.metal; UI/CanvasSurface.swift",
-      "test": "test native definiti ove presenti; non eseguiti in Windows",
+      "test": "nessuna prova pertinente registrata per questa funzione; la suite15/15 copre solo i casi di docs/NATIVE_TEST_RESULTS.md",
       "differences": "sottoinsieme collegato al motore; controlli mancanti e approssimazioni in BRUSH_PARAMETERS.md; prove pertinenti ancora da svolgere",
       "status": "parziale"
     },
@@ -752,8 +752,8 @@
       "interaction": "Preview e canvas devono usare lo stesso motore",
       "id": "BS-05",
       "implementation": "Brushes/BrushParameters.swift + BrushStudioView.swift; Engine/StrokePlanner.swift + Paint.metal; UI/CanvasSurface.swift",
-      "test": "test native definiti ove presenti; non eseguiti in Windows",
-      "differences": "sottoinsieme collegato al motore; controlli mancanti e approssimazioni in BRUSH_PARAMETERS.md; prove pertinenti ancora da svolgere",
+      "test": "testDeterministicReplayAndSpacingAffectPixels passato: PNG cambia usando grana charcoal e profondita1; run #6 40763569979, commit 5871e5dfe7a1da879806fd86e737598ec242bb3a; iOS Simulator26.2 x86_64, input sintetico",
+      "differences": "variazione combinata di sorgente/profondità; altri sottoparametri e continuità della grana ai bordi non verificati",
       "status": "parziale"
     },
     {
@@ -765,7 +765,7 @@
       "interaction": "Preview e canvas devono usare lo stesso motore",
       "id": "BS-06",
       "implementation": "Brushes/BrushParameters.swift + BrushStudioView.swift; Engine/StrokePlanner.swift + Paint.metal; UI/CanvasSurface.swift",
-      "test": "test native definiti ove presenti; non eseguiti in Windows",
+      "test": "nessuna prova pertinente registrata per questa funzione; la suite15/15 copre solo i casi di docs/NATIVE_TEST_RESULTS.md",
       "differences": "sottoinsieme collegato al motore; controlli mancanti e approssimazioni in BRUSH_PARAMETERS.md; prove pertinenti ancora da svolgere",
       "status": "parziale"
     },
@@ -778,7 +778,7 @@
       "interaction": "Preview e canvas devono usare lo stesso motore",
       "id": "BS-07",
       "implementation": "Brushes/BrushParameters.swift + BrushStudioView.swift; Engine/StrokePlanner.swift + Paint.metal; UI/CanvasSurface.swift",
-      "test": "test native definiti ove presenti; non eseguiti in Windows",
+      "test": "nessuna prova pertinente registrata per questa funzione; la suite15/15 copre solo i casi di docs/NATIVE_TEST_RESULTS.md",
       "differences": "sottoinsieme collegato al motore; controlli mancanti e approssimazioni in BRUSH_PARAMETERS.md; prove pertinenti ancora da svolgere",
       "status": "parziale"
     },
@@ -791,8 +791,8 @@
       "interaction": "Preview e canvas devono usare lo stesso motore",
       "id": "BS-08",
       "implementation": "Brushes/BrushParameters.swift + BrushStudioView.swift; Engine/StrokePlanner.swift + Paint.metal; UI/CanvasSurface.swift",
-      "test": "test native definiti ove presenti; non eseguiti in Windows",
-      "differences": "sottoinsieme collegato al motore; controlli mancanti e approssimazioni in BRUSH_PARAMETERS.md; prove pertinenti ancora da svolgere",
+      "test": "testDeterministicReplayAndSpacingAffectPixels passato: PNG cambia con hueJitter; run #6 40763569979, commit 5871e5dfe7a1da879806fd86e737598ec242bb3a; iOS Simulator26.2 x86_64, input sintetico",
+      "differences": "un controllo provato; tutte le dinamiche colore, input Pencil reali e parità non verificati",
       "status": "parziale"
     },
     {
@@ -804,7 +804,7 @@
       "interaction": "Preview e canvas devono usare lo stesso motore",
       "id": "BS-09",
       "implementation": "Brushes/BrushParameters.swift + BrushStudioView.swift; Engine/StrokePlanner.swift + Paint.metal; UI/CanvasSurface.swift",
-      "test": "test native definiti ove presenti; non eseguiti in Windows",
+      "test": "nessuna prova pertinente registrata per questa funzione; la suite15/15 copre solo i casi di docs/NATIVE_TEST_RESULTS.md",
       "differences": "sottoinsieme collegato al motore; controlli mancanti e approssimazioni in BRUSH_PARAMETERS.md; prove pertinenti ancora da svolgere",
       "status": "parziale"
     },
@@ -817,8 +817,8 @@
       "interaction": "Preview e canvas devono usare lo stesso motore",
       "id": "BS-10",
       "implementation": "Brushes/BrushParameters.swift + BrushStudioView.swift; Engine/StrokePlanner.swift + Paint.metal; UI/CanvasSurface.swift",
-      "test": "test native definiti ove presenti; non eseguiti in Windows",
-      "differences": "sottoinsieme collegato al motore; controlli mancanti e approssimazioni in BRUSH_PARAMETERS.md; prove pertinenti ancora da svolgere",
+      "test": "testDeterministicReplayAndSpacingAffectPixels passato: PNG cambia con pressureSize/pressureCurve; run #6 40763569979, commit 5871e5dfe7a1da879806fd86e737598ec242bb3a; iOS Simulator26.2 x86_64, input sintetico",
+      "differences": "pressione sintetica; sensori Pencil reali, grafici a nodi e tutte le risposte non verificati",
       "status": "parziale"
     },
     {
@@ -830,7 +830,7 @@
       "interaction": "Preview e canvas devono usare lo stesso motore",
       "id": "BS-11",
       "implementation": "Brushes/BrushParameters.swift + BrushStudioView.swift; Engine/StrokePlanner.swift + Paint.metal; UI/CanvasSurface.swift",
-      "test": "test native definiti ove presenti; non eseguiti in Windows",
+      "test": "nessuna prova pertinente registrata per questa funzione; la suite15/15 copre solo i casi di docs/NATIVE_TEST_RESULTS.md",
       "differences": "sottoinsieme collegato al motore; controlli mancanti e approssimazioni in BRUSH_PARAMETERS.md; prove pertinenti ancora da svolgere",
       "status": "parziale"
     },
@@ -856,7 +856,7 @@
       "interaction": "Preview e canvas devono usare lo stesso motore",
       "id": "BS-13",
       "implementation": "Brushes/BrushParameters.swift + BrushStudioView.swift; Engine/StrokePlanner.swift + Paint.metal; UI/CanvasSurface.swift",
-      "test": "test native definiti ove presenti; non eseguiti in Windows",
+      "test": "nessuna prova pertinente registrata per questa funzione; la suite15/15 copre solo i casi di docs/NATIVE_TEST_RESULTS.md",
       "differences": "sottoinsieme collegato al motore; controlli mancanti e approssimazioni in BRUSH_PARAMETERS.md; prove pertinenti ancora da svolgere",
       "status": "parziale"
     },
@@ -869,8 +869,8 @@
       "interaction": "Preview e canvas devono usare lo stesso motore",
       "id": "BS-14",
       "implementation": "Brushes/BrushParameters.swift + BrushStudioView.swift; Engine/StrokePlanner.swift + Paint.metal; UI/CanvasSurface.swift",
-      "test": "test native definiti ove presenti; non eseguiti in Windows",
-      "differences": "sottoinsieme collegato al motore; controlli mancanti e approssimazioni in BRUSH_PARAMETERS.md; prove pertinenti ancora da svolgere",
+      "test": "customBrushSurvivesSaveReopenAndJSONRoundTrip passato: parametri/seed/asset/metadati conservati con nuova istanza store; run #6 40763569979, commit 5871e5dfe7a1da879806fd86e737598ec242bb3a; iOS Simulator26.2 x86_64, input sintetico",
+      "differences": "persistenza di modello provata; bozza/annulla/conferma UI e riavvio completo del processo non verificati",
       "status": "parziale"
     },
     {
@@ -882,7 +882,7 @@
       "interaction": "Preview e canvas devono usare lo stesso motore",
       "id": "BS-15",
       "implementation": "Engine/StrokePlanner.swift — dualEnabled/dualScale/dualRotation/dualOpacity",
-      "test": "test native definiti ove presenti; non eseguiti in Windows",
+      "test": "nessuna prova pertinente registrata per questa funzione; la suite15/15 copre solo i casi di docs/NATIVE_TEST_RESULTS.md",
       "differences": "seconda impronta della stessa sorgente; due configurazioni indipendenti non implementate",
       "status": "parziale"
     },
@@ -895,7 +895,7 @@
       "interaction": "Preview e canvas devono usare lo stesso motore",
       "id": "BS-16",
       "implementation": "Brushes/BrushParameters.swift + BrushStudioView.swift; Engine/StrokePlanner.swift + Paint.metal; UI/CanvasSurface.swift",
-      "test": "test native definiti ove presenti; non eseguiti in Windows",
+      "test": "nessuna prova pertinente registrata per questa funzione; la suite15/15 copre solo i casi di docs/NATIVE_TEST_RESULTS.md",
       "differences": "sottoinsieme collegato al motore; controlli mancanti e approssimazioni in BRUSH_PARAMETERS.md; prove pertinenti ancora da svolgere",
       "status": "parziale"
     },
@@ -908,8 +908,8 @@
       "interaction": "Preview e canvas devono usare lo stesso motore",
       "id": "BS-17",
       "implementation": "Brushes/BrushParameters.swift + BrushStudioView.swift; Engine/StrokePlanner.swift + Paint.metal; UI/CanvasSurface.swift",
-      "test": "test native definiti ove presenti; non eseguiti in Windows",
-      "differences": "sottoinsieme collegato al motore; controlli mancanti e approssimazioni in BRUSH_PARAMETERS.md; prove pertinenti ancora da svolgere",
+      "test": "customBrushSurvivesSaveReopenAndJSONRoundTrip passato: parametri/seed/asset/metadati conservati con nuova istanza store; run #6 40763569979, commit 5871e5dfe7a1da879806fd86e737598ec242bb3a; iOS Simulator26.2 x86_64, input sintetico",
+      "differences": "persistenza di modello provata; bozza/annulla/conferma UI e riavvio completo del processo non verificati",
       "status": "parziale"
     },
     {
@@ -921,7 +921,7 @@
       "interaction": "Preview e canvas devono usare lo stesso motore",
       "id": "BS-18",
       "implementation": "Brushes/BrushParameters.swift + BrushStudioView.swift; Engine/StrokePlanner.swift + Paint.metal; UI/CanvasSurface.swift",
-      "test": "test native definiti ove presenti; non eseguiti in Windows",
+      "test": "nessuna prova pertinente registrata per questa funzione; la suite15/15 copre solo i casi di docs/NATIVE_TEST_RESULTS.md",
       "differences": "sottoinsieme collegato al motore; controlli mancanti e approssimazioni in BRUSH_PARAMETERS.md; prove pertinenti ancora da svolgere",
       "status": "parziale"
     },
@@ -934,7 +934,7 @@
       "interaction": "Compositing, selezione, pennelli, undo e formati",
       "id": "LY-01",
       "implementation": "Model/PaintDocument.swift; Engine/MetalPainter.swift",
-      "test": "test native definiti ove presenti; non eseguiti in Windows",
+      "test": "nessuna prova pertinente registrata per questa funzione; la suite15/15 copre solo i casi di docs/NATIVE_TEST_RESULTS.md",
       "differences": "operazioni di modello presenti; gestione UI e undo/hardware da verificare; sottocasi incompleti",
       "status": "parziale"
     },
@@ -973,7 +973,7 @@
       "interaction": "Compositing, selezione, pennelli, undo e formati",
       "id": "LY-04",
       "implementation": "Model/PaintDocument.swift; Engine/MetalPainter.swift",
-      "test": "test native definiti ove presenti; non eseguiti in Windows",
+      "test": "nessuna prova pertinente registrata per questa funzione; la suite15/15 copre solo i casi di docs/NATIVE_TEST_RESULTS.md",
       "differences": "operazioni di modello presenti; gestione UI e undo/hardware da verificare; sottocasi incompleti",
       "status": "parziale"
     },
@@ -986,7 +986,7 @@
       "interaction": "Compositing, selezione, pennelli, undo e formati",
       "id": "LY-05",
       "implementation": "Model/PaintDocument.swift; Engine/MetalPainter.swift",
-      "test": "test native definiti ove presenti; non eseguiti in Windows",
+      "test": "nessuna prova pertinente registrata per questa funzione; la suite15/15 copre solo i casi di docs/NATIVE_TEST_RESULTS.md",
       "differences": "operazioni di modello presenti; gestione UI e undo/hardware da verificare; sottocasi incompleti",
       "status": "parziale"
     },
@@ -999,7 +999,7 @@
       "interaction": "Compositing, selezione, pennelli, undo e formati",
       "id": "LY-06",
       "implementation": "Model/PaintDocument.swift; Engine/MetalPainter.swift",
-      "test": "test native definiti ove presenti; non eseguiti in Windows",
+      "test": "nessuna prova pertinente registrata per questa funzione; la suite15/15 copre solo i casi di docs/NATIVE_TEST_RESULTS.md",
       "differences": "operazioni di modello presenti; gestione UI e undo/hardware da verificare; sottocasi incompleti",
       "status": "parziale"
     },
@@ -1064,7 +1064,7 @@
       "interaction": "Compositing, selezione, pennelli, undo e formati",
       "id": "LY-11",
       "implementation": "PaintLayer.blendMode; Engine/Paint.metal",
-      "test": "test native definiti ove presenti; non eseguiti in Windows",
+      "test": "nessuna prova pertinente registrata per questa funzione; la suite15/15 copre solo i casi di docs/NATIVE_TEST_RESULTS.md",
       "differences": "soltanto tre modalità nel modello corrente: normale, moltiplica, scolora; resto assente",
       "status": "parziale"
     },
@@ -1103,7 +1103,7 @@
       "interaction": "Compositing, selezione, pennelli, undo e formati",
       "id": "LY-14",
       "implementation": "Model/PaintDocument.swift; Engine/MetalPainter.swift",
-      "test": "test native definiti ove presenti; non eseguiti in Windows",
+      "test": "nessuna prova pertinente registrata per questa funzione; la suite15/15 copre solo i casi di docs/NATIVE_TEST_RESULTS.md",
       "differences": "operazioni di modello presenti; gestione UI e undo/hardware da verificare; sottocasi incompleti",
       "status": "parziale"
     },
@@ -1116,7 +1116,7 @@
       "interaction": "Compositing, selezione, pennelli, undo e formati",
       "id": "LY-15",
       "implementation": "Model/PaintDocument.swift; Engine/MetalPainter.swift",
-      "test": "test native definiti ove presenti; non eseguiti in Windows",
+      "test": "nessuna prova pertinente registrata per questa funzione; la suite15/15 copre solo i casi di docs/NATIVE_TEST_RESULTS.md",
       "differences": "operazioni di modello presenti; gestione UI e undo/hardware da verificare; sottocasi incompleti",
       "status": "parziale"
     },
@@ -1142,7 +1142,7 @@
       "interaction": "Pennello, profili, livelli, riempimenti, clipboard",
       "id": "CO-01",
       "implementation": "UI/AtelierColors.swift",
-      "test": "test native definiti ove presenti; non eseguiti in Windows",
+      "test": "nessuna prova pertinente registrata per questa funzione; la suite15/15 copre solo i casi di docs/NATIVE_TEST_RESULTS.md",
       "differences": "selettori originali con RGB/HSB/hex, cronologia e palette locali semplici; armonie, organizzazione completa e parità UI mancanti",
       "status": "parziale"
     },
@@ -1155,7 +1155,7 @@
       "interaction": "Pennello, profili, livelli, riempimenti, clipboard",
       "id": "CO-02",
       "implementation": "UI/AtelierColors.swift",
-      "test": "test native definiti ove presenti; non eseguiti in Windows",
+      "test": "nessuna prova pertinente registrata per questa funzione; la suite15/15 copre solo i casi di docs/NATIVE_TEST_RESULTS.md",
       "differences": "selettori originali con RGB/HSB/hex, cronologia e palette locali semplici; armonie, organizzazione completa e parità UI mancanti",
       "status": "parziale"
     },
@@ -1181,7 +1181,7 @@
       "interaction": "Pennello, profili, livelli, riempimenti, clipboard",
       "id": "CO-04",
       "implementation": "UI/AtelierColors.swift",
-      "test": "test native definiti ove presenti; non eseguiti in Windows",
+      "test": "nessuna prova pertinente registrata per questa funzione; la suite15/15 copre solo i casi di docs/NATIVE_TEST_RESULTS.md",
       "differences": "selettori originali con RGB/HSB/hex, cronologia e palette locali semplici; armonie, organizzazione completa e parità UI mancanti",
       "status": "parziale"
     },
@@ -1194,7 +1194,7 @@
       "interaction": "Pennello, profili, livelli, riempimenti, clipboard",
       "id": "CO-05",
       "implementation": "UI/AtelierColors.swift",
-      "test": "test native definiti ove presenti; non eseguiti in Windows",
+      "test": "nessuna prova pertinente registrata per questa funzione; la suite15/15 copre solo i casi di docs/NATIVE_TEST_RESULTS.md",
       "differences": "selettori originali con RGB/HSB/hex, cronologia e palette locali semplici; armonie, organizzazione completa e parità UI mancanti",
       "status": "parziale"
     },
@@ -1207,7 +1207,7 @@
       "interaction": "Pennello, profili, livelli, riempimenti, clipboard",
       "id": "CO-06",
       "implementation": "UI/AtelierColors.swift",
-      "test": "test native definiti ove presenti; non eseguiti in Windows",
+      "test": "nessuna prova pertinente registrata per questa funzione; la suite15/15 copre solo i casi di docs/NATIVE_TEST_RESULTS.md",
       "differences": "selettori originali con RGB/HSB/hex, cronologia e palette locali semplici; armonie, organizzazione completa e parità UI mancanti",
       "status": "parziale"
     },
@@ -2468,7 +2468,7 @@
       "interaction": "Sistema iPadOS, toolbar, documenti, input e servizi",
       "id": "PR-03",
       "implementation": "AtelierApp.swift; UI/CanvasSurface.swift; Brushes/*.swift",
-      "test": "test native definiti ove presenti; non eseguiti in Windows",
+      "test": "nessuna prova pertinente registrata per questa funzione; la suite15/15 copre solo i casi di docs/NATIVE_TEST_RESULTS.md",
       "differences": "undo/redo da tastiera e alcune etichette accessibili; elenco completo, focus, gesti e prove assistive mancanti",
       "status": "parziale"
     },
@@ -2520,7 +2520,7 @@
       "interaction": "Sistema iPadOS, toolbar, documenti, input e servizi",
       "id": "PR-07",
       "implementation": "AtelierApp.swift; UI/CanvasSurface.swift; Brushes/*.swift",
-      "test": "test native definiti ove presenti; non eseguiti in Windows",
+      "test": "nessuna prova pertinente registrata per questa funzione; la suite15/15 copre solo i casi di docs/NATIVE_TEST_RESULTS.md",
       "differences": "undo/redo da tastiera e alcune etichette accessibili; elenco completo, focus, gesti e prove assistive mancanti",
       "status": "parziale"
     },
@@ -2754,8 +2754,8 @@
       "interaction": "Livelli, profili, testo, animazione, modelli, brush",
       "id": "FM-01",
       "implementation": "Model/PaintDocument.swift",
-      "test": "test native definiti ove presenti; non eseguiti in Windows",
-      "differences": "validazione, snapshot in memoria e scrittura atomica con recovery; crash/disk-full/GPU non provati; undo non persistito",
+      "test": "testUndoRedoReopenPreservePixelsAndParameters passato: contenuti e PNG identici dopo undo/redo e salvataggio/caricamento; run #6 40763569979, commit 5871e5dfe7a1da879806fd86e737598ec242bb3a; iOS Simulator26.2 x86_64, input sintetico",
+      "differences": "istanze documento ricreate nel medesimo test; nessun crash/process restart e non tutte le operazioni verificate",
       "status": "parziale"
     },
     {
@@ -2767,8 +2767,8 @@
       "interaction": "Livelli, profili, testo, animazione, modelli, brush",
       "id": "FM-02",
       "implementation": "Engine/MetalPainter.swift — image()",
-      "test": "test native definiti ove presenti; non eseguiti in Windows",
-      "differences": "conversione/export sRGB nel motore; flusso completo import/export non verificato",
+      "test": "testUndoRedoReopenPreservePixelsAndParameters + testCatalogComparisonFromActualMetalRenderer passati con PNG del motore; run #6 40763569979, commit 5871e5dfe7a1da879806fd86e737598ec242bb3a; iOS Simulator26.2 x86_64, input sintetico",
+      "differences": "export PNG del motore verificato nei casi sintetici; import e flusso UI completo non verificati",
       "status": "parziale"
     },
     {
@@ -2897,7 +2897,7 @@
       "interaction": "Livelli, profili, testo, animazione, modelli, brush",
       "id": "FM-12",
       "implementation": "UI/AtelierColors.swift",
-      "test": "test native definiti ove presenti; non eseguiti in Windows",
+      "test": "nessuna prova pertinente registrata per questa funzione; la suite15/15 copre solo i casi di docs/NATIVE_TEST_RESULTS.md",
       "differences": "selettori originali con RGB/HSB/hex, cronologia e palette locali semplici; armonie, organizzazione completa e parità UI mancanti",
       "status": "parziale"
     },
@@ -2975,8 +2975,8 @@
       "interaction": "Tutti i moduli e criteri A–F",
       "id": "QA-01",
       "implementation": "Engine/MetalPainter.swift + Paint.metal",
-      "test": "test native definiti ove presenti; non eseguiti in Windows",
-      "differences": "dispatch tile256 con texture full-canvas; RGBA16Float lineare/sRGB; no cache out-of-core, ICC/P3/CMYK o prestazioni misurate",
+      "test": "8RendererTests passati su motore Metal; tavola192preset estratta da xcresult; run #6 40763569979, commit 5871e5dfe7a1da879806fd86e737598ec242bb3a; iOS Simulator26.2 x86_64, input sintetico",
+      "differences": "renderer del simulatore con input sintetico; latenza/FPS/memoria iPad, tutti i casi e parità motore non verificati",
       "status": "parziale"
     },
     {
@@ -2988,8 +2988,8 @@
       "interaction": "Tutti i moduli e criteri A–F",
       "id": "QA-02",
       "implementation": "Engine/MetalPainter.swift + Paint.metal",
-      "test": "test native definiti ove presenti; non eseguiti in Windows",
-      "differences": "dispatch tile256 con texture full-canvas; RGBA16Float lineare/sRGB; no cache out-of-core, ICC/P3/CMYK o prestazioni misurate",
+      "test": "testOpaqueStrokeHasNoTransparentTileSeam passato: alpha>0.95 ai pixel x255/256/257; run #6 40763569979, commit 5871e5dfe7a1da879806fd86e737598ec242bb3a; iOS Simulator26.2 x86_64, input sintetico",
+      "differences": "solo giunto opaco senza grana; interpolazione completa, coordinate grana/pickup ai bordi e hardware non verificati",
       "status": "parziale"
     },
     {
@@ -3001,7 +3001,7 @@
       "interaction": "Tutti i moduli e criteri A–F",
       "id": "QA-03",
       "implementation": "Engine/MetalPainter.swift + Paint.metal",
-      "test": "test native definiti ove presenti; non eseguiti in Windows",
+      "test": "nessuna prova pertinente registrata per questa funzione; la suite15/15 copre solo i casi di docs/NATIVE_TEST_RESULTS.md",
       "differences": "dispatch tile256 con texture full-canvas; RGBA16Float lineare/sRGB; no cache out-of-core, ICC/P3/CMYK o prestazioni misurate",
       "status": "parziale"
     },
@@ -3014,8 +3014,8 @@
       "interaction": "Tutti i moduli e criteri A–F",
       "id": "QA-04",
       "implementation": "Engine/MetalPainter.swift + Paint.metal",
-      "test": "test native definiti ove presenti; non eseguiti in Windows",
-      "differences": "dispatch tile256 con texture full-canvas; RGBA16Float lineare/sRGB; no cache out-of-core, ICC/P3/CMYK o prestazioni misurate",
+      "test": "testInvalidDocumentCannotReplaceCurrentState + testOverBudgetStrokeIsRejectedInsteadOfSilentlyTruncated passati; run #6 40763569979, commit 5871e5dfe7a1da879806fd86e737598ec242bb3a; iOS Simulator26.2 x86_64, input sintetico",
+      "differences": "rifiuti sintetici di dimensioni/stamp verificati; nessuna allocazione GPU fallita su iPad o misura globale memoria",
       "status": "parziale"
     },
     {
@@ -3027,8 +3027,8 @@
       "interaction": "Tutti i moduli e criteri A–F",
       "id": "QA-05",
       "implementation": "Model/PaintDocument.swift",
-      "test": "test native definiti ove presenti; non eseguiti in Windows",
-      "differences": "validazione, snapshot in memoria e scrittura atomica con recovery; crash/disk-full/GPU non provati; undo non persistito",
+      "test": "testUndoRedoReopenPreservePixelsAndParameters passato: contenuti e PNG identici dopo undo/redo e salvataggio/caricamento; run #6 40763569979, commit 5871e5dfe7a1da879806fd86e737598ec242bb3a; iOS Simulator26.2 x86_64, input sintetico",
+      "differences": "istanze documento ricreate nel medesimo test; nessun crash/process restart e non tutte le operazioni verificate",
       "status": "parziale"
     },
     {
@@ -3040,8 +3040,8 @@
       "interaction": "Tutti i moduli e criteri A–F",
       "id": "QA-06",
       "implementation": "Model/PaintDocument.swift",
-      "test": "test native definiti ove presenti; non eseguiti in Windows",
-      "differences": "validazione, snapshot in memoria e scrittura atomica con recovery; crash/disk-full/GPU non provati; undo non persistito",
+      "test": "testUndoRedoReopenPreservePixelsAndParameters + testDuplicatingDocumentPreservesOriginalFile passati; run #6 40763569979, commit 5871e5dfe7a1da879806fd86e737598ec242bb3a; iOS Simulator26.2 x86_64, input sintetico",
+      "differences": "save/load e conservazione originale provati; scrittura interrotta e crash recovery documenti non verificati",
       "status": "parziale"
     },
     {
@@ -3053,8 +3053,8 @@
       "interaction": "Tutti i moduli e criteri A–F",
       "id": "QA-07",
       "implementation": "Model/PaintDocument.swift",
-      "test": "test native definiti ove presenti; non eseguiti in Windows",
-      "differences": "validazione, snapshot in memoria e scrittura atomica con recovery; crash/disk-full/GPU non provati; undo non persistito",
+      "test": "failedDiskWriteRollsBackMemoryAndReportsError + damagedArchiveIsPreservedBeforeReplacement passati per BrushStore; run #6 40763569979, commit 5871e5dfe7a1da879806fd86e737598ec242bb3a; iOS Simulator26.2 x86_64, input sintetico",
+      "differences": "errore simulato tramite percorso non scrivibile; volume pieno reale e salvataggio documenti sotto guasto non provati",
       "status": "parziale"
     },
     {
@@ -3066,8 +3066,8 @@
       "interaction": "Tutti i moduli e criteri A–F",
       "id": "QA-08",
       "implementation": "Model/PaintDocument.swift",
-      "test": "test native definiti ove presenti; non eseguiti in Windows",
-      "differences": "validazione, snapshot in memoria e scrittura atomica con recovery; crash/disk-full/GPU non provati; undo non persistito",
+      "test": "testInvalidDocumentCannotReplaceCurrentState + testOverBudgetStrokeIsRejectedInsteadOfSilentlyTruncated passati; run #6 40763569979, commit 5871e5dfe7a1da879806fd86e737598ec242bb3a; iOS Simulator26.2 x86_64, input sintetico",
+      "differences": "rifiuti sintetici di dimensioni/stamp verificati; nessuna allocazione GPU fallita su iPad o misura globale memoria",
       "status": "parziale"
     },
     {
@@ -3079,7 +3079,7 @@
       "interaction": "Tutti i moduli e criteri A–F",
       "id": "QA-09",
       "implementation": "catalogo e asset nel bundle; documenti/librerie locali",
-      "test": "test native definiti ove presenti; non eseguiti in Windows",
+      "test": "nessuna prova pertinente registrata per questa funzione; la suite15/15 copre solo i casi di docs/NATIVE_TEST_RESULTS.md",
       "differences": "assenza di dipendenze rete nel percorso creativo; primo avvio reale offline non eseguito",
       "status": "parziale"
     },
@@ -3092,8 +3092,8 @@
       "interaction": "Tutti i moduli e criteri A–F",
       "id": "QA-10",
       "implementation": "Engine/RendererEvidence.swift; AtelierTests/RendererTests.swift",
-      "test": "test definiti; risultati effettivi da registrare dopo CI, nessun test Pencil reale",
-      "differences": "generazione tavola reale e smoke test GPU predisposti; esecuzione e analisi visiva non ancora certificate",
+      "test": "testCatalogComparisonFromActualMetalRenderer passato: tavola PNG reale192preset,192hash distinti; allegati xcresult estratti; run #6 40763569979, commit 5871e5dfe7a1da879806fd86e737598ec242bb3a; iOS Simulator26.2 x86_64, input sintetico",
+      "differences": "differenze fra famiglie visibili ma molte varianti simili; hash unici non dimostrano qualità sufficiente o confronto con l’originale",
       "status": "parziale"
     },
     {
@@ -3118,7 +3118,7 @@
       "interaction": "Tutti i moduli e criteri A–F",
       "id": "QA-12",
       "implementation": "Atelier.xcodeproj; .github/workflows/build-ipad-unsigned.yml; scripts/; README_WINDOWS.md",
-      "test": "build Release iphoneos arm64 riuscita; verifica Mach-O device2 e UIDeviceFamily=[2]; run #4 40760299865, commit f10dfb4b05c82b17bbef5a9bbeb1fa4d4d80a558",
+      "test": "build Release iphoneos arm64 riuscita; verifica Mach-O device2 e UIDeviceFamily=[2]; run #6 40763569979, commit 5871e5dfe7a1da879806fd86e737598ec242bb3a",
       "differences": "target device compilato e struttura solo iPad provata per la revisione indicata; disponibilità/installazione hardware e parità UI non verificate",
       "status": "parziale"
     },
@@ -3131,8 +3131,8 @@
       "interaction": "Tutti i moduli e criteri A–F",
       "id": "QA-13",
       "implementation": "Atelier.xcodeproj; .github/workflows/build-ipad-unsigned.yml; scripts/; README_WINDOWS.md",
-      "test": "workflow remoto eseguito e artefatto scaricato/verificato su Windows; run #4 40760299865, commit f10dfb4b05c82b17bbef5a9bbeb1fa4d4d80a558",
-      "differences": "compilazione device riuscita; run complessivo fallito nel successivo passo simulatore senza XCTest; esecuzione dello script PowerShell completa non certificata",
+      "test": "workflow completato success: build device, IPA e15test nativi; download e verificaWindows eseguiti; run #6 40763569979, commit 5871e5dfe7a1da879806fd86e737598ec242bb3a; iOS Simulator26.2 x86_64, input sintetico",
+      "differences": "script PowerShell end-to-end non certificato; test simulatore distinti dall’esecuzione su iPad reale",
       "status": "parziale"
     },
     {
@@ -3144,7 +3144,7 @@
       "interaction": "Tutti i moduli e criteri A–F",
       "id": "QA-14",
       "implementation": "Atelier.xcodeproj; .github/workflows/build-ipad-unsigned.yml; scripts/; README_WINDOWS.md",
-      "test": "IPA700285B scaricata, struttura/arm64/platform2/family2/default.metallib/assenza firme e provisioning verificati anche su Windows; run #4 40760299865, commit f10dfb4b05c82b17bbef5a9bbeb1fa4d4d80a558",
+      "test": "IPA 703220 byte scaricata, struttura/arm64/platform2/family2/default.metallib/assenza firme e provisioning verificati anche su Windows; run #6 40763569979, commit 5871e5dfe7a1da879806fd86e737598ec242bb3a",
       "differences": "verifica strutturale per il commit indicato; firma/installazione, esecuzione iPad, funzionalità e parità non sono dimostrate",
       "status": "verificata"
     },
@@ -3157,8 +3157,8 @@
       "interaction": "Tutti i moduli e criteri A–F",
       "id": "QA-15",
       "implementation": "Atelier.xcodeproj; .github/workflows/build-ipad-unsigned.yml; scripts/; README_WINDOWS.md",
-      "test": "BUILD_REPORT.json reale e SHA25605628391edc69b247e88922c53a88135ee5225b69eddf57d9b9e0c9c496f3563; run #4 40760299865, commit f10dfb4b05c82b17bbef5a9bbeb1fa4d4d80a558",
-      "differences": "rapporto della build device riuscita; test simulatore non eseguiti e sorgenti successivi non coperti dalla stessa provenienza",
+      "test": "BUILD_REPORT.json reale e SHA-256 f2d751ebae647943589f4524cca8393da98c637dfabee11b2153c62b8825f4ae; run #6 40763569979, commit 5871e5dfe7a1da879806fd86e737598ec242bb3a",
+      "differences": "rapporti reali build device e suite simulatore15/15 disponibili; hardware e parità complessiva non provati",
       "status": "verificata"
     },
     {
@@ -3187,5 +3187,20 @@
       "differences": "prodotto complessivo incompleto; costi infrastruttura e firma separati",
       "status": "parziale"
     }
-  ]
+  ],
+  "updated_date": "2026-10-29",
+  "native_test_provenance": {
+    "run_url": "https://github.com/Megami-Hylia/Atelier/actions/runs/40763569979",
+    "commit": "5871e5dfe7a1da879806fd86e737598ec242bb3a",
+    "result": "Passed",
+    "passed": 15,
+    "failed": 0,
+    "skipped": 0,
+    "platform": "iOS Simulator",
+    "architecture": "x86_64",
+    "model": "iPad (A16)",
+    "os": "26.2",
+    "physical_hardware_tests": false,
+    "comparison_to_original": false
+  }
 }

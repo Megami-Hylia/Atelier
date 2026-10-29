@@ -1,19 +1,21 @@
 # Accettazione e prove
 
-Stato al **28 ottobre 2026**: incremento di sorgenti in lavorazione; la parità complessiva non è dimostrata. I risultati di controlli automatici vanno letti nel rapporto effettivamente prodotto, non dedotti dalla presenza dei test. Una build riuscita non dimostra avvio su iPad o equivalenza con il riferimento.
+Rapporto consegna aggiornato il **29 ottobre 2026**; sorgenti, build e test CI del **28 ottobre**. La parità complessiva non è dimostrata. Il run #6 ha completato build device, packaging e 15 test sul simulatore; le prove hardware e il confronto con l’originale restano distinti.
 
 | Criterio | Stato | Evidenza / passaggio necessario |
 |---|---|---|
 | A — Sorgenti e progetto completati | **incompleto** | sorgenti dell’incremento e progetto presenti; molte voci della matrice assenti o parziali |
-| B — Build nativa device riuscita | **riuscita** | Release `iphoneos` arm64 nel [run #4](https://github.com/Megami-Hylia/Atelier/actions/runs/40760299865), commit `f10dfb4b05c82b17bbef5a9bbeb1fa4d4d80a558`; Swift e Metal compilati con Xcode 26.2/17C52, SDK 26.2 |
+| B — Build nativa device riuscita | **riuscita** | Release `iphoneos` arm64 nel [run #6](https://github.com/Megami-Hylia/Atelier/actions/runs/40763569979), commit `5871e5dfe7a1da879806fd86e737598ec242bb3a`; Swift e Metal compilati con Xcode 26.2/17C52, SDK 26.2 |
 | C — IPA unsigned confezionata e verificata | **riuscita per il commit indicato** | `Atelier-unsigned.ipa` scaricata e ricontrollata su Windows: Mach-O device arm64, family `[2]`, shader/risorse presenti, nessuna firma/provisioning |
 | D — Firma/installazione Windows | **non eseguita** | passo separato, credenziali inserite dall’utente nel programma locale |
 | E — Test iPad reale e prestazioni | **non eseguiti** | nessun iPad o Apple Pencil collegato per questa consegna |
 | F — Parità complessiva dimostrata | **non raggiunta** | [FEATURE_PARITY.md](FEATURE_PARITY.md) contiene lacune e confronti non svolti |
 
-L’IPA verificata del run #4 misura **700.285 byte** e ha SHA-256 `05628391edc69b247e88922c53a88135ee5225b69eddf57d9b9e0c9c496f3563`. Il `BUILD_REPORT.json` effettivo dichiara `BUILT_AND_STRUCTURALLY_VERIFIED`; il validatore rafforzato eseguito sul file scaricato conferma anche il catalogo incluso: due librerie, 18 set nuovi da dieci preset, 12 basi separate e tutte le dodici texture PNG originali.
+La consegna corrente è l’IPA verificata del run #6: **703.220 byte**, SHA-256 `f2d751ebae647943589f4524cca8393da98c637dfabee11b2153c62b8825f4ae`. Il `BUILD_REPORT.json` effettivo dichiara `BUILT_AND_STRUCTURALLY_VERIFIED`; i validatori rafforzati in CI e sul file scaricato in Windows confermano anche il catalogo incluso: due librerie, 18 set nuovi da dieci preset, 12 basi separate e tutte le dodici texture PNG originali. L’artefatto sostituisce le IPA dei tentativi precedenti.
 
-Il run #4 complessivamente è fallito **dopo** il caricamento dell’IPA, nella selezione della destinazione simulatore. Non è stato eseguito alcun XCTest in quel run; la build device riuscita e il fallimento del passaggio test restano due risultati distinti. Le modifiche successive ai sorgenti e ai preset non sono attribuite retroattivamente a questa IPA. L’esito di una nuova build dovrà sostituire la provenienza solo dopo download e verifica del nuovo artefatto.
+Il run #6 si è concluso con successo. La diagnostica scaricata contiene `test-summary.json` con risultato **Passed: 15 test superati, zero fallimenti, zero test saltati**; `test.log` conferma otto XCTest del renderer, sette test Swift Testing dei pennelli e `TEST SUCCEEDED`. Sono test nativi di modello/rendering su **iOS Simulator 26.2 build 23C54, modello simulato iPad (A16), architettura x86_64**, con input sintetico. Non sono prove di gesture UI complete o di Apple Pencil fisica. La cronologia dei tentativi precedenti resta in [BUILD_STATUS.md](BUILD_STATUS.md).
+
+[NATIVE_TEST_RESULTS.md](docs/NATIVE_TEST_RESULTS.md) elenca i quindici casi effettivamente eseguiti, gli allegati estratti e i limiti. La tavola grafica usa il motore Metal effettivo e contiene 192 preset con 192 hash diversi; questo non dimostra che ogni variante sia percettivamente abbastanza distinta o corrisponda a un pennello proprietario.
 
 La build unsigned non ha richiesto segreti Apple. B/C non dimostrano D/E/F né il primo avvio offline dell’app; provano compilazione device, packaging e struttura dell’artefatto descritto.
 
@@ -21,19 +23,19 @@ La build unsigned non ha richiesto segreti Apple. B/C non dimostrano D/E/F né i
 
 | ID | Procedura ripetibile | Risultato da registrare | Stato |
 |---|---|---|---|
-| BR-A01 | installazione pulita, rete disattivata, primo avvio | 18 set × 10 preset più basi separate; nessuna risorsa mancante | inclusione di catalogo/asset verificata nell’IPA run #4; primo avvio offline su app non eseguito |
+| BR-A01 | installazione pulita, rete disattivata, primo avvio | 18 set × 10 preset più basi separate; nessuna risorsa mancante | inclusione di catalogo/asset verificata nell’IPA run #6; primo avvio offline su app non eseguito |
 | BR-A02 | selezionare almeno un preset per ogni categoria e dipingere lo stesso input | nome selezionato, canvas, differenza motivata del segno | non eseguita su app |
-| BR-A03 | generare tavola dal renderer comune con input/colore/seed identici | PNG con preset annotati, parametri, versione motore e hash | `RendererEvidence.generate` e test nativo predisposti; esecuzione non certificata |
-| BR-A04 | per ogni controllo modificare solo un parametro, stessa traccia e seed | differenza pertinente, immagine prima/dopo e metrica | non eseguita; vedi matrice parametri |
-| BR-A05 | crea → duplica → rinomina → riordina → sposta → salva → termina → riapri → reset | JSON e asset prima/dopo identici salvo cambi richiesti | test di modello da eseguire; flusso UI non verificato |
-| BR-A06 | dipingere campioni multicolore; sfumare; cancellare usando la stessa famiglia | sfumino trasporta colore e gomma riduce alpha; nessun tratto colore aggiunto dalla gomma | non eseguita su GPU/hardware |
-| BR-A07 | esporta/importa singolo pennello, set e libreria originali; tentare file malformati | round trip, ordine, asset e parametri; rifiuti espliciti | export JSON Atelier di pennello/set/libreria collegato alla UI; test nativi predisposti, esito da acquisire; proprietari non supportati |
-| BR-A08 | tratto → undo → redo → salva → riapri → export | stesso risultato del renderer a parità di input; documentare tolleranza float | non eseguita su Metal |
+| BR-A03 | generare tavola dal renderer comune con input/colore/seed identici | PNG con preset annotati, parametri, versione motore e hash | eseguita su Metal nel simulatore: tavola di 192 preset e 192 hash distinti estratti da `.xcresult`; distinzione qualitativa e confronto originale ancora parziali |
+| BR-A04 | per ogni controllo modificare solo un parametro, stessa traccia e seed | differenza pertinente, immagine prima/dopo e metrica | test sintetico passato per variazioni di spacing, grana, taper, pressione e hue jitter; ogni altro controllo richiede prova pertinente, non si estende il risultato a tutti i parametri |
+| BR-A05 | crea → duplica → rinomina → riordina → sposta → salva → termina → riapri → reset | JSON e asset prima/dopo identici salvo cambi richiesti | test di modello passati per i casi documentati, con store ricreato da file; riavvio del processo e intero flusso UI non verificati |
+| BR-A06 | dipingere campioni multicolore; sfumare; cancellare usando la stessa famiglia | sfumino trasporta colore e gomma riduce alpha; nessun tratto colore aggiunto dalla gomma | test Metal sintetico passato: alpha ridotto dalla gomma e pigmento trasportato in area trasparente; tutte le famiglie, misture complete e hardware non verificati |
+| BR-A07 | esporta/importa singolo pennello, set e libreria originali; tentare file malformati | round trip, ordine, asset e parametri; rifiuti espliciti | JSON pennello round trip, libreria vuota e rifiuto dati invalidi passati nei test; copertura end-to-end di set/librerie e Files incompleta; proprietari non supportati |
+| BR-A08 | tratto → undo → redo → salva → riapri → export | stesso risultato del renderer a parità di input; documentare tolleranza float | test sintetico passato con contenuti e PNG identici dopo undo/redo e ricreazione documento da file; crash/process restart e hardware non verificati |
 | BR-A09 | ripetere BR-A02/04/06 con iPad e Pencil identificati | log hardware con sensori effettivi e capacità disponibili | non eseguita; input sintetico separato |
 
-Lo stato “catalogo numericamente valido” non soddisfa BR-A02/03/04. Due preset con JSON diverso possono restare troppo simili nel segno; la distinzione qualitativa richiede una tavola reale e il confronto visivo.
+Lo stato “catalogo numericamente valido” non soddisfa BR-A02/03/04. La tavola reale ora esiste: l’esame mostra differenze fra famiglie ma anche molte varianti simili. Né configurazioni né hash diversi sostituiscono il giudizio qualitativo o il confronto con l’originale.
 
-`AtelierTests/RendererTests.swift` contiene le seguenti prove predisposte. Il run #4 non le ha eseguite perché la destinazione simulatore non è stata risolta; l’esito funzionale resta da acquisire:
+Nel run #6 sono passate tutte le otto prove di `AtelierTests/RendererTests.swift`:
 
 - `testDeterministicReplayAndSpacingAffectPixels`: replica input e varia spacing, grana, taper, pressione e colore, cercando differenze nei pixel.
 - `testUndoRedoReopenPreservePixelsAndParameters`: confronta contenuto e output dopo undo/redo e riapertura.
@@ -44,7 +46,7 @@ Lo stato “catalogo numericamente valido” non soddisfa BR-A02/03/04. Due pres
 - `testOverBudgetStrokeIsRejectedInsteadOfSilentlyTruncated`: richiede un errore esplicito per il superamento del limite di stamp, senza dichiarare un tratto troncato come rendering completo.
 - `testDuplicatingDocumentPreservesOriginalFile`: verifica che la copia di un documento non alteri il file originale.
 
-`BrushTests.swift` esercita persistenza, ripristino, validazione e JSON originali. L’esistenza dei test non costituisce un risultato di esecuzione. Una differenza di PNG prova un effetto, ma non da sola fedeltà qualitativa o equivalenza fisica con il riferimento.
+Sono passate anche le sette prove di `BrushTests.swift`: persistenza/JSON round trip, rifiuto riferimenti e parametri invalidi, conservazione dei pennelli personali dopo ripristino, catalogo incluso, operazioni set/libreria, rollback dopo errore di scrittura simulato e conservazione dell’archivio corrotto in recovery. Il rapporto citato descrive esattamente i casi; una differenza di PNG prova un effetto ma non da sola fedeltà qualitativa o equivalenza con il riferimento.
 
 La review e le correzioni sul percorso di salvataggio e allocazione sono in [STORAGE_AUDIT.md](STORAGE_AUDIT.md). Rimangono non eseguite le prove con disco fisicamente pieno, interruzione del processo e memoria esaurita su iPad.
 

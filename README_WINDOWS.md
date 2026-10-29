@@ -8,6 +8,8 @@ Il codice viene modificato da Windows. Xcode e gli SDK Apple compilano su macOS 
 
 Consultare [BUILD_STATUS.md](BUILD_STATUS.md), [FEATURE_PARITY.md](FEATURE_PARITY.md) e il rapporto della specifica esecuzione CI. Il progetto non è dichiarato completo o identico a Procreate. Versione di iPadOS e modello iPad/Pencil dell’utente non sono ancora noti: la compatibilità del dispositivo e la firma/installazione non sono state provate in questa sessione.
 
+La consegna corrente è stata **realmente compilata e confezionata** nel [run #6](https://github.com/Megami-Hylia/Atelier/actions/runs/40763569979), commit `5871e5dfe7a1da879806fd86e737598ec242bb3a`: `Atelier-unsigned.ipa`, 703220 byte, SHA-256 `f2d751ebae647943589f4524cca8393da98c637dfabee11b2153c62b8825f4ae`. Il download è stato verificato nuovamente su Windows. Il workflow è concluso con successo e ha superato **15 test nativi su simulatore iPad: zero falliti, zero saltati**. Questi test non dimostrano prove Pencil o prestazioni su hardware reale.
+
 Repository creato privato: [Megami-Hylia/Atelier](https://github.com/Megami-Hylia/Atelier). Le credenziali GitHub e quelle Apple svolgono ruoli diversi. Nessun segreto Apple è necessario o letto dal workflow.
 
 ## Prerequisiti e costi della build
@@ -56,6 +58,8 @@ Controlla inoltre l’effettivo `BrushCatalog.json` incluso nel bundle: schema1,
 Il progetto imposta `TARGETED_DEVICE_FAMILY=2`, `SUPPORTS_MACCATALYST=NO`, `SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD=NO` e `SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD=NO`. Non esistono target iPhone, Mac, Android o web. `iphonesimulator` serve unicamente ai test iPad e non entra nell’IPA. Un’eventuale distribuzione App Store richiederebbe separatamente una configurazione App Store Connect coerente e l’esclusione della disponibilità sui Mac Apple Silicon; non viene pubblicato nulla in questo flusso.
 
 I test creano un iPad(A16) simulato dedicato sul runtime26.2, con nome univoco per il run, senza riutilizzare gli snapshot preconfigurati dell’immagine. Il boot ha un limite di 300 secondi. Il cleanup riguarda soltanto l’UUID creato dallo script. Un timeout produce una diagnostica esplicita e non diventa un test superato. `test-summary.json` contiene il riepilogo XCTest effettivo, oppure indica che non è disponibile; i PNG allegati provengono dalle prove realmente eseguite.
+
+Nel run #6 il boot è riuscito e [TEST_SUMMARY.json](docs/verification/TEST_SUMMARY.json) conferma **15/15 test superati** su iPad(A16) simulato, iOS26.2 (23C54), x86_64: otto XCTest del renderer/documenti e sette test Swift Testing della libreria pennelli. La [tavola dei 192 preset](docs/verification/BRUSH_COMPARISON.png) è stata generata dal renderer Metal effettivo con input sintetico e seed42; il [manifest](docs/verification/BRUSH_RENDER_MANIFEST.json) contiene 192 hash distinti. Questo dimostra la distinzione dei pixel per quella traiettoria e non certifica equivalenza artistica con Procreate o comportamento della Pencil fisica. La diagnostica CI include log, `.xcresult` e allegati originali.
 
 ## Firma e installazione da Windows: Sideloadly
 

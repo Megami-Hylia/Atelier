@@ -1,0 +1,119 @@
+{
+  "status": "BUILT_AND_STRUCTURALLY_VERIFIED",
+  "commit": "5871e5dfe7a1da879806fd86e737598ec242bb3a",
+  "utc": "2026-10-28T20:32:30.513859+00:00",
+  "runner": "macOS",
+  "runner_arch": "X64",
+  "runner_image": "macos26",
+  "runner_image_version": "20260824.0517.1",
+  "workflow_run_url": "https://github.com/Megami-Hylia/Atelier/actions/runs/40763569979",
+  "xcode": "Xcode 26.2\nBuild version 17C52",
+  "sdk": "26.2",
+  "macos": "ProductName:\t\tmacOS\nProductVersion:\t\t26.6.1\nBuildVersion:\t\t25G76",
+  "swift": "Apple Swift version 6.2.3 (swiftlang-6.2.3.3.21 clang-1700.6.3.2)\nTarget: x86_64-apple-macosx26.0",
+  "metal": "Apple metal version 32023.864 (metalfe-32023.864)\nTarget: air64-apple-darwin25.6.0\nThread model: posix\nInstalledDir: /Users/runner/Library/Developer/DVTDownloads/MetalToolchain/mounts/058e1b31129b642e40598a87b55aa54b2a29e538/Metal.xctoolchain/usr/metal/current/bin",
+  "ipa": {
+    "result": "passed",
+    "ipa": "Atelier-unsigned.ipa",
+    "sha256": "f2d751ebae647943589f4524cca8393da98c637dfabee11b2153c62b8825f4ae",
+    "bytes": 703220,
+    "bundle_identifier": "org.atelier.ipad",
+    "executable": "Atelier",
+    "device_family": [
+      2
+    ],
+    "platform": "iphoneos",
+    "minimum_os": "18.0",
+    "metal_library": "Payload/Atelier.app/default.metallib",
+    "mach_o_binaries": {
+      "Payload/Atelier.app/Atelier": [
+        {
+          "architecture": "arm64",
+          "platform": "iOS device",
+          "platform_id": 2,
+          "filetype": 2,
+          "code_signature": false
+        }
+      ]
+    },
+    "bundled_brushes": {
+      "schema_version": 1,
+      "libraries": 2,
+      "new_sets": 18,
+      "presets_per_new_set": 10,
+      "new_presets": 180,
+      "classic_foundations": 12,
+      "total_presets": 192,
+      "assets": [
+        {
+          "path": "Payload/Atelier.app/BrushShape-bristle.png",
+          "width": 128,
+          "height": 128
+        },
+        {
+          "path": "Payload/Atelier.app/BrushShape-chisel.png",
+          "width": 128,
+          "height": 128
+        },
+        {
+          "path": "Payload/Atelier.app/BrushShape-flat.png",
+          "width": 128,
+          "height": 128
+        },
+        {
+          "path": "Payload/Atelier.app/BrushShape-fleck.png",
+          "width": 128,
+          "height": 128
+        },
+        {
+          "path": "Payload/Atelier.app/BrushShape-round.png",
+          "width": 128,
+          "height": 128
+        },
+        {
+          "path": "Payload/Atelier.app/BrushShape-soft.png",
+          "width": 128,
+          "height": 128
+        },
+        {
+          "path": "Payload/Atelier.app/BrushGrain-canvas.png",
+          "width": 128,
+          "height": 128
+        },
+        {
+          "path": "Payload/Atelier.app/BrushGrain-charcoal.png",
+          "width": 128,
+          "height": 128
+        },
+        {
+          "path": "Payload/Atelier.app/BrushGrain-noise.png",
+          "width": 128,
+          "height": 128
+        },
+        {
+          "path": "Payload/Atelier.app/BrushGrain-none.png",
+          "width": 128,
+          "height": 128
+        },
+        {
+          "path": "Payload/Atelier.app/BrushGrain-paper.png",
+          "width": 128,
+          "height": 128
+        },
+        {
+          "path": "Payload/Atelier.app/BrushGrain-wash.png",
+          "width": 128,
+          "height": 128
+        }
+      ],
+      "scope": "Offline resource inclusion and configuration validation; qualitative behavior requires renderer/device tests."
+    },
+    "provisioning_profiles": [],
+    "signatures": [],
+    "scope": "Structural validation only; no installation, hardware or parity claim."
+  },
+  "signing": "disabled; no Apple secrets used",
+  "hardware_tests": "not executed by this script",
+  "simulator_tests": "separate CI step; see test log/xcresult",
+  "parity": "not demonstrated by build"
+}

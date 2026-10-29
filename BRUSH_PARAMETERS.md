@@ -1,12 +1,16 @@
 # Matrice dei parametri pennello
 
-Revisione 2026-10-28. Baseline richiesta: Procreate 5.4.14, build non osservata. Il [manuale ufficiale corrente di Brush Studio](https://help.procreate.com/procreate/handbook/brushes/brush-studio-settings) è stato consultato per titoli e inventario; non sostituisce una verifica diretta della build richiesta.
+Revisione 29 ottobre 2026, con esiti dei test del 28 ottobre. Baseline richiesta: Procreate 5.4.14, build non osservata. Il [manuale ufficiale corrente di Brush Studio](https://help.procreate.com/procreate/handbook/brushes/brush-studio-settings) è stato consultato per titoli e inventario; non sostituisce una verifica diretta della build richiesta.
 
 I 14 titoli delle sezioni sono mantenuti nel pannello: Stroke Path, Stabilization, Taper, Shape, Grain, Rendering, Wet Mix, Color Dynamics, Dynamics, Apple Pencil, Properties, Materials, Preview, About this Brush. Le diciture con `Atelier` e `exponent` identificano esplicitamente opzioni o rappresentazioni indipendenti. In particolare la curva di pressione è un esponente, non l'editor multipunto dell'originale.
 
 ## Stato delle prove
 
-**NV** = collegamento nel sorgente identificato, risultato visivo e parità non verificati. Ogni controllo elencato scrive la propria chiave nel preset; il planner legge le chiavi e produce dati diversi di posizione, forma, texture, colore o compositing. Quattro parametri modificano solo l'anteprima, secondo il loro scopo. Il controllo statico delle chiavi non dimostra l'efficacia visiva né la precisione dell'algoritmo. Test nativi e tavole eventualmente eseguiti sono registrati separatamente nel report della sessione/CI; nessuna riga diventa verificata per la sola compilazione.
+**NV** = collegamento nel sorgente identificato, effetto isolato non verificato. **SYN** = differenza di pixel verificata con una singola chiave modificata nel test sintetico. **GRUPPO-SYN** = differenza verificata modificando insieme le chiavi o la sorgente indicata; non è una prova isolata della singola chiave. La parità con il riferimento, la risposta hardware e la verifica completa del dominio di tutti i 76 parametri restano non dimostrate, anche per le righe SYN.
+
+Il [run nativo 40763569979](https://github.com/Megami-Hylia/Atelier/actions/runs/40763569979), sorgenti `5871e5dfe7a1da879806fd86e737598ec242bb3a`, ha superato 15 test su iOS Simulator 26.2 x86_64, senza fallimenti o salti. Il test `testDeterministicReplayAndSpacingAffectPixels` modifica spacing e hue jitter separatamente; modifica invece grana insieme a depth, taper iniziale insieme alla dimensione del taper, e pressure size insieme alla curva. Non estendere l'esito a tutti i sottoparametri della categoria. La [tavola reale](docs/verification/BRUSH_COMPARISON.png) e la [revisione qualitativa](BRUSH_VISUAL_REVIEW.md) sono disponibili; non costituiscono prove Pencil né confronto con l'app originale.
+
+Ogni controllo elencato scrive la propria chiave nel preset e ha un collegamento al planner o all'anteprima. Il controllo statico delle chiavi non dimostra da solo un effetto pertinente in tutti i contesti. Quattro parametri modificano solo l'anteprima, secondo il loro scopo. La maggioranza dei controlli rimane NV.
 
 `BrushParameter.all` è la fonte dei limiti UI e di validazione. Tutti i 76 valori sono persistiti nel dizionario JSON. I preset includono inoltre forma, grana, seed e sorgenti PNG opzionali. Forme e grane sono originali. I controlli binari sono switch; conteggio e modalità sono discreti. L'area prova usa il medesimo `CanvasSurface` del documento. La bozza viene scartata con Annulla e confermata con Salva; la duplicazione in Studio resta una bozza finché non si salva. Le vecchie pennellate dell'area prova conservano i parametri con cui sono state create.
 
@@ -16,7 +20,7 @@ I limiti sono normalizzati Atelier; non sono i valori interni proprietari. Le de
 
 | Sezione | Controllo | Chiave persistita | Intervallo; default | Effetto implementato | Collegamento | Prova |
 |---|---|---|---|---|---|---|
-| Stroke Path | Spacing | `spacing` | 0.01…2; 0.08 | Distanza fra le impronte in proporzione al diametro. | `Engine/StrokePlanner.swift → Engine/Paint.metal` | NV |
+| Stroke Path | Spacing | `spacing` | 0.01…2; 0.08 | Distanza fra le impronte in proporzione al diametro. | `Engine/StrokePlanner.swift → Engine/Paint.metal` | SYN: spacing isolato |
 | Stroke Path | Spacing Jitter | `spacingJitter` | 0…1; 0 | Variazione ripetibile della distanza fra impronte. | `Engine/StrokePlanner.swift → Engine/Paint.metal` | NV |
 | Stroke Path | Jitter Lateral | `jitterLateral` | 0…1; 0 | Spostamento perpendicolare al percorso. | `Engine/StrokePlanner.swift → Engine/Paint.metal` | NV |
 | Stroke Path | Jitter Linear | `jitterLinear` | 0…1; 0 | Spostamento lungo il percorso. | `Engine/StrokePlanner.swift → Engine/Paint.metal` | NV |
@@ -26,9 +30,9 @@ I limiti sono normalizzati Atelier; non sono i valori interni proprietari. Le de
 | Stabilization | Stabilization Amount | `stabilization` | 0…1; 0 | Media delle posizioni durante il tratto. | `Engine/StrokePlanner.swift → Engine/Paint.metal` | NV |
 | Stabilization | Motion Filtering Amount | `motionFiltering` | 0…1; 0 | Ulteriore attenuazione delle deviazioni. | `Engine/StrokePlanner.swift → Engine/Paint.metal` | NV |
 | Stabilization | Motion Filtering Expression | `motionExpression` | 0…1; 0 | Recupero di una parte del movimento originale. | `Engine/StrokePlanner.swift → Engine/Paint.metal` | NV |
-| Taper | Start | `taperStart` | 0…1; 0 | Lunghezza relativa della punta iniziale. | `Engine/StrokePlanner.swift → Engine/Paint.metal` | NV |
+| Taper | Start | `taperStart` | 0…1; 0 | Lunghezza relativa della punta iniziale. | `Engine/StrokePlanner.swift → Engine/Paint.metal` | GRUPPO-SYN: start + size |
 | Taper | End | `taperEnd` | 0…1; 0 | Lunghezza relativa della punta finale; aggiornata a fine tratto. | `Engine/StrokePlanner.swift → Engine/Paint.metal` | NV |
-| Taper | Size | `taperSize` | 0…1; 1 | Riduzione del diametro alle estremità. | `Engine/StrokePlanner.swift → Engine/Paint.metal` | NV |
+| Taper | Size | `taperSize` | 0…1; 1 | Riduzione del diametro alle estremità. | `Engine/StrokePlanner.swift → Engine/Paint.metal` | GRUPPO-SYN: start + size |
 | Taper | Opacity | `taperOpacity` | 0…1; 0 | Riduzione dell'alpha alle estremità. | `Engine/StrokePlanner.swift → Engine/Paint.metal` | NV |
 | Shape | Scatter | `scatter` | 0…1; 0 | Rotazione casuale deterministica delle impronte. | `Engine/StrokePlanner.swift → Engine/Paint.metal` | NV |
 | Shape | Rotation | `rotation` | -1…1; 0 | Orientamento relativo alla tangente. | `Engine/StrokePlanner.swift → Engine/Paint.metal` | NV |
@@ -43,7 +47,7 @@ I limiti sono normalizzati Atelier; non sono i valori interni proprietari. Le de
 | Shape | Flip X | `flipX` | 0…1; 0 | Riflessione orizzontale della sorgente. | `Engine/StrokePlanner.swift → Engine/Paint.metal` | NV |
 | Shape | Flip Y | `flipY` | 0…1; 0 | Riflessione verticale della sorgente. | `Engine/StrokePlanner.swift → Engine/Paint.metal` | NV |
 | Grain | Scale | `grainScale` | 0.1…8; 1 | Scala spaziale della texture. | `Engine/StrokePlanner.swift → Engine/Paint.metal` | NV |
-| Grain | Depth | `grainDepth` | 0…1; 0 | Influenza della grana sul deposito. | `Engine/StrokePlanner.swift → Engine/Paint.metal` | NV |
+| Grain | Depth | `grainDepth` | 0…1; 0 | Influenza della grana sul deposito. | `Engine/StrokePlanner.swift → Engine/Paint.metal` | GRUPPO-SYN: sorgente grana + depth |
 | Grain | Movement | `grainMovement` | 0…1; 0 | Scorrimento della texture rispetto al percorso. | `Engine/StrokePlanner.swift → Engine/Paint.metal` | NV |
 | Grain | Rotation | `grainRotation` | -1…1; 0 | Rotazione delle coordinate di texture. | `Engine/StrokePlanner.swift → Engine/Paint.metal` | NV |
 | Grain | Contrast | `grainContrast` | 0…2; 1 | Contrasto della maschera di grana. | `Engine/StrokePlanner.swift → Engine/Paint.metal` | NV |
@@ -63,7 +67,7 @@ I limiti sono normalizzati Atelier; non sono i valori interni proprietari. Le de
 | Wet Mix | Attack | `wetAttack` | 0…1; 1 | Intensità del deposito umido. | `Engine/StrokePlanner.swift → Engine/Paint.metal` | NV |
 | Wet Mix | Pull | `wetPull` | 0…1; 0 | Prelievo del colore già presente prima del tratto. | `Engine/StrokePlanner.swift → Engine/Paint.metal` | NV |
 | Wet Mix | Grade | `wetGrade` | 0…1; 0 | Contrasto del colore prelevato; modello semplificato. | `Engine/StrokePlanner.swift → Engine/Paint.metal` | NV |
-| Color Dynamics | Hue | `hueJitter` | 0…1; 0 | Deviazione cromatica per impronta. | `Engine/StrokePlanner.swift → Engine/Paint.metal` | NV |
+| Color Dynamics | Hue | `hueJitter` | 0…1; 0 | Deviazione cromatica per impronta. | `Engine/StrokePlanner.swift → Engine/Paint.metal` | SYN: hue jitter isolato |
 | Color Dynamics | Saturation | `saturationJitter` | 0…1; 0 | Deviazione della saturazione per impronta. | `Engine/StrokePlanner.swift → Engine/Paint.metal` | NV |
 | Color Dynamics | Lightness / Darkness | `brightnessJitter` | 0…1; 0 | Deviazione del valore per impronta. | `Engine/StrokePlanner.swift → Engine/Paint.metal` | NV |
 | Color Dynamics | Stroke Hue | `strokeHue` | 0…1; 0 | Deviazione cromatica costante lungo il tratto. | `Engine/StrokePlanner.swift → Engine/Paint.metal` | NV |
@@ -73,11 +77,11 @@ I limiti sono normalizzati Atelier; non sono i valori interni proprietari. Le de
 | Dynamics | Speed Spacing | `speedSpacing` | 0…2; 0 | Distanza fra impronte in funzione della velocità. | `Engine/StrokePlanner.swift → Engine/Paint.metal` | NV |
 | Dynamics | Jitter Size | `sizeJitter` | 0…1; 0 | Variazione pseudocasuale del diametro. | `Engine/StrokePlanner.swift → Engine/Paint.metal` | NV |
 | Dynamics | Jitter Opacity | `opacityJitter` | 0…1; 0 | Variazione pseudocasuale dell'alpha. | `Engine/StrokePlanner.swift → Engine/Paint.metal` | NV |
-| Apple Pencil | Pressure Size | `pressureSize` | 0…1; 0.6 | Risposta del diametro alla pressione. | `Engine/StrokePlanner.swift → Engine/Paint.metal` | NV |
+| Apple Pencil | Pressure Size | `pressureSize` | 0…1; 0.6 | Risposta del diametro alla pressione. | `Engine/StrokePlanner.swift → Engine/Paint.metal` | GRUPPO-SYN: size + curva |
 | Apple Pencil | Pressure Opacity | `pressureOpacity` | 0…1; 0 | Risposta dell'alpha alla pressione. | `Engine/StrokePlanner.swift → Engine/Paint.metal` | NV |
 | Apple Pencil | Pressure Flow | `pressureFlow` | 0…1; 0 | Risposta del flusso alla pressione. | `Engine/StrokePlanner.swift → Engine/Paint.metal` | NV |
 | Apple Pencil | Pressure Bleed | `pressureBleed` | 0…1; 0 | Influenza della pressione sul prelievo del pigmento. | `Engine/StrokePlanner.swift → Engine/Paint.metal` | NV |
-| Apple Pencil | Pressure Graph · exponent | `pressureCurve` | 0.2…3; 1 | Curva di potenza; non è un grafico multipunto. | `Engine/StrokePlanner.swift → Engine/Paint.metal` | NV |
+| Apple Pencil | Pressure Graph · exponent | `pressureCurve` | 0.2…3; 1 | Curva di potenza; non è un grafico multipunto. | `Engine/StrokePlanner.swift → Engine/Paint.metal` | GRUPPO-SYN: size + curva |
 | Apple Pencil | Tilt Size | `tiltSize` | 0…1; 0 | Allargamento del segno con Pencil inclinata. | `Engine/StrokePlanner.swift → Engine/Paint.metal` | NV |
 | Apple Pencil | Tilt Opacity | `tiltOpacity` | 0…1; 0 | Variazione dell'alpha con Pencil inclinata. | `Engine/StrokePlanner.swift → Engine/Paint.metal` | NV |
 | Apple Pencil | Tilt Gradation | `tiltGradation` | 0…1; 0 | Gradazione del deposito in inclinazione. | `Engine/StrokePlanner.swift → Engine/Paint.metal` | NV |
@@ -125,4 +129,4 @@ Queste voci conservano l'intero perimetro richiesto. Non ci sono slider inattivi
 
 `BrushStore.validate` controlla versione, limiti, identificatori, riferimenti, nomi, valori finiti e intervalli. Gli asset importati devono essere PNG singoli entro512×512; il pannello converte i formati immagine consentiti tramite thumbnail senza decomprimere un'immagine enorme a risoluzione piena. L'archivio non può superare32MB in ingresso. Un file danneggiato viene conservato in una copia di recupero; se la copia non riesce, la scrittura resta bloccata. Il salvataggio JSON usa scrittura atomica e, in caso di errore, ripristina lo stato persistito precedente in memoria e mostra il problema. Nessuna di queste precauzioni costituisce una prova eseguita di power-loss o disco pieno su iPad.
 
-`AtelierTests/BrushTests.swift` predispone prove di configurazione completa dopo salvataggio/riapertura, round trip, preservazione dei byte immagine e seed, rifiuto di riferimenti/range invalidi senza mutazioni, spostamento e ripristino senza perdita dei pennelli personali, catalogo192. L'esecuzione va controllata nel report nativo. Non sono state eseguite prove con Apple Pencil reale.
+I sette test di `AtelierTests/BrushTests.swift` sono stati eseguiti con successo nel run indicato: configurazione dopo salvataggio e ricreazione dello store, round trip, preservazione dei byte immagine e seed, rifiuto dati invalidi senza mutazioni, ordine/librerie, ripristino dei personali, catalogo 192, rollback della memoria su destinazione di scrittura invalida e conservazione del file danneggiato. Non sono prove di riavvio UI completo, disco pieno reale o Apple Pencil.

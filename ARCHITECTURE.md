@@ -32,7 +32,7 @@ L’interfaccia ricostruisce la disposizione richiesta con controlli nativi atti
 
 ## Confini di verifica
 
-I test locali su Windows possono controllare catalogo, asset, configurazioni, progetto e packaging. Non compilano UIKit/Metal e non provano il comportamento GPU. La build macOS, il packaging IPA, la firma/installazione e i test hardware sono criteri distinti in [ACCEPTANCE.md](ACCEPTANCE.md). Tutto il perimetro mancante resta in [FEATURE_PARITY.md](FEATURE_PARITY.md), senza riduzioni implicite.
+I test locali su Windows controllano catalogo, asset, configurazioni, progetto e packaging; non compilano UIKit/Metal. La CI macOS del run #6 ha compilato la build device e superato quindici test di modello/rendering sul simulatore x86_64. Sono verificati alcuni scenari sintetici, fra cui replay, effetti di parametri, alpha della gomma, trasporto dello sfumino, persistenza e tavola dei preset; il rapporto dettagliato è in [NATIVE_TEST_RESULTS.md](docs/NATIVE_TEST_RESULTS.md). Non sono misure su iPad fisico o prove dell’intera UI. Build, packaging, firma/installazione e test hardware restano criteri distinti in [ACCEPTANCE.md](ACCEPTANCE.md). Il perimetro mancante rimane in [FEATURE_PARITY.md](FEATURE_PARITY.md), senza riduzioni implicite.
 
 Le correzioni emerse dalla review di persistenza e budget sono registrate in [STORAGE_AUDIT.md](STORAGE_AUDIT.md); la review dei sorgenti non sostituisce l’esecuzione dei relativi test. Il canvas segnala una sola volta lo stesso errore di rendering, lasciando accessibili undo e galleria; una revisione del documento o un nuovo input permettono un nuovo tentativo. L’apertura di file `.atelier` da Files passa dallo stesso caricamento validato dell’importazione manuale e salva prima l’eventuale documento già aperto.
 

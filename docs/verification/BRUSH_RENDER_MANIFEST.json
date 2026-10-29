@@ -1,0 +1,1545 @@
+{
+  "hardware" : "iPad",
+  "input" : "PencilSample.demo count100 size32 sRGB color.16,.35,.65 seed42",
+  "presets" : [
+    {
+      "file" : "0.png",
+      "id" : "atelier-pencils-01",
+      "name" : "Graphite Core",
+      "seed" : 42,
+      "set" : "pencils",
+      "sha256" : "1700f5c47c9a5596f6a45cf26107742a29e76a773e67dcc87c7a1cd3b4fcdb1a"
+    },
+    {
+      "file" : "1.png",
+      "id" : "atelier-pencils-02",
+      "name" : "Tilt Shading",
+      "seed" : 42,
+      "set" : "pencils",
+      "sha256" : "a9b142bd875eba13ecf656f1e62c945578d3ca93fbf50f30119298ed164bb7c6"
+    },
+    {
+      "file" : "2.png",
+      "id" : "atelier-pencils-03",
+      "name" : "Draft Point",
+      "seed" : 42,
+      "set" : "pencils",
+      "sha256" : "cf5732275c0c0ef5365b9257cab84595e64f558a8b696f24a4655f451ba71dea"
+    },
+    {
+      "file" : "3.png",
+      "id" : "atelier-pencils-04",
+      "name" : "Soft Graphite",
+      "seed" : 42,
+      "set" : "pencils",
+      "sha256" : "04a8a456ef79dd9869adeae0780955ddb803a2ca0ae2c3b056c0e89fd4a8acef"
+    },
+    {
+      "file" : "4.png",
+      "id" : "atelier-pencils-05",
+      "name" : "Grain Sketch",
+      "seed" : 42,
+      "set" : "pencils",
+      "sha256" : "b7e2b42d4e73b5cf3b4399d725254523b561976293eba8005cf5e6a400cef4e3"
+    },
+    {
+      "file" : "5.png",
+      "id" : "atelier-pencils-06",
+      "name" : "Crosshatch",
+      "seed" : 42,
+      "set" : "pencils",
+      "sha256" : "0f0c8607484e6556ef9157f4bac482e0b44b796f0ff02bded6e7ab1a4c986a8a"
+    },
+    {
+      "file" : "6.png",
+      "id" : "atelier-pencils-07",
+      "name" : "Broad Lead",
+      "seed" : 42,
+      "set" : "pencils",
+      "sha256" : "791141727704a0e6445abfc8101dddbf2da5e1aee5d2e2921db4e358987f1898"
+    },
+    {
+      "file" : "7.png",
+      "id" : "atelier-pencils-08",
+      "name" : "Contour Lead",
+      "seed" : 42,
+      "set" : "pencils",
+      "sha256" : "1125d8b5f39e6f4cd7fe023af87d16cbaa7bcb63695f91cd5d9f17d8c561af0d"
+    },
+    {
+      "file" : "8.png",
+      "id" : "atelier-pencils-09",
+      "name" : "Dust Graphite",
+      "seed" : 42,
+      "set" : "pencils",
+      "sha256" : "a4c4338a991578c653ea01441bfb75fa5277ad08df071a00572646ca1b794bec"
+    },
+    {
+      "file" : "9.png",
+      "id" : "atelier-pencils-10",
+      "name" : "Colored Core",
+      "seed" : 42,
+      "set" : "pencils",
+      "sha256" : "5e3945bba315a3ce139147a974880f7268488f9a4d08af010357c60123866a60"
+    },
+    {
+      "file" : "10.png",
+      "id" : "atelier-pens-01",
+      "name" : "Fine Nib",
+      "seed" : 42,
+      "set" : "pens",
+      "sha256" : "d60fae20acf70493265674a5f9d382eeba35070adce167dba5298d02b85beef5"
+    },
+    {
+      "file" : "11.png",
+      "id" : "atelier-pens-02",
+      "name" : "Flexible Nib",
+      "seed" : 42,
+      "set" : "pens",
+      "sha256" : "15ce516914ddd55c5df6c6de62c7408ae6bc8c132e45de2689d42439ed0dc6f1"
+    },
+    {
+      "file" : "12.png",
+      "id" : "atelier-pens-03",
+      "name" : "Technical Line",
+      "seed" : 42,
+      "set" : "pens",
+      "sha256" : "3ab7bdfc0ff4c2d56ef1cfdd5ee79dd6a3180792cb843bc325b687eefaf062d6"
+    },
+    {
+      "file" : "13.png",
+      "id" : "atelier-pens-04",
+      "name" : "Fountain Edge",
+      "seed" : 42,
+      "set" : "pens",
+      "sha256" : "e85fecc957c6f9f67fdb50221b130b9a72b9ddc99d9adbd39f7a044dab494c02"
+    },
+    {
+      "file" : "14.png",
+      "id" : "atelier-pens-05",
+      "name" : "Drawing Pen",
+      "seed" : 42,
+      "set" : "pens",
+      "sha256" : "87f8d6b3fa17ecbfa05f4499e88e4cf9437865b02d42a51d1e0c26204407dcbe"
+    },
+    {
+      "file" : "15.png",
+      "id" : "atelier-pens-06",
+      "name" : "Brush Pen",
+      "seed" : 42,
+      "set" : "pens",
+      "sha256" : "9dfeba6bb5148955d68d401d51d36cfa1e054f2e56c72ad43364c4c43dc92503"
+    },
+    {
+      "file" : "16.png",
+      "id" : "atelier-pens-07",
+      "name" : "Broad Pen",
+      "seed" : 42,
+      "set" : "pens",
+      "sha256" : "f823036563ee8e80f833fae21218b6c4868533603d2dff29423e4cbdc2d25b3b"
+    },
+    {
+      "file" : "17.png",
+      "id" : "atelier-pens-08",
+      "name" : "Contour Pen",
+      "seed" : 42,
+      "set" : "pens",
+      "sha256" : "d2bf15c6baf99a69830e31795d7e573725d877ed8f93d5168dbfd57b7be56e6d"
+    },
+    {
+      "file" : "18.png",
+      "id" : "atelier-pens-09",
+      "name" : "Broken Ink",
+      "seed" : 42,
+      "set" : "pens",
+      "sha256" : "fe01d23abdbef90a6a66967a8acc43ac0bb3e106d0b930c0d39f9b4bbb071a31"
+    },
+    {
+      "file" : "19.png",
+      "id" : "atelier-pens-10",
+      "name" : "Tinted Ink",
+      "seed" : 42,
+      "set" : "pens",
+      "sha256" : "a64513da6b3edfa33520b77eae2a0739a3b9f2fb6775f9fc6efaab92e004755a"
+    },
+    {
+      "file" : "20.png",
+      "id" : "atelier-inks-01",
+      "name" : "Dense Ink",
+      "seed" : 42,
+      "set" : "inks",
+      "sha256" : "ccf5569c3347d4361bb7f11882c01216dc638ffb699e2738f209a29855b2ff65"
+    },
+    {
+      "file" : "21.png",
+      "id" : "atelier-inks-02",
+      "name" : "Sumi Tilt",
+      "seed" : 42,
+      "set" : "inks",
+      "sha256" : "b175efe67b36bae216f9f5d1f11f7671e0dd19d9dd1e202d3bc49fbb578fe875"
+    },
+    {
+      "file" : "22.png",
+      "id" : "atelier-inks-03",
+      "name" : "Copper Point",
+      "seed" : 42,
+      "set" : "inks",
+      "sha256" : "54ee3bb6766114eddbe1c2c38d6c5a2b397ba0abf5b705c095d50bd576d7414e"
+    },
+    {
+      "file" : "23.png",
+      "id" : "atelier-inks-04",
+      "name" : "Diluted Ink",
+      "seed" : 42,
+      "set" : "inks",
+      "sha256" : "99cd002a48fc39bd335d9b23b926a61379c0a260308a3dc8fe04f6f5b864923f"
+    },
+    {
+      "file" : "24.png",
+      "id" : "atelier-inks-05",
+      "name" : "Fibre Ink",
+      "seed" : 42,
+      "set" : "inks",
+      "sha256" : "da66ea15fe1a3a8c945f2d1ac6a0f7482445e04f2efaf1e7e5891afbf7e0a574"
+    },
+    {
+      "file" : "25.png",
+      "id" : "atelier-inks-06",
+      "name" : "Rake Ink",
+      "seed" : 42,
+      "set" : "inks",
+      "sha256" : "0076f9e774c4d6942aaf695d3487d1a20055367be0f255401d816536a24397ce"
+    },
+    {
+      "file" : "26.png",
+      "id" : "atelier-inks-07",
+      "name" : "Ink Block",
+      "seed" : 42,
+      "set" : "inks",
+      "sha256" : "6d07195503c839a029a6c06a84c4f50599cef54145be24b88c987da4b4c28672"
+    },
+    {
+      "file" : "27.png",
+      "id" : "atelier-inks-08",
+      "name" : "Liner Wash",
+      "seed" : 42,
+      "set" : "inks",
+      "sha256" : "c041bb95c2e1bca4683354c32f7f64067147bc127d388e2b4d4370e40fd48a99"
+    },
+    {
+      "file" : "28.png",
+      "id" : "atelier-inks-09",
+      "name" : "Splatter Ink",
+      "seed" : 42,
+      "set" : "inks",
+      "sha256" : "c2a00a38d57346093658ae122a263025f3f4b246df3126244207c98a27fa68f3"
+    },
+    {
+      "file" : "29.png",
+      "id" : "atelier-inks-10",
+      "name" : "Chromatic Ink",
+      "seed" : 42,
+      "set" : "inks",
+      "sha256" : "794c9297202f393d59317aab205d314e1f5b422a06d982af327358f372cbf29b"
+    },
+    {
+      "file" : "30.png",
+      "id" : "atelier-markers-01",
+      "name" : "Flat Marker",
+      "seed" : 42,
+      "set" : "markers",
+      "sha256" : "c4d844959237213c6dc90213783baeb6262b8d82cb7279ccc7c5eda412c88536"
+    },
+    {
+      "file" : "31.png",
+      "id" : "atelier-markers-02",
+      "name" : "Side Marker",
+      "seed" : 42,
+      "set" : "markers",
+      "sha256" : "6bf6948076b148d560d554dfeb814f94d4cf920c6ec01fb48c209059771dc899"
+    },
+    {
+      "file" : "32.png",
+      "id" : "atelier-markers-03",
+      "name" : "Detail Marker",
+      "seed" : 42,
+      "set" : "markers",
+      "sha256" : "8708fe9126edb5e09a7e425cf2821ac7fb1ed217bd2a7f92ef1010444c60d1cb"
+    },
+    {
+      "file" : "33.png",
+      "id" : "atelier-markers-04",
+      "name" : "Soft Marker",
+      "seed" : 42,
+      "set" : "markers",
+      "sha256" : "50fe1591162e6be73950b798a1a080af174dcc4aae3840520d14cf98d12b06ec"
+    },
+    {
+      "file" : "34.png",
+      "id" : "atelier-markers-05",
+      "name" : "Dry Marker",
+      "seed" : 42,
+      "set" : "markers",
+      "sha256" : "79f3cd7c698c5749bd475d43ae2b0ff218b6482dcaee9a1fe6ff941284dc1aa2"
+    },
+    {
+      "file" : "35.png",
+      "id" : "atelier-markers-06",
+      "name" : "Parallel Marker",
+      "seed" : 42,
+      "set" : "markers",
+      "sha256" : "7024b76e360057015a7b529a937da49e27b087a444301896c1479dbb57833dd7"
+    },
+    {
+      "file" : "36.png",
+      "id" : "atelier-markers-07",
+      "name" : "Poster Marker",
+      "seed" : 42,
+      "set" : "markers",
+      "sha256" : "f3e9ac43a7fc67dc1198429c7685a23730e647666a6fd8b40a159a3e0af0ac4a"
+    },
+    {
+      "file" : "37.png",
+      "id" : "atelier-markers-08",
+      "name" : "Outline Marker",
+      "seed" : 42,
+      "set" : "markers",
+      "sha256" : "5ff617584aaad707e1f01dd953db860471b7c391fdab8efa850ed40d41e54ed4"
+    },
+    {
+      "file" : "38.png",
+      "id" : "atelier-markers-09",
+      "name" : "Fleck Marker",
+      "seed" : 42,
+      "set" : "markers",
+      "sha256" : "a51e585e9f91a7ac676f382c7f04a96c989ca386a06f20e94ff3890fafb9f670"
+    },
+    {
+      "file" : "39.png",
+      "id" : "atelier-markers-10",
+      "name" : "Blended Marker",
+      "seed" : 42,
+      "set" : "markers",
+      "sha256" : "afa109146b9efa78af4a718affa58b2208702a385883c2df636166336f7fbad7"
+    },
+    {
+      "file" : "40.png",
+      "id" : "atelier-pastels-01",
+      "name" : "Soft Stick",
+      "seed" : 42,
+      "set" : "pastels",
+      "sha256" : "278e062ae4de8e735f1aafd6d0680cd6ad1151d078054d710948b6ca2ace5470"
+    },
+    {
+      "file" : "41.png",
+      "id" : "atelier-pastels-02",
+      "name" : "Side Pastel",
+      "seed" : 42,
+      "set" : "pastels",
+      "sha256" : "64ab175e6c317009bbcb2e60d348a813857d30eed3d8316ce32a3f55a7dbffe4"
+    },
+    {
+      "file" : "42.png",
+      "id" : "atelier-pastels-03",
+      "name" : "Pastel Point",
+      "seed" : 42,
+      "set" : "pastels",
+      "sha256" : "7ecfba11503c5914da940c859fe5ceb0cd06db7630a7045dee90b8aa5df9fed3"
+    },
+    {
+      "file" : "43.png",
+      "id" : "atelier-pastels-04",
+      "name" : "Velvet Pastel",
+      "seed" : 42,
+      "set" : "pastels",
+      "sha256" : "b9835f1088d6c89e326f30e24435fbbe79dfd36fb494244d6b0e975715b25a1a"
+    },
+    {
+      "file" : "44.png",
+      "id" : "atelier-pastels-05",
+      "name" : "Tooth Pastel",
+      "seed" : 42,
+      "set" : "pastels",
+      "sha256" : "2a570cfc9b5f426eda8d967ddcbfb92279f45b6592593fd0223b1634c8339f8a"
+    },
+    {
+      "file" : "45.png",
+      "id" : "atelier-pastels-06",
+      "name" : "Rake Pastel",
+      "seed" : 42,
+      "set" : "pastels",
+      "sha256" : "6416bf6a4948769aba8ca00f5932bade469c2e3939f7dad6d55c406ae857483f"
+    },
+    {
+      "file" : "46.png",
+      "id" : "atelier-pastels-07",
+      "name" : "Broad Pastel",
+      "seed" : 42,
+      "set" : "pastels",
+      "sha256" : "11f3bf57a23f5eff2afc9edec66baaa983daf378e0f51d61bc3aabeba274633f"
+    },
+    {
+      "file" : "47.png",
+      "id" : "atelier-pastels-08",
+      "name" : "Chalk Contour",
+      "seed" : 42,
+      "set" : "pastels",
+      "sha256" : "2f1a8abd2a2091bd03d8ec8bae758ec9a07397a62f9cc3cbbfdfa4c01d54fefa"
+    },
+    {
+      "file" : "48.png",
+      "id" : "atelier-pastels-09",
+      "name" : "Pastel Dust",
+      "seed" : 42,
+      "set" : "pastels",
+      "sha256" : "a46aa13237d76c62c86888aa70856476f3012e8d3ccb69c60e2a51ba2f83713b"
+    },
+    {
+      "file" : "49.png",
+      "id" : "atelier-pastels-10",
+      "name" : "Pastel Blend",
+      "seed" : 42,
+      "set" : "pastels",
+      "sha256" : "efcd4750e9bbd0491dc1f6872afdf9abaf191ccb3e53880435ea07e7d6a2d5ec"
+    },
+    {
+      "file" : "50.png",
+      "id" : "atelier-oils-01",
+      "name" : "Loaded Bristle",
+      "seed" : 42,
+      "set" : "oils",
+      "sha256" : "e1f0930a4787ce54e46fc04bcd5b8e2480a6290c5300abd1ab80f786da070fde"
+    },
+    {
+      "file" : "51.png",
+      "id" : "atelier-oils-02",
+      "name" : "Side Bristle",
+      "seed" : 42,
+      "set" : "oils",
+      "sha256" : "83ff547c537666e9f6a821b6d4aea138902069160367003283f525c201abec48"
+    },
+    {
+      "file" : "52.png",
+      "id" : "atelier-oils-03",
+      "name" : "Liner Oil",
+      "seed" : 42,
+      "set" : "oils",
+      "sha256" : "536d4c4b07fc03ecb50429b3268471f0611330574f680c21d224392e509704bc"
+    },
+    {
+      "file" : "53.png",
+      "id" : "atelier-oils-04",
+      "name" : "Glaze Oil",
+      "seed" : 42,
+      "set" : "oils",
+      "sha256" : "a18dd19ccc528aa00d90cbf4dbd59c33f9db5b8a51fe7a9e8f146c2b252a615b"
+    },
+    {
+      "file" : "54.png",
+      "id" : "atelier-oils-05",
+      "name" : "Scumble",
+      "seed" : 42,
+      "set" : "oils",
+      "sha256" : "78f2363b66b931db569799bcf5dc70fabf448b3b16280b9b821882eebd48edbd"
+    },
+    {
+      "file" : "55.png",
+      "id" : "atelier-oils-06",
+      "name" : "Comb Oil",
+      "seed" : 42,
+      "set" : "oils",
+      "sha256" : "876bb7f5b6cb0d884370191f733b03cb94d684e4c72f63e4a80d04e845a4ab1b"
+    },
+    {
+      "file" : "56.png",
+      "id" : "atelier-oils-07",
+      "name" : "Flat Oil",
+      "seed" : 42,
+      "set" : "oils",
+      "sha256" : "bee6926726eacc9b6db32d14dbc5aaa6f76de44e3a3b3afaf4912d4f5ce8ef0c"
+    },
+    {
+      "file" : "57.png",
+      "id" : "atelier-oils-08",
+      "name" : "Contour Oil",
+      "seed" : 42,
+      "set" : "oils",
+      "sha256" : "99d329539a66428a55b9a0df2cd72fcc944b57d368709f4a2f1e2c81bc69b5eb"
+    },
+    {
+      "file" : "58.png",
+      "id" : "atelier-oils-09",
+      "name" : "Dry Speck",
+      "seed" : 42,
+      "set" : "oils",
+      "sha256" : "d49cb046e9255cd99a624a59230891a7a4e5cccf3a1cca26f043ad3937923cc1"
+    },
+    {
+      "file" : "59.png",
+      "id" : "atelier-oils-10",
+      "name" : "Oil Mixer",
+      "seed" : 42,
+      "set" : "oils",
+      "sha256" : "6290897e8bc639d7a6094c279dec5b8d8308c74ae388ccf05e0a767e7470c85b"
+    },
+    {
+      "file" : "60.png",
+      "id" : "atelier-paints-01",
+      "name" : "Studio Round",
+      "seed" : 42,
+      "set" : "paints",
+      "sha256" : "18a6835c861bf872688db4ce63f7aec02018c7d941f50cf5ad382d6c52b88fef"
+    },
+    {
+      "file" : "61.png",
+      "id" : "atelier-paints-02",
+      "name" : "Flat Sweep",
+      "seed" : 42,
+      "set" : "paints",
+      "sha256" : "e0d136246e856ee3b666f459e6876205116f943ce481b89fa01ac962f5ca2cfa"
+    },
+    {
+      "file" : "62.png",
+      "id" : "atelier-paints-03",
+      "name" : "Detail Paint",
+      "seed" : 42,
+      "set" : "paints",
+      "sha256" : "d160d1073a9b84fde6ee95456d8f31402a5efa4b4c531abab096aa11e679062d"
+    },
+    {
+      "file" : "63.png",
+      "id" : "atelier-paints-04",
+      "name" : "Soft Paint",
+      "seed" : 42,
+      "set" : "paints",
+      "sha256" : "558e13969130c27a24a40dddcd1773354cf8ecbded4a26450cfbafdddd2d9dd4"
+    },
+    {
+      "file" : "64.png",
+      "id" : "atelier-paints-05",
+      "name" : "Dry Paint",
+      "seed" : 42,
+      "set" : "paints",
+      "sha256" : "d0021d587a0b1654cb24623854a4f6eef85f6382c90b15b7ad557856c17a753f"
+    },
+    {
+      "file" : "65.png",
+      "id" : "atelier-paints-06",
+      "name" : "Rake Paint",
+      "seed" : 42,
+      "set" : "paints",
+      "sha256" : "aa052207ed59d9f16e80969d50e6f905f2bd312b12b1690c2243b5ef840d86ec"
+    },
+    {
+      "file" : "66.png",
+      "id" : "atelier-paints-07",
+      "name" : "Wide Paint",
+      "seed" : 42,
+      "set" : "paints",
+      "sha256" : "198e45ec99e1ac310919c4efbb59765373c9673a9dd4acaffe6f07850472c1b3"
+    },
+    {
+      "file" : "67.png",
+      "id" : "atelier-paints-08",
+      "name" : "Edge Paint",
+      "seed" : 42,
+      "set" : "paints",
+      "sha256" : "c976ef8f20bc3fa173d31c146b6e34b05221a39573b5c76c4e1ada68967c991e"
+    },
+    {
+      "file" : "68.png",
+      "id" : "atelier-paints-09",
+      "name" : "Stipple Paint",
+      "seed" : 42,
+      "set" : "paints",
+      "sha256" : "2007acf47596d06b4a2fc5a5a5b6d9a7290ce774903668aecb3db1425c360040"
+    },
+    {
+      "file" : "69.png",
+      "id" : "atelier-paints-10",
+      "name" : "Prism Paint",
+      "seed" : 42,
+      "set" : "paints",
+      "sha256" : "7824b8129a7222f15dba0e87d12c376ec0b11d3ad26965840d8b62821fb239bc"
+    },
+    {
+      "file" : "70.png",
+      "id" : "atelier-gouache-01",
+      "name" : "Opaque Round",
+      "seed" : 42,
+      "set" : "gouache",
+      "sha256" : "197d84a28d87831d75f9c7f009cebe6b2b462f3b1f28931946d3c1013af7edd3"
+    },
+    {
+      "file" : "71.png",
+      "id" : "atelier-gouache-02",
+      "name" : "Gouache Edge",
+      "seed" : 42,
+      "set" : "gouache",
+      "sha256" : "4a1558a305e29bee7747976fa9ebd84df902023c2608d848d29570d112692718"
+    },
+    {
+      "file" : "72.png",
+      "id" : "atelier-gouache-03",
+      "name" : "Gouache Point",
+      "seed" : 42,
+      "set" : "gouache",
+      "sha256" : "75d9a929c81da405433211a9e53cf5d125b6beaf665580d02424337029d10626"
+    },
+    {
+      "file" : "73.png",
+      "id" : "atelier-gouache-04",
+      "name" : "Thin Gouache",
+      "seed" : 42,
+      "set" : "gouache",
+      "sha256" : "17f4321c7c80f45d915956e8148cd916227529c76364abae17e558e50e2aaa8f"
+    },
+    {
+      "file" : "74.png",
+      "id" : "atelier-gouache-05",
+      "name" : "Dry Gouache",
+      "seed" : 42,
+      "set" : "gouache",
+      "sha256" : "9f807d350b8806f721983d6f40818c6a9b2d46d6cff47a04abbe70734eb59744"
+    },
+    {
+      "file" : "75.png",
+      "id" : "atelier-gouache-06",
+      "name" : "Gouache Comb",
+      "seed" : 42,
+      "set" : "gouache",
+      "sha256" : "1202ec81c484d91783e368ca4c5054d1becb3a21bee691a0a2b0459ddec451b8"
+    },
+    {
+      "file" : "76.png",
+      "id" : "atelier-gouache-07",
+      "name" : "Broad Gouache",
+      "seed" : 42,
+      "set" : "gouache",
+      "sha256" : "9800eab787d864bad47ffc842fbc952d3a786aef49dda62df8e78ea9bdca68ea"
+    },
+    {
+      "file" : "77.png",
+      "id" : "atelier-gouache-08",
+      "name" : "Gouache Contour",
+      "seed" : 42,
+      "set" : "gouache",
+      "sha256" : "cbc353071304a49b32a83269c1ed972f3ca65a88e238018f94b3607d296bced3"
+    },
+    {
+      "file" : "78.png",
+      "id" : "atelier-gouache-09",
+      "name" : "Gouache Flecks",
+      "seed" : 42,
+      "set" : "gouache",
+      "sha256" : "eee3824c84fb93aab7a3cc8520edf3f8952a303a0ad7dad1aed5a51d9f49c560"
+    },
+    {
+      "file" : "79.png",
+      "id" : "atelier-gouache-10",
+      "name" : "Gouache Mix",
+      "seed" : 42,
+      "set" : "gouache",
+      "sha256" : "8c5218d747d3e7f088fadf8b5c7502d8e8b2e887b14a56502985b679b94263ec"
+    },
+    {
+      "file" : "80.png",
+      "id" : "atelier-watercolors-01",
+      "name" : "Water Wash",
+      "seed" : 42,
+      "set" : "watercolors",
+      "sha256" : "36f1b1e341ef437e7abd76126372d87e76a15dbb61370d1c2214d1af1dc03706"
+    },
+    {
+      "file" : "81.png",
+      "id" : "atelier-watercolors-02",
+      "name" : "Wet Edge",
+      "seed" : 42,
+      "set" : "watercolors",
+      "sha256" : "856c188a03c74d52a1771638714dc40603511f0d76f594bf177546f9c65da9b6"
+    },
+    {
+      "file" : "82.png",
+      "id" : "atelier-watercolors-03",
+      "name" : "Detail Water",
+      "seed" : 42,
+      "set" : "watercolors",
+      "sha256" : "d50a75a871e564afd0c048b02a54ae6cbb9d1039194a67fd6ef2b28741bea00a"
+    },
+    {
+      "file" : "83.png",
+      "id" : "atelier-watercolors-04",
+      "name" : "Pale Wash",
+      "seed" : 42,
+      "set" : "watercolors",
+      "sha256" : "f0055dad1bfcce6374a00e8ff0603ed9d1d5adaf62e0bc6e764fab715558c150"
+    },
+    {
+      "file" : "84.png",
+      "id" : "atelier-watercolors-05",
+      "name" : "Granulated Wash",
+      "seed" : 42,
+      "set" : "watercolors",
+      "sha256" : "5eb0dda6f8d18a09b4ef28783c4ba99fab0320e48857e172bd89886a14796bf7"
+    },
+    {
+      "file" : "85.png",
+      "id" : "atelier-watercolors-06",
+      "name" : "Water Rake",
+      "seed" : 42,
+      "set" : "watercolors",
+      "sha256" : "750ea861cbcf1eee09863871855ce5268ee0118cbf84967baf0f16fa27a52c10"
+    },
+    {
+      "file" : "86.png",
+      "id" : "atelier-watercolors-07",
+      "name" : "Broad Wash",
+      "seed" : 42,
+      "set" : "watercolors",
+      "sha256" : "c6801ca1f05653f61f9bacea560dd8bb2850899fc067334b2900e6a9928fa04d"
+    },
+    {
+      "file" : "87.png",
+      "id" : "atelier-watercolors-08",
+      "name" : "Water Contour",
+      "seed" : 42,
+      "set" : "watercolors",
+      "sha256" : "6f6ebe35722708c5f177fe0ea53c8acb28780f2ade266a5473c060924b68aff4"
+    },
+    {
+      "file" : "88.png",
+      "id" : "atelier-watercolors-09",
+      "name" : "Water Mist",
+      "seed" : 42,
+      "set" : "watercolors",
+      "sha256" : "d4b2e0c2c48a07ea879ac0f4b5ff18e0c41956765086b32dc5cdbc941b27cca2"
+    },
+    {
+      "file" : "89.png",
+      "id" : "atelier-watercolors-10",
+      "name" : "Pigment Mix",
+      "seed" : 42,
+      "set" : "watercolors",
+      "sha256" : "cc6d0980440b4be310eb69c20f08db060c3e1db283c561a450974cf2b9759268"
+    },
+    {
+      "file" : "90.png",
+      "id" : "atelier-charcoals-01",
+      "name" : "Vine Core",
+      "seed" : 42,
+      "set" : "charcoals",
+      "sha256" : "a6fb1c236fb319e14cdce937e06ee826e3ef4d1973c2b7b40a9ab24d4959b4bb"
+    },
+    {
+      "file" : "91.png",
+      "id" : "atelier-charcoals-02",
+      "name" : "Charcoal Side",
+      "seed" : 42,
+      "set" : "charcoals",
+      "sha256" : "fe4c8e98a8da7b114eb485452f4af580efca5d6140ae0124ff5b8a217d1bab35"
+    },
+    {
+      "file" : "92.png",
+      "id" : "atelier-charcoals-03",
+      "name" : "Charcoal Point",
+      "seed" : 42,
+      "set" : "charcoals",
+      "sha256" : "4afc1936bcb2f9878654bfad0bab101960468cb3f1e4d2ab09a57bd47fe5d204"
+    },
+    {
+      "file" : "93.png",
+      "id" : "atelier-charcoals-04",
+      "name" : "Soft Coal",
+      "seed" : 42,
+      "set" : "charcoals",
+      "sha256" : "50e2808a2a88e1afa231cec4130d9ae73911922001cec660beb61557a8682958"
+    },
+    {
+      "file" : "94.png",
+      "id" : "atelier-charcoals-05",
+      "name" : "Rough Coal",
+      "seed" : 42,
+      "set" : "charcoals",
+      "sha256" : "6a26226bcf9232b03e1fc0a77898a6fc90b0aebd574f4f7e5f90bff0b4fcf5c3"
+    },
+    {
+      "file" : "95.png",
+      "id" : "atelier-charcoals-06",
+      "name" : "Coal Rake",
+      "seed" : 42,
+      "set" : "charcoals",
+      "sha256" : "f1106f209157be883c82c33c1f88454f9396d6be970b78edd9237bc328b67ed6"
+    },
+    {
+      "file" : "96.png",
+      "id" : "atelier-charcoals-07",
+      "name" : "Coal Block",
+      "seed" : 42,
+      "set" : "charcoals",
+      "sha256" : "adf2cad3278eaba54941b946624327c2b7f3bf04e69dd46039027c62cbd628e7"
+    },
+    {
+      "file" : "97.png",
+      "id" : "atelier-charcoals-08",
+      "name" : "Coal Contour",
+      "seed" : 42,
+      "set" : "charcoals",
+      "sha256" : "d148b709b9fcb3b655dac4f0a943dcff0c29fd198c33931e0b9613b0ddc27c19"
+    },
+    {
+      "file" : "98.png",
+      "id" : "atelier-charcoals-09",
+      "name" : "Coal Dust",
+      "seed" : 42,
+      "set" : "charcoals",
+      "sha256" : "685e8f688763afc692dd3814fd144531d7043f10f5d87cf3d277eb652a82f1bc"
+    },
+    {
+      "file" : "99.png",
+      "id" : "atelier-charcoals-10",
+      "name" : "Tinted Coal",
+      "seed" : 42,
+      "set" : "charcoals",
+      "sha256" : "ea8050749997157bc9e00f7816d12c8cb53e1742c03d80559d16f45dadfed5f0"
+    },
+    {
+      "file" : "100.png",
+      "id" : "atelier-basics-01",
+      "name" : "Hard Round",
+      "seed" : 42,
+      "set" : "basics",
+      "sha256" : "8a91018f7d2337e3d68aa722f8a8b2dc2262097220c72cb5746786eb5ef7d700"
+    },
+    {
+      "file" : "101.png",
+      "id" : "atelier-basics-02",
+      "name" : "Soft Air",
+      "seed" : 42,
+      "set" : "basics",
+      "sha256" : "cf44ff4dae502c135972079304903e62bfeb986aee6630a34692dd3cfc2989d5"
+    },
+    {
+      "file" : "102.png",
+      "id" : "atelier-basics-03",
+      "name" : "Fine Round",
+      "seed" : 42,
+      "set" : "basics",
+      "sha256" : "05d60016ff354054c26ad2841835ed98b88685084af60e70a7f3bc9446d65912"
+    },
+    {
+      "file" : "103.png",
+      "id" : "atelier-basics-04",
+      "name" : "Soft Round",
+      "seed" : 42,
+      "set" : "basics",
+      "sha256" : "52d74bbdafaecd9b7077b50f3b0e6f6dc608b798b6538ebddb5fed4d5a2e97c9"
+    },
+    {
+      "file" : "104.png",
+      "id" : "atelier-basics-05",
+      "name" : "Textured Round",
+      "seed" : 42,
+      "set" : "basics",
+      "sha256" : "d299037c8913554b4de4e6c93e54e29228827ebf24a89c82e6d250a80d2f9b9f"
+    },
+    {
+      "file" : "105.png",
+      "id" : "atelier-basics-06",
+      "name" : "Double Round",
+      "seed" : 42,
+      "set" : "basics",
+      "sha256" : "ed532dd67e1a0521c0ac644e4ad37b41d67cd9a3d895634a9ec36c17c03ce3c0"
+    },
+    {
+      "file" : "106.png",
+      "id" : "atelier-basics-07",
+      "name" : "Flat Basic",
+      "seed" : 42,
+      "set" : "basics",
+      "sha256" : "5159caabcf64d65e8443ba5a5d5b2a7f0992e5f238d98450d87242b00097586a"
+    },
+    {
+      "file" : "107.png",
+      "id" : "atelier-basics-08",
+      "name" : "Smooth Liner",
+      "seed" : 42,
+      "set" : "basics",
+      "sha256" : "91c1bb6f724157010d3da1879495a06f15cb924d1dade72d20752b7f7fa14c15"
+    },
+    {
+      "file" : "108.png",
+      "id" : "atelier-basics-09",
+      "name" : "Basic Scatter",
+      "seed" : 42,
+      "set" : "basics",
+      "sha256" : "1453571cb26cd996683be2c7230899da61f5d0b76db14f4c06c0edb16e49ac90"
+    },
+    {
+      "file" : "109.png",
+      "id" : "atelier-basics-10",
+      "name" : "Color Round",
+      "seed" : 42,
+      "set" : "basics",
+      "sha256" : "287067be9818ce2912cf5dedd9ef32e21ca76f35dc1626b0431b789e3e60518a"
+    },
+    {
+      "file" : "110.png",
+      "id" : "atelier-lettering-01",
+      "name" : "Italic Nib",
+      "seed" : 42,
+      "set" : "lettering",
+      "sha256" : "7b69381cbea52d71fef8400297f8800530a60b6bc2affe4b9e56ebcd224c35c8"
+    },
+    {
+      "file" : "111.png",
+      "id" : "atelier-lettering-02",
+      "name" : "Lettering Side",
+      "seed" : 42,
+      "set" : "lettering",
+      "sha256" : "c6dcc395edba2da26d24b1b55c75e1b3dff745dcbc2ebce04612e80b6429d7e2"
+    },
+    {
+      "file" : "112.png",
+      "id" : "atelier-lettering-03",
+      "name" : "Hairline",
+      "seed" : 42,
+      "set" : "lettering",
+      "sha256" : "0c5b1c31fc66fe427fd15fecd4287585bd4b0e53c874263ca741432da106d862"
+    },
+    {
+      "file" : "113.png",
+      "id" : "atelier-lettering-04",
+      "name" : "Soft Script",
+      "seed" : 42,
+      "set" : "lettering",
+      "sha256" : "e78aee9f384a13141bd97a03a7a32a0b543f4daf63c9c8e830cf32e0ad61337d"
+    },
+    {
+      "file" : "114.png",
+      "id" : "atelier-lettering-05",
+      "name" : "Dry Script",
+      "seed" : 42,
+      "set" : "lettering",
+      "sha256" : "08d0f54ad52f50ff4b9a4ad6614e233806993aaead93ae19b353c980cacb30c6"
+    },
+    {
+      "file" : "115.png",
+      "id" : "atelier-lettering-06",
+      "name" : "Ribbon Pair",
+      "seed" : 42,
+      "set" : "lettering",
+      "sha256" : "ea600c7292a63dd59c8ac02a391d4259d6733632dede46e28f6b033f4cc3b43c"
+    },
+    {
+      "file" : "116.png",
+      "id" : "atelier-lettering-07",
+      "name" : "Broad Letter",
+      "seed" : 42,
+      "set" : "lettering",
+      "sha256" : "fc817ca9a9c8f5cd48dd450833c8b82516d203d3dc7bab81d42fbb7a2690f856"
+    },
+    {
+      "file" : "117.png",
+      "id" : "atelier-lettering-08",
+      "name" : "Monoline",
+      "seed" : 42,
+      "set" : "lettering",
+      "sha256" : "dd622a3f586f317feb3d4d290e2926bea3a3c9c494f50c59d485bdaa2e0f1c91"
+    },
+    {
+      "file" : "118.png",
+      "id" : "atelier-lettering-09",
+      "name" : "Fleck Script",
+      "seed" : 42,
+      "set" : "lettering",
+      "sha256" : "ab63ba8dbb827b13317c219d4a3c3ccab7282b5f7081dff24d1f0e4129f975b8"
+    },
+    {
+      "file" : "119.png",
+      "id" : "atelier-lettering-10",
+      "name" : "Prism Script",
+      "seed" : 42,
+      "set" : "lettering",
+      "sha256" : "fff88070d72f1a4842961003307c962a62278e6946b11274bfa0dfbb421eb8e8"
+    },
+    {
+      "file" : "120.png",
+      "id" : "atelier-comics-01",
+      "name" : "Panel Ink",
+      "seed" : 42,
+      "set" : "comics",
+      "sha256" : "0e235aeb6104318110b97833f354e530b13c8bfa5ff0cb0831aa1db68cbf859f"
+    },
+    {
+      "file" : "121.png",
+      "id" : "atelier-comics-02",
+      "name" : "Manga Edge",
+      "seed" : 42,
+      "set" : "comics",
+      "sha256" : "3898d1abb2ae2c1941570660a93f538358b010530e0b747d973c0f9d601b8174"
+    },
+    {
+      "file" : "122.png",
+      "id" : "atelier-comics-03",
+      "name" : "Detail Liner",
+      "seed" : 42,
+      "set" : "comics",
+      "sha256" : "3a8aeaca735e90fe07ce0bf74be4fb173c0a220118692240ba1a3052398bfb8b"
+    },
+    {
+      "file" : "123.png",
+      "id" : "atelier-comics-04",
+      "name" : "Tone Wash",
+      "seed" : 42,
+      "set" : "comics",
+      "sha256" : "27511f18e1b8cfd9352608c2b9f9237d6dd5700b217e38d2cf88f3afcbbf5e9f"
+    },
+    {
+      "file" : "124.png",
+      "id" : "atelier-comics-05",
+      "name" : "Rough Inker",
+      "seed" : 42,
+      "set" : "comics",
+      "sha256" : "26ba66c92cfe7a07d4ddc45260ce97202b9a8f785a63414b33047d26c276a5bd"
+    },
+    {
+      "file" : "125.png",
+      "id" : "atelier-comics-06",
+      "name" : "Speed Pair",
+      "seed" : 42,
+      "set" : "comics",
+      "sha256" : "fcccb9b68b8a0678e6708a2d6a01d3f3c2c47a4e14ea34a70ae290a6b64b1910"
+    },
+    {
+      "file" : "126.png",
+      "id" : "atelier-comics-07",
+      "name" : "Black Block",
+      "seed" : 42,
+      "set" : "comics",
+      "sha256" : "9175deaf8e90b9fd0a09ae2fba8651af748ac9cbbab97e3f97d4269a17f86894"
+    },
+    {
+      "file" : "127.png",
+      "id" : "atelier-comics-08",
+      "name" : "Even Contour",
+      "seed" : 42,
+      "set" : "comics",
+      "sha256" : "0d6a22f81c9d5505785c2b708c48f7fe75c60ef32c10d699b8dce57225243058"
+    },
+    {
+      "file" : "128.png",
+      "id" : "atelier-comics-09",
+      "name" : "Stipple Tone",
+      "seed" : 42,
+      "set" : "comics",
+      "sha256" : "1cd791263512709cf044486ee522e1acda1d5ae6217eeb39612b9a87da5be2d0"
+    },
+    {
+      "file" : "129.png",
+      "id" : "atelier-comics-10",
+      "name" : "Color Panel",
+      "seed" : 42,
+      "set" : "comics",
+      "sha256" : "530c4319b87e88a9d76af6997f86288012b42ecb4278e7b689304fa5938ac2b2"
+    },
+    {
+      "file" : "130.png",
+      "id" : "atelier-design-01",
+      "name" : "Plan Edge",
+      "seed" : 42,
+      "set" : "design",
+      "sha256" : "5a339b5623e404e872c5e8b5ab402ad5abdd5e0e78103b35a5f12451082d3e9c"
+    },
+    {
+      "file" : "131.png",
+      "id" : "atelier-design-02",
+      "name" : "Side Fill",
+      "seed" : 42,
+      "set" : "design",
+      "sha256" : "daa940395512d681ae3218589ffa8d93be1c479612ac861defc5a0b2cbb763ad"
+    },
+    {
+      "file" : "132.png",
+      "id" : "atelier-design-03",
+      "name" : "Draft Line",
+      "seed" : 42,
+      "set" : "design",
+      "sha256" : "99e3b9e2336d1c338da329fb7d8184aabe50fd71585fddf94e2b8373077781e5"
+    },
+    {
+      "file" : "133.png",
+      "id" : "atelier-design-04",
+      "name" : "Soft Layout",
+      "seed" : 42,
+      "set" : "design",
+      "sha256" : "213308dd1db083daa3aad4f4733558713d264fe601f0c17c7e22c18ded05d07b"
+    },
+    {
+      "file" : "134.png",
+      "id" : "atelier-design-05",
+      "name" : "Paper Layout",
+      "seed" : 42,
+      "set" : "design",
+      "sha256" : "ed85b123b6350118e9b5044ebfad9a852b6e37fa69c6fa924c672efdde418f39"
+    },
+    {
+      "file" : "135.png",
+      "id" : "atelier-design-06",
+      "name" : "Parallel Guide",
+      "seed" : 42,
+      "set" : "design",
+      "sha256" : "6069ea198901f74e89c3a51106795b88646d8b02f8ba95c2e47d7df051375f92"
+    },
+    {
+      "file" : "136.png",
+      "id" : "atelier-design-07",
+      "name" : "Wide Layout",
+      "seed" : 42,
+      "set" : "design",
+      "sha256" : "dc5e19f8f4c89d808ca8c15f4750776468c21c8340b506f10c7d962d1c729c3c"
+    },
+    {
+      "file" : "137.png",
+      "id" : "atelier-design-08",
+      "name" : "Contour Guide",
+      "seed" : 42,
+      "set" : "design",
+      "sha256" : "7df36a9579850cb16446ab3de4d75703982a2e7c40ebf9f2994849e0403b18e7"
+    },
+    {
+      "file" : "138.png",
+      "id" : "atelier-design-09",
+      "name" : "Dot Layout",
+      "seed" : 42,
+      "set" : "design",
+      "sha256" : "70e28634fb9577d239fae38364653cf6ea73cb8500cca12b871438ad5487d25b"
+    },
+    {
+      "file" : "139.png",
+      "id" : "atelier-design-10",
+      "name" : "Spectrum Guide",
+      "seed" : 42,
+      "set" : "design",
+      "sha256" : "0f664511957090a9ab63073f65d6726418828cf57911584c6e57a39291d89fc5"
+    },
+    {
+      "file" : "140.png",
+      "id" : "atelier-grunge-01",
+      "name" : "Broken Surface",
+      "seed" : 42,
+      "set" : "grunge",
+      "sha256" : "83d9504c29bcb78022a520009be2f0d8dfce829f089f4e79ccf8f68fb03d7d04"
+    },
+    {
+      "file" : "141.png",
+      "id" : "atelier-grunge-02",
+      "name" : "Scraped Edge",
+      "seed" : 42,
+      "set" : "grunge",
+      "sha256" : "b7633089784b53f5d08fa361b871f190b2c7f3dcc55c64b035ef62c28e16e79c"
+    },
+    {
+      "file" : "142.png",
+      "id" : "atelier-grunge-03",
+      "name" : "Scratch Point",
+      "seed" : 42,
+      "set" : "grunge",
+      "sha256" : "465dc01c5e89c8e7bb63d662b75a0e98d5afa00122f820beda80135e04bf0801"
+    },
+    {
+      "file" : "143.png",
+      "id" : "atelier-grunge-04",
+      "name" : "Faded Surface",
+      "seed" : 42,
+      "set" : "grunge",
+      "sha256" : "39bbe37d045730d9df651ad66ec79f30306f1996be1de21b425c207743f9df9c"
+    },
+    {
+      "file" : "144.png",
+      "id" : "atelier-grunge-05",
+      "name" : "Coarse Surface",
+      "seed" : 42,
+      "set" : "grunge",
+      "sha256" : "79b216d2bda5cd63c8909a841ccafadeb1673d36187e35cc8dbfd815d96b5305"
+    },
+    {
+      "file" : "145.png",
+      "id" : "atelier-grunge-06",
+      "name" : "Scrape Rake",
+      "seed" : 42,
+      "set" : "grunge",
+      "sha256" : "2c8663d610b182ab088e814eea52c31e77926434b5fa297b85db9d6a86aab62d"
+    },
+    {
+      "file" : "146.png",
+      "id" : "atelier-grunge-07",
+      "name" : "Wide Scrape",
+      "seed" : 42,
+      "set" : "grunge",
+      "sha256" : "f16a32a439cb7af9cd8bfecdfbfc84ffaa7c3b8319d1e013143ab8739e2c2aa8"
+    },
+    {
+      "file" : "147.png",
+      "id" : "atelier-grunge-08",
+      "name" : "Grunge Contour",
+      "seed" : 42,
+      "set" : "grunge",
+      "sha256" : "0844c6df2b3d84f474fceafba8c69842cb2c3e1ff264b696455afa27de382640"
+    },
+    {
+      "file" : "148.png",
+      "id" : "atelier-grunge-09",
+      "name" : "Debris",
+      "seed" : 42,
+      "set" : "grunge",
+      "sha256" : "dc6fae3af63a11b96f30a6e4299e129598de2638246869e84e569836633e5e37"
+    },
+    {
+      "file" : "149.png",
+      "id" : "atelier-grunge-10",
+      "name" : "Rust Color",
+      "seed" : 42,
+      "set" : "grunge",
+      "sha256" : "affecf3f3a5025472792a932fa81bde518d50e91eb1a3dd5a353b8154df81181"
+    },
+    {
+      "file" : "150.png",
+      "id" : "atelier-street-art-01",
+      "name" : "Spray Cap",
+      "seed" : 42,
+      "set" : "street-art",
+      "sha256" : "bbab566cb149c56642c2c3bac169bd4da76179784052f1520b1e357ef46041db"
+    },
+    {
+      "file" : "151.png",
+      "id" : "atelier-street-art-02",
+      "name" : "Spray Edge",
+      "seed" : 42,
+      "set" : "street-art",
+      "sha256" : "5619a6ac493e5824b5a48a3e1c0641d7c55e2cb5da634f35ed18ad5ec4e623a6"
+    },
+    {
+      "file" : "152.png",
+      "id" : "atelier-street-art-03",
+      "name" : "Needle Cap",
+      "seed" : 42,
+      "set" : "street-art",
+      "sha256" : "3a213117209ad1b347e8e397f8576842cef1acc9d3d7a31b9a7dbce5d936e044"
+    },
+    {
+      "file" : "153.png",
+      "id" : "atelier-street-art-04",
+      "name" : "Mist Cap",
+      "seed" : 42,
+      "set" : "street-art",
+      "sha256" : "4c5d91ee5ab5d05b3ae8a680dd15174b42eb0a74bd2c1c709baccfbde0cfdd62"
+    },
+    {
+      "file" : "154.png",
+      "id" : "atelier-street-art-05",
+      "name" : "Dry Spray",
+      "seed" : 42,
+      "set" : "street-art",
+      "sha256" : "1f2d2bb8956006a42b11d0d5c52615b92ff98958b3a898d3ad65cbfdc0343d7d"
+    },
+    {
+      "file" : "155.png",
+      "id" : "atelier-street-art-06",
+      "name" : "Twin Cap",
+      "seed" : 42,
+      "set" : "street-art",
+      "sha256" : "7e42c6561a70161d26c4872431af77b83e751a507347822116e7f27d715358c5"
+    },
+    {
+      "file" : "156.png",
+      "id" : "atelier-street-art-07",
+      "name" : "Wide Cap",
+      "seed" : 42,
+      "set" : "street-art",
+      "sha256" : "9476c3edc2be500c09c8ddc275927321a6b60fa9a3a737c685783da964a8a3d0"
+    },
+    {
+      "file" : "157.png",
+      "id" : "atelier-street-art-08",
+      "name" : "Spray Contour",
+      "seed" : 42,
+      "set" : "street-art",
+      "sha256" : "120cea7d05693536c5bb97774e304142a8ccdca22888d46e566518af709332a3"
+    },
+    {
+      "file" : "158.png",
+      "id" : "atelier-street-art-09",
+      "name" : "Paint Spit",
+      "seed" : 42,
+      "set" : "street-art",
+      "sha256" : "59d485a1faadc2225c9baef531e7cdbfa873fd9b91d0ea518a1b64989c9d240e"
+    },
+    {
+      "file" : "159.png",
+      "id" : "atelier-street-art-10",
+      "name" : "Neon Spray",
+      "seed" : 42,
+      "set" : "street-art",
+      "sha256" : "19ed4cb95b7c21602b6af48e71c567de726299b121d09baddfbf7c526e9d4896"
+    },
+    {
+      "file" : "160.png",
+      "id" : "atelier-digital-01",
+      "name" : "Crisp Round",
+      "seed" : 42,
+      "set" : "digital",
+      "sha256" : "4e4a01cfd42c3df9ad783ff934766b997f6ab5fbd30148455fd8d6eb5654cbed"
+    },
+    {
+      "file" : "161.png",
+      "id" : "atelier-digital-02",
+      "name" : "Digital Edge",
+      "seed" : 42,
+      "set" : "digital",
+      "sha256" : "81983b912f3815b83d4693f3f6d36d433096bb64f17446992ae27f67fb8a2b32"
+    },
+    {
+      "file" : "162.png",
+      "id" : "atelier-digital-03",
+      "name" : "Crisp Point",
+      "seed" : 42,
+      "set" : "digital",
+      "sha256" : "addc2f832b67466328a108bdceb82a9f5550f1c685435fc556c7e5627164b9e6"
+    },
+    {
+      "file" : "163.png",
+      "id" : "atelier-digital-04",
+      "name" : "Air Gradient",
+      "seed" : 42,
+      "set" : "digital",
+      "sha256" : "f5a77acd7cb69f79b0fca2000699680df8022b650f0df574907573f5ad20c1c6"
+    },
+    {
+      "file" : "164.png",
+      "id" : "atelier-digital-05",
+      "name" : "Binary Grain",
+      "seed" : 42,
+      "set" : "digital",
+      "sha256" : "81ee12622393195c4ebf0bdc8ad0642245e335a4732da6d7e5a1350078e4af00"
+    },
+    {
+      "file" : "165.png",
+      "id" : "atelier-digital-06",
+      "name" : "Twin Light",
+      "seed" : 42,
+      "set" : "digital",
+      "sha256" : "92a6b21022caf4269761eb3c825fd38913511f7102589b5e166029a11161d638"
+    },
+    {
+      "file" : "166.png",
+      "id" : "atelier-digital-07",
+      "name" : "Crisp Block",
+      "seed" : 42,
+      "set" : "digital",
+      "sha256" : "cc86fedc0be2219658ae06fa17f2b578787319c3b3f3159b080d09ac7ecb2d95"
+    },
+    {
+      "file" : "167.png",
+      "id" : "atelier-digital-08",
+      "name" : "Vector Liner",
+      "seed" : 42,
+      "set" : "digital",
+      "sha256" : "612426d0f1c332cbc0a8af108f921d5edc4a4c39ffc8f71fc70c03fd59dbfe4e"
+    },
+    {
+      "file" : "168.png",
+      "id" : "atelier-digital-09",
+      "name" : "Crisp Scatter",
+      "seed" : 42,
+      "set" : "digital",
+      "sha256" : "b7f5040f345815a9447288e0767e20e1088625017580efcfec1cb96246dda4f8"
+    },
+    {
+      "file" : "169.png",
+      "id" : "atelier-digital-10",
+      "name" : "Hue Cycle",
+      "seed" : 42,
+      "set" : "digital",
+      "sha256" : "a891a6d476f6b1d3a75480baccc1716a5721a7887cdc8a686e71e0564257aa44"
+    },
+    {
+      "file" : "170.png",
+      "id" : "atelier-creative-01",
+      "name" : "Organic Trace",
+      "seed" : 42,
+      "set" : "creative",
+      "sha256" : "9351c3c484766fdd3b664056395ac371ea1ba23a394c1742741d6ebaa835121a"
+    },
+    {
+      "file" : "171.png",
+      "id" : "atelier-creative-02",
+      "name" : "Ribbon Trace",
+      "seed" : 42,
+      "set" : "creative",
+      "sha256" : "c88a6c0d180031cf6c7400a4a0bd5abd18f592124510a09763c573adf667e901"
+    },
+    {
+      "file" : "172.png",
+      "id" : "atelier-creative-03",
+      "name" : "Etched Trace",
+      "seed" : 42,
+      "set" : "creative",
+      "sha256" : "ccca1471e8b42233969d097f5d189db714bdb0c6a8ea6a1c20daf2bdb4e2d542"
+    },
+    {
+      "file" : "173.png",
+      "id" : "atelier-creative-04",
+      "name" : "Dream Wash",
+      "seed" : 42,
+      "set" : "creative",
+      "sha256" : "29698201aa0594ad67443d6ab434c50855fe74bcb3675f125d047527154b7482"
+    },
+    {
+      "file" : "174.png",
+      "id" : "atelier-creative-05",
+      "name" : "Woven Trace",
+      "seed" : 42,
+      "set" : "creative",
+      "sha256" : "fc47059bf41efe443406db2236370883f0121b40ca65bee0ef755ad047263828"
+    },
+    {
+      "file" : "175.png",
+      "id" : "atelier-creative-06",
+      "name" : "Twin Trace",
+      "seed" : 42,
+      "set" : "creative",
+      "sha256" : "1e2bd0942d0bd12fa45af2e13951a8e529da2c13dc4fe145e57fe47773a5c552"
+    },
+    {
+      "file" : "176.png",
+      "id" : "atelier-creative-07",
+      "name" : "Broad Ribbon",
+      "seed" : 42,
+      "set" : "creative",
+      "sha256" : "8dbce68963ed72b3a9fc791637548bf3f5a4bec550b9f8d7c6adf9e2032911c9"
+    },
+    {
+      "file" : "177.png",
+      "id" : "atelier-creative-08",
+      "name" : "Echo Line",
+      "seed" : 42,
+      "set" : "creative",
+      "sha256" : "24fb656ae557636389f3d5cd666478df9850c62ef01930270d3558980327b7aa"
+    },
+    {
+      "file" : "178.png",
+      "id" : "atelier-creative-09",
+      "name" : "Petal Scatter",
+      "seed" : 42,
+      "set" : "creative",
+      "sha256" : "c98590c30d6d308c70347deb70215e4883d0fe58bf16839ba3204c81996ae2b5"
+    },
+    {
+      "file" : "179.png",
+      "id" : "atelier-creative-10",
+      "name" : "Prism Trail",
+      "seed" : 42,
+      "set" : "creative",
+      "sha256" : "e5fb52a4f9e30bcab26228726e55e46db4bc96a429d2f471b06d6512bb2c812c"
+    },
+    {
+      "file" : "180.png",
+      "id" : "classic-foundation-01",
+      "name" : "Graphite Foundation",
+      "seed" : 42,
+      "set" : "classic-foundations",
+      "sha256" : "c257a78f49668777e61d5f258c65669008f6c14bebce3447fde427eed0f868db"
+    },
+    {
+      "file" : "181.png",
+      "id" : "classic-foundation-02",
+      "name" : "Tilt Shader Foundation",
+      "seed" : 42,
+      "set" : "classic-foundations",
+      "sha256" : "78ccceb815e232e5af2dbcff3acd7b3f46ef1107eb1f41b60d59731a2922d6d5"
+    },
+    {
+      "file" : "182.png",
+      "id" : "classic-foundation-03",
+      "name" : "Ink Foundation",
+      "seed" : 42,
+      "set" : "classic-foundations",
+      "sha256" : "64a82b6f13ac9a705608d32f9a6039b11f9fba171102676eab9259ae86b71c63"
+    },
+    {
+      "file" : "183.png",
+      "id" : "classic-foundation-04",
+      "name" : "Calligraphy Foundation",
+      "seed" : 42,
+      "set" : "classic-foundations",
+      "sha256" : "3d446bacc2317aff28daf8f71375c2f0bbf77deb9d28421766ff4a3235b72817"
+    },
+    {
+      "file" : "184.png",
+      "id" : "classic-foundation-05",
+      "name" : "Flat Marker Foundation",
+      "seed" : 42,
+      "set" : "classic-foundations",
+      "sha256" : "acb42e30c7132e82fa9b2c82e4cbc3d32aac85a219ed6491d9d8f8cdb5e6b001"
+    },
+    {
+      "file" : "185.png",
+      "id" : "classic-foundation-06",
+      "name" : "Soft Air Foundation",
+      "seed" : 42,
+      "set" : "classic-foundations",
+      "sha256" : "99cadbcef850cb967c0a0c70d621fc63d8d9385a7302fd9360c4c69256ea2ab8"
+    },
+    {
+      "file" : "186.png",
+      "id" : "classic-foundation-07",
+      "name" : "Hard Round Foundation",
+      "seed" : 42,
+      "set" : "classic-foundations",
+      "sha256" : "d081e62a56802674235825d2a6831ef9c27616d48fac5c54adf3963d35006901"
+    },
+    {
+      "file" : "187.png",
+      "id" : "classic-foundation-08",
+      "name" : "Pastel Foundation",
+      "seed" : 42,
+      "set" : "classic-foundations",
+      "sha256" : "8eaa110741cb05877b2424dc6cb69069fd589d7710ca47d982e89f64d9faaab8"
+    },
+    {
+      "file" : "188.png",
+      "id" : "classic-foundation-09",
+      "name" : "Charcoal Foundation",
+      "seed" : 42,
+      "set" : "classic-foundations",
+      "sha256" : "4946dd78f80ef409b046e37be62d044a9b12860a65ba0c43e7e2a2bf962ffc21"
+    },
+    {
+      "file" : "189.png",
+      "id" : "classic-foundation-10",
+      "name" : "Dry Bristle Foundation",
+      "seed" : 42,
+      "set" : "classic-foundations",
+      "sha256" : "029a263bb975de34159a8fbd0de3c30d7893ee5a22b47154046faaae39d9012d"
+    },
+    {
+      "file" : "190.png",
+      "id" : "classic-foundation-11",
+      "name" : "Oil Foundation",
+      "seed" : 42,
+      "set" : "classic-foundations",
+      "sha256" : "ff5c5aec28516ec4d6fde1b0764c542846708c5ee115a21d2ce0e51be2340448"
+    },
+    {
+      "file" : "191.png",
+      "id" : "classic-foundation-12",
+      "name" : "Watercolor Foundation",
+      "seed" : 42,
+      "set" : "classic-foundations",
+      "sha256" : "ce6cbd116b755e53f03813126518a3fc7dfd8dd5f19d0c75e364bc2a4ad29a4f"
+    }
+  ],
+  "renderer" : "Atelier MetalPainter",
+  "syntheticInput" : true,
+  "system" : "26.2"
+}

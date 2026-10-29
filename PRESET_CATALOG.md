@@ -1,6 +1,6 @@
 # Catalogo preset originali Atelier
 
-Generato deterministicamente da `scripts/generate_catalog.py`. 180 preset in 18 set e 12 basi funzionali separate; non costituiscono la libreria Classic completa. Configurazioni e 12 texture PNG incluse nel bundle e disponibili offline. Ogni riga corrisponde a una configurazione distinta; la differenza visiva richiede ancora la tavola prodotta dal renderer Metal.
+Generato deterministicamente da `scripts/generate_catalog.py`. 180 preset in 18 set e 12 basi funzionali separate; non costituiscono la libreria Classic completa. Configurazioni e 12 texture PNG incluse nel bundle e disponibili offline. Ogni riga corrisponde a una configurazione distinta. La [tavola Metal dei 192 preset](docs/verification/BRUSH_COMPARISON.png), generata nel test nativo del 28 ottobre 2026, mostra 192 hash PNG distinti per lo stesso percorso sintetico. La [revisione visiva del 29 ottobre](BRUSH_VISUAL_REVIEW.md) conferma differenze osservabili ma rileva silhouette condivise e lacune di caratterizzazione dei materiali: quantità e hash non dimostrano qualità completa né parità. Nessuna prova Pencil reale è stata svolta.
 
 | Set | Preset | Forma / grana | Comportamento configurato |
 |---|---|---|---|
