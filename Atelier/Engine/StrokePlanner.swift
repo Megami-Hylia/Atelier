@@ -93,6 +93,8 @@ enum StrokePlanner {
     // The cursor retains constant-size state, never the growing sample array.
     struct Stream {
         private var secondary: [Stream] = []
+        private let settings: PlannedBrushSettings
+        private let hsv: SIMD3<Float>
         private var context: PaintStroke
         private var rng: SeededGenerator
         private var initialRotation: Float = 0
@@ -107,11 +109,13 @@ enum StrokePlanner {
         private(set) var lastRawSample: PencilSample?
 
         init(_ stroke: PaintStroke, finalDistance: Float? = nil) {
+            settings = PlannedBrushSettings(stroke.brush)
+            hsv = StrokePlanner.rgbToHSV(SIMD3(stroke.color.x, stroke.color.y, stroke.color.z))
             context = stroke; context.samples = []
             rng = SeededGenerator(seed: stroke.seed ^ stroke.brush.seed)
             self.finalDistance = finalDistance
-            initialRotation = p("randomRotation") > 0 ? rng.unit() * .pi * 2 : 0
-            strokeHue = rng.signed() * p("strokeHue") * 0.5
+            initialRotation = settings.randomRotation > 0 ? rng.unit() * .pi * 2 : 0
+            strokeHue = rng.signed() * settings.strokeHue * 0.5
             if var brush = stroke.brush.secondaryBrushes?.first {
                 brush.parameters["blendMode"] = Double(stroke.brush.combineMode ?? 0)
                 var component = stroke; component.brush = brush; component.samples = []
@@ -122,11 +126,6 @@ enum StrokePlanner {
         func matches(_ stroke: PaintStroke) -> Bool {
             context.id == stroke.id && context.brush == stroke.brush && context.tool == stroke.tool &&
             context.color == stroke.color && context.size == stroke.size && context.opacity == stroke.opacity && context.seed == stroke.seed && context.distanceDynamicsVersion == stroke.distanceDynamicsVersion
-        }
-
-        private func p(_ key: String, _ fallback: Double = 0) -> Float {
-            let value = context.brush.value(key, fallback)
-            return value.isFinite ? Float(max(-16, min(16, value))) : Float(fallback)
         }
 
         mutating func append(_ samples: ArraySlice<PencilSample>) throws -> [GPUStamp] {
@@ -163,71 +162,70 @@ enum StrokePlanner {
         private mutating func makeStamps(a: PencilSample, b: PencilSample, t: Float, segmentLength: Float) throws -> [GPUStamp] {
             var stamps: [GPUStamp] = []
             let point = SIMD2<Float>(a.x + (b.x - a.x) * t, a.y + (b.y - a.y) * t)
-            let pressure = pow(max(0, a.pressure + (b.pressure - a.pressure) * t), max(0.2, p("pressureCurve", 1)))
+            let pressure = pow(max(0, a.pressure + (b.pressure - a.pressure) * t), max(0.2, settings.pressureCurve))
             let tilt = 1 - min(1, max(0, (a.altitude + (b.altitude - a.altitude) * t) / (.pi / 2)))
             let speed = min(1, segmentLength / max(0.001, Float(b.time - a.time)) / 1800)
             let direction = atan2(b.y - a.y, b.x - a.x)
             let along = SIMD2<Float>(cos(direction), sin(direction))
             let across = SIMD2<Float>(-along.y, along.x)
             let normalizedDistance = nextDistance / max(1, context.size * 10)
-            let startTaper = p("taperStart") > 0 ? min(1, normalizedDistance / max(0.001, p("taperStart") * 0.5)) : 1
+            let startTaper = settings.taperStart > 0 ? min(1, normalizedDistance / max(0.001, settings.taperStart * 0.5)) : 1
             let endProgress = finalDistance.map { nextDistance / max(1, $0) } ?? 0
-            let endTaper = finalDistance != nil && p("taperEnd") > 0 ? min(1, (1 - endProgress) / max(0.001, p("taperEnd") * 0.5)) : 1
+            let endTaper = finalDistance != nil && settings.taperEnd > 0 ? min(1, (1 - endProgress) / max(0.001, settings.taperEnd * 0.5)) : 1
             let taper = max(0.015, min(startTaper, endTaper))
-            let sizePressure = 1 - p("pressureSize") + p("pressureSize") * pressure
-            let speedSize = max(0.02, 1 + p("speedSize") * speed)
-            let diameter = max(0.1, min(2048, context.size * sizePressure * speedSize * (1 + tilt * p("tiltSize") * 3) *
-                                   (1 - p("sizeJitter") * rng.unit()) * (1 - p("taperSize") + p("taperSize") * taper)))
-            let radius = max(0.05, min(context.size * max(0.01, p("maxSize", 1)), max(context.size * p("minSize"), diameter)) / 2)
-            let count = max(1, min(16, Int(p("stampCount", 1) * (1 - p("countJitter") * rng.unit()))))
+            let sizePressure = 1 - settings.pressureSize + settings.pressureSize * pressure
+            let speedSize = max(0.02, 1 + settings.speedSize * speed)
+            let diameter = max(0.1, min(2048, context.size * sizePressure * speedSize * (1 + tilt * settings.tiltSize * 3) *
+                                   (1 - settings.sizeJitter * rng.unit()) * (1 - settings.taperSize + settings.taperSize * taper)))
+            let radius = max(0.05, min(context.size * max(0.01, settings.maxSize), max(context.size * settings.minSize, diameter)) / 2)
+            let count = max(1, min(16, Int(settings.stampCount * (1 - settings.countJitter * rng.unit()))))
             for _ in 0..<count {
-                let offset = across * (rng.signed() * p("jitterLateral") * radius * 2) + along * (rng.signed() * p("jitterLinear") * radius * 2)
-                var angle = direction * p("rotation") + initialRotation + rng.signed() * p("scatter") * .pi
-                angle += direction * p("azimuth") * 0.25
+                let offset = across * (rng.signed() * settings.jitterLateral * radius * 2) + along * (rng.signed() * settings.jitterLinear * radius * 2)
+                var angle = direction * settings.rotation + initialRotation + rng.signed() * settings.scatter * .pi
+                angle += direction * settings.azimuth * 0.25
                 if a.isPencil {
-                    angle += (a.azimuth + (b.azimuth - a.azimuth) * t) * p("azimuth")
-                    angle += (a.roll + (b.roll - a.roll) * t) * p("barrelRoll")
+                    angle += (a.azimuth + (b.azimuth - a.azimuth) * t) * settings.azimuth
+                    angle += (a.roll + (b.roll - a.roll) * t) * settings.barrelRoll
                 }
-                let rx = max(0.02, (1 - p("roundnessJitterX") * rng.unit()) * (1 - p("pressureRoundness") * (1 - pressure) * 0.9))
-                let ry = max(0.02, p("roundness", 1) * (1 - p("roundnessJitterY") * rng.unit()) * (1 - p("tiltRoundness") * tilt * 0.95))
-                var alpha = context.opacity * context.color.w * p("opacity", 1) * p("flow", 1)
-                alpha *= (1 - p("pressureOpacity") + p("pressureOpacity") * pressure)
-                alpha *= (1 - p("pressureFlow") + p("pressureFlow") * pressure)
-                alpha *= max(0, 1 + p("speedOpacity") * speed) * (1 - p("opacityJitter") * rng.unit())
-                alpha *= (1 - p("tiltOpacity") * tilt) * (1 - p("taperOpacity") + p("taperOpacity") * taper)
-                alpha *= exp(-p("fallOff") * normalizedDistance * 10) * (0.15 + p("accumulation", 1) * 0.85)
-                let charge = p("wetCharge", 1)
-                alpha *= max(0.01, 1 - p("wetDilution") * 0.9) * (0.05 + 0.95 * charge) * max(0.01, 1 - (1 - charge) * normalizedDistance * 0.95)
-                alpha *= 1 + p("wetAttack") * pressure
-                alpha = min(p("maxOpacity", 1), max(p("minOpacity"), alpha))
-                let hsv = StrokePlanner.rgbToHSV(SIMD3<Float>(context.color.x, context.color.y, context.color.z))
-                let hue = hsv.x + rng.signed() * (p("hueJitter") + p("stampHue")) * 0.5 + strokeHue
-                let rgb = StrokePlanner.hsvToRGB(SIMD3<Float>(hue, min(1, max(0, hsv.y + rng.signed() * p("saturationJitter"))),
-                                               min(1, max(0, hsv.z + rng.signed() * p("brightnessJitter")))))
+                let rx = max(0.02, (1 - settings.roundnessJitterX * rng.unit()) * (1 - settings.pressureRoundness * (1 - pressure) * 0.9))
+                let ry = max(0.02, settings.roundness * (1 - settings.roundnessJitterY * rng.unit()) * (1 - settings.tiltRoundness * tilt * 0.95))
+                var alpha = context.opacity * context.color.w * settings.opacity * settings.flow
+                alpha *= (1 - settings.pressureOpacity + settings.pressureOpacity * pressure)
+                alpha *= (1 - settings.pressureFlow + settings.pressureFlow * pressure)
+                alpha *= max(0, 1 + settings.speedOpacity * speed) * (1 - settings.opacityJitter * rng.unit())
+                alpha *= (1 - settings.tiltOpacity * tilt) * (1 - settings.taperOpacity + settings.taperOpacity * taper)
+                alpha *= exp(-settings.fallOff * normalizedDistance * 10) * (0.15 + settings.accumulation * 0.85)
+                let charge = settings.wetCharge
+                alpha *= max(0.01, 1 - settings.wetDilution * 0.9) * (0.05 + 0.95 * charge) * max(0.01, 1 - (1 - charge) * normalizedDistance * 0.95)
+                alpha *= 1 + settings.wetAttack * pressure
+                alpha = min(settings.maxOpacity, max(settings.minOpacity, alpha))
+                let hue = hsv.x + rng.signed() * (settings.hueJitter + settings.stampHue) * 0.5 + strokeHue
+                let rgb = StrokePlanner.hsvToRGB(SIMD3<Float>(hue, min(1, max(0, hsv.y + rng.signed() * settings.saturationJitter)),
+                                               min(1, max(0, hsv.z + rng.signed() * settings.brightnessJitter))))
                 let previousPoint = SIMD2<Float>(a.x, a.y)
                 var stamp = GPUStamp(
                     geometry: SIMD4(point.x + offset.x, point.y + offset.y, radius, angle),
                     color: SIMD4(rgb.x, rgb.y, rgb.z, max(0, min(1, alpha))),
-                    shape: SIMD4(rx * (p("flipX") > 0.5 ? -1 : 1), ry * (p("flipY") > 0.5 ? -1 : 1), 0, 0),
-                    grain: SIMD4(max(0.1, p("grainScale", 1)), min(1, p("grainDepth")), p("grainContrast", 1), p("grainBrightness")),
-                    texture: SIMD4(p("grainMovement"), p("grainZoom", 1), p("grainRotation") * .pi, p("tiltGradation") * tilt),
+                    shape: SIMD4(rx * (settings.flipX > 0.5 ? -1 : 1), ry * (settings.flipY > 0.5 ? -1 : 1), 0, 0),
+                    grain: SIMD4(max(0.1, settings.grainScale), min(1, settings.grainDepth), settings.grainContrast, settings.grainBrightness),
+                    texture: SIMD4(settings.grainMovement, settings.grainZoom, settings.grainRotation * .pi, settings.tiltGradation * tilt),
                     pickup: SIMD4(point.x - previousPoint.x, point.y - previousPoint.y,
-                                  min(1, p("wetDilution") + p("pressureBleed") * (1 - pressure)),
-                                  context.tool == .smudge ? max(0.02, p("smudge", 0.7)) : p("wetPull")),
-                    rendering: SIMD4(p("blendMode"), context.tool == .paint ? 0 : context.tool == .smudge ? 1 : 2, p("alphaThreshold"), p("wetGrade")),
+                                  min(1, settings.wetDilution + settings.pressureBleed * (1 - pressure)),
+                                  context.tool == .smudge ? max(0.02, settings.smudge) : settings.wetPull),
+                    rendering: SIMD4(settings.blendMode, context.tool == .paint ? 0 : context.tool == .smudge ? 1 : 2, settings.alphaThreshold, settings.wetGrade),
                     variation: SIMD4(rng.unit(), 0, nextDistance, 0))
                 stamps.append(stamp)
-                if p("dualEnabled") > 0.5 {
-                    stamp.geometry.z *= max(0.1, p("dualScale", 0.6))
-                    stamp.geometry.w += p("dualRotation") * .pi
-                    stamp.color.w *= p("dualOpacity", 0.5)
+                if settings.dualEnabled > 0.5 {
+                    stamp.geometry.z *= max(0.1, settings.dualScale)
+                    stamp.geometry.w += settings.dualRotation * .pi
+                    stamp.color.w *= settings.dualOpacity
                     stamps.append(stamp)
                 }
             }
             stampCount += stamps.count
             guard stamps.count <= 100_000 else { throw DocumentError.strokeBudget }
-            let jitter = 1 + rng.signed() * p("spacingJitter") * 0.95
-            nextDistance += max(0.15, radius * 2 * max(0.01, p("spacing", 0.08)) * jitter * (1 + p("speedSpacing") * speed))
+            let jitter = 1 + rng.signed() * settings.spacingJitter * 0.95
+            nextDistance += max(0.15, radius * 2 * max(0.01, settings.spacing) * jitter * (1 + settings.speedSpacing * speed))
             return stamps
         }
     }
