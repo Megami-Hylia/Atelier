@@ -314,9 +314,9 @@ struct CanvasSurface: UIViewRepresentable {
     func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
         !(gestureRecognizer is UITapGestureRecognizer) && !(otherGestureRecognizer is UITapGestureRecognizer)
     }
-    func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+    override func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
         // Navigation and history gestures must never cancel a live Pencil stroke.
-        activeTouch?.type != .pencil
+        activeTouch?.type != .pencil && super.gestureRecognizerShouldBegin(gestureRecognizer)
     }
 }
 
