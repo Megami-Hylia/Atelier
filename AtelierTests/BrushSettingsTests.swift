@@ -4,6 +4,7 @@ import Metal
 
 @MainActor
 final class BrushSettingsTests: XCTestCase {
+    private let centerAlpha = 16643
     private func stroke(_ parameters: [String: Double] = [:]) -> PaintStroke {
         var brush = BrushPreset.fallback
         brush.parameters = ["pressureSize": 0, "spacing": 0.15, "wetAttack": 0]
@@ -67,7 +68,7 @@ final class BrushSettingsTests: XCTestCase {
         XCTAssertEqual(clamped.spacing, 0.08, accuracy: 0.00001); XCTAssertEqual(clamped.blendMode, 10)
     }
     func testPressureOnlyChangesAssignedPropertiesAndAzimuthUsesThePenAngle() throws {
-        var low = stroke(["azimuth": 1, "wetAttack": 1])
+        var low = stroke(["azimuth": 1, "wetAttack": 1, "wetDilution": 0.3, "flow": 0.2])
         low.samples = [PencilSample(x: 20,y: 20,pressure: 0.1,azimuth: 0.7,time: 0)]
         var high = low; high.samples[0].pressure = 1
         let a = try XCTUnwrap(try StrokePlanner.stamps(for: low).first)
@@ -93,10 +94,10 @@ final class BrushSettingsTests: XCTestCase {
         XCTAssertGreaterThan(alpha.max() ?? 0, 0.34)
         var second = line; second.id = UUID()
         let twice = try render([line,second])
-        XCTAssertGreaterThan(twice[32*128*4+64*4+3],0.5)
+        XCTAssertGreaterThan(twice[centerAlpha],0.5)
         var dot = stroke(["flow": 0.1]); dot.samples = [PencilSample(x: 64,y: 32)]
         let thin = try render([dot]); dot.brush.parameters["flow"] = 0.6
-        let dense = try render([dot]); XCTAssertLessThan(thin[32*128*4+64*4+3],dense[32*128*4+64*4+3])
+        let dense = try render([dot]); XCTAssertLessThan(thin[centerAlpha],dense[centerAlpha])
         for key in ["flow", "opacity", "maxOpacity", "maxSize"] {
             var disabled = line; disabled.brush.parameters[key] = 0; disabled.brush.parameters["minOpacity"] = 0.8
             let empty = try render([disabled])
@@ -104,8 +105,8 @@ final class BrushSettingsTests: XCTestCase {
         }
         var nonAccumulating = line; nonAccumulating.brush.parameters["accumulation"] = 0
         let once = try render([nonAccumulating])
-        XCTAssertGreaterThan(once[32*128*4+64*4+3],0)
-        XCTAssertLessThan(once[32*128*4+64*4+3],image[32*128*4+64*4+3])
+        XCTAssertGreaterThan(once[centerAlpha],0)
+        XCTAssertLessThan(once[centerAlpha],image[centerAlpha])
     }
     func testChangedSettingsAlterPixelsAndPreviewAndPreserveExistingStrokeSnapshot() throws {
         let original = stroke()
@@ -203,16 +204,27 @@ final class BrushSettingsTests: XCTestCase {
         combined.samples = [PencilSample(x: 64,y: 32)]
         combined.brush.secondaryBrushes = [combined.brush]
         let image = try render([combined])
-        XCTAssertLessThanOrEqual(image[32*128*4+64*4+3],0.402)
+        XCTAssertLessThanOrEqual(image[centerAlpha],0.402)
         var held = stroke(["opacity":0.5,"flow":1,"hueJitter":1])
         held.samples = [PencilSample(x: 64,y: 32,pressure: 1,time: 0)]
         let first = try render([held])
         held.samples += [PencilSample(x: 64,y: 32,pressure: 0.3,time: 0.1),
             PencilSample(x: 64,y: 32,pressure: 1,time: 0.2)]
         let varied = try render([held])
-        XCTAssertEqual(varied[32*128*4+64*4+3],first[32*128*4+64*4+3],accuracy: 0.003)
-        XCTAssertNotEqual(Array(varied[(32*128*4+64*4)..<(32*128*4+64*4+3)]),
-            Array(first[(32*128*4+64*4)..<(32*128*4+64*4+3)]))
+        XCTAssertEqual(varied[centerAlpha],first[centerAlpha],accuracy: 0.003)
+        XCTAssertNotEqual(varied,first)
+    }
+
+    func testLocalStabilizationStillRespondsWhenGlobalStabilizationIsEnabled() {
+        let samples = PencilSample.demo(width: 128,height: 64,count: 24)
+        func path(_ amount: Double) -> [PencilSample] {
+            var brush = BrushPreset.fallback; brush.parameters["stabilization"] = amount
+            var curve = StrokeTrajectory(brush: brush,stabilization: 0.5,screenScale: 1,corrected: true)
+            var result: [PencilSample] = []
+            for sample in samples { result += curve.append(sample) }
+            return result + curve.finish()
+        }
+        XCTAssertNotEqual(path(0),path(0.5)); XCTAssertNotEqual(path(0.5),path(1))
     }
 
 }

@@ -38,7 +38,7 @@ enum StrokeGeometry {
         return lengths > 0.000001 && simd_dot(incoming,outgoing)/lengths < 0.85
     }
     static func equivalentTrajectory(_ original: [PencilSample], _ candidate: [PencilSample], brush: BrushPreset,
-                                     stabilization: Float, scale: Float, tolerance: Float) -> Bool {
+                                     stabilization: Float, scale: Float, tolerance: Float, corrected: Bool = false) -> Bool {
         if original == candidate { return true }
         struct Cursor {
             var samples: [PencilSample]
@@ -58,7 +58,7 @@ enum StrokeGeometry {
             }
         }
         func cursor(_ samples: [PencilSample]) -> Cursor {
-            Cursor(samples: samples,curve: StrokeTrajectory(brush: brush,stabilization: stabilization,screenScale: scale))
+            Cursor(samples: samples,curve: StrokeTrajectory(brush: brush,stabilization: stabilization,screenScale: scale, corrected: corrected))
         }
         // Compare as streams so a long pen-up cannot allocate two full flattened trajectories.
         func matches(_ from: [PencilSample], _ to: [PencilSample]) -> Bool {
@@ -126,9 +126,11 @@ struct StrokeTrajectory {
     private let scale: Float
     private var ended = false
 
-    init(brush: BrushPreset, stabilization: Float, screenScale: Float) {
+    init(brush: BrushPreset, stabilization: Float, screenScale: Float, corrected: Bool = false) {
         let local = Float(brush.value("streamline"))*0.6 + Float(brush.value("stabilization"))*0.35 + Float(brush.value("motionFiltering"))*(1-Float(brush.value("motionExpression"))*0.5)*0.2
-        strength = min(1,max(0,max(stabilization,local)))
+        let global = min(1,max(0,stabilization))
+        let localAmount = min(1,max(0,local))
+        strength = corrected ? 1-(1-global)*(1-localAmount) : min(1,max(0,max(stabilization,local)))
         pressureSmoothing = min(1,max(0,Float(brush.value("pressureSmoothing"))))
         scale = max(0.0001,screenScale)
     }

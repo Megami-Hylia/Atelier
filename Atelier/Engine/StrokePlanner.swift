@@ -70,7 +70,7 @@ enum StrokePlanner {
 
     private static func pathLength(_ stroke: PaintStroke) -> Float {
         if stroke.curveVersion == 1 {
-            var curve = StrokeTrajectory(brush: stroke.brush, stabilization: stroke.stabilizationAmount ?? 0, screenScale: stroke.inputScale ?? 1)
+            var curve = StrokeTrajectory(brush: stroke.brush, stabilization: stroke.stabilizationAmount ?? 0, screenScale: stroke.inputScale ?? 1, corrected: stroke.brushSettingsVersion == 1)
             var previous: PencilSample?; var distance: Float = 0
             func consume(_ samples: [PencilSample]) {
                 for sample in samples {
@@ -131,7 +131,7 @@ enum StrokePlanner {
             context = stroke; context.samples = []
             rng = SeededGenerator(seed: stroke.seed ^ stroke.brush.seed)
             self.finalDistance = finalDistance
-            trajectory = stroke.curveVersion == 1 ? StrokeTrajectory(brush: stroke.brush, stabilization: stroke.stabilizationAmount ?? 0, screenScale: stroke.inputScale ?? 1) : nil
+            trajectory = stroke.curveVersion == 1 ? StrokeTrajectory(brush: stroke.brush, stabilization: stroke.stabilizationAmount ?? 0, screenScale: stroke.inputScale ?? 1, corrected: stroke.brushSettingsVersion == 1) : nil
             initialRotation = settings.randomRotation > 0 ? rng.unit() * .pi * 2 : 0
             strokeHue = rng.signed() * settings.strokeHue * 0.5
             if var brush = stroke.brush.secondaryBrushes?.first {
@@ -259,7 +259,7 @@ enum StrokePlanner {
                 let charge = settings.wetCharge
                 alpha *= max(0.01, 1 - settings.wetDilution * 0.9) * (context.brushSettingsVersion == 1 ? charge : (0.05 + 0.95 * charge)) * max(0.01, 1 - (1 - charge) * normalizedDistance * 0.95)
                 if context.brushSettingsVersion != 1 || settings.wetDilution > 0 || settings.wetPull > 0 || charge < 1 {
-                    alpha *= 1 + settings.wetAttack * pressure
+                    alpha *= 1 + settings.wetAttack * (context.brushSettingsVersion == 1 ? 1 : pressure)
                 }
                 let maximum = settings.maxOpacity
                 let pressureOpacity = 1 - settings.pressureOpacity + settings.pressureOpacity * pressure

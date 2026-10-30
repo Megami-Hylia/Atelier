@@ -192,7 +192,7 @@ struct CanvasSurface: UIViewRepresentable {
             if components.allSatisfy({ component in
                 StrokeGeometry.equivalentTrajectory(stroke.samples,result.samples,brush: component,
                                                    stabilization: stroke.stabilizationAmount ?? 0,scale: stroke.inputScale ?? 1,
-                                                   tolerance: 0.3/maximumInputScale)
+                                                   tolerance: 0.3/maximumInputScale,corrected: stroke.brushSettingsVersion == 1)
             }) {
                 let indices = Dictionary(uniqueKeysWithValues: result.retainedIndices.enumerated().map { ($0.element,$0.offset) })
                 for (key,value) in estimates where value.0 == stroke.id {
