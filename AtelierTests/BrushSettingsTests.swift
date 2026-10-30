@@ -213,6 +213,16 @@ final class BrushSettingsTests: XCTestCase {
         let varied = try render([held])
         XCTAssertEqual(varied[centerAlpha],first[centerAlpha],accuracy: 0.003)
         XCTAssertNotEqual(varied,first)
+        var previewBrush = held.brush
+        previewBrush.parameters["opacity"] = 0
+        var secondary = BrushPreset.fallback
+        secondary.parameters["opacity"] = 0.8; secondary.parameters["flow"] = 0.2
+        secondary.parameters["wetDilution"] = 0.8
+        previewBrush.secondaryBrushes = [secondary]
+        previewBrush.parameters["previewWetMix"] = 0
+        let dry = try BrushPreviewRenderer.shared.image(previewBrush,lightOnDark: false).pngData()
+        previewBrush.parameters["previewWetMix"] = 1
+        XCTAssertNotEqual(dry,try BrushPreviewRenderer.shared.image(previewBrush,lightOnDark: false).pngData())
     }
 
     func testLocalStabilizationStillRespondsWhenGlobalStabilizationIsEnabled() {

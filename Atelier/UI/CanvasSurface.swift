@@ -328,13 +328,18 @@ final class BrushPreviewRenderer {
         var samples = PencilSample.demo(width: 320 * length, height: 90, count: 60)
         let pressure = Float(brush.value("previewPressure", 1))
         for i in samples.indices { samples[i].pressure = min(1, samples[i].pressure * pressure) }
-        var previewBrush = brush
         let wetPreview = brush.value("previewWetMix", 1)
-        for key in ["wetDilution", "wetPull", "wetAttack", "wetGrade"] {
-            let definition = BrushParameter.all.first { $0.id == key }
-            previewBrush.parameters[key] = brush.value(key, definition?.defaultValue ?? 0) * wetPreview
+        func previewComponent(_ source: BrushPreset) -> BrushPreset {
+            var result = source
+            for key in ["wetDilution", "wetPull", "wetAttack", "wetGrade"] {
+                let definition = BrushParameter.all.first { $0.id == key }
+                result.parameters[key] = source.value(key, definition?.defaultValue ?? 0) * wetPreview
+            }
+            result.parameters["wetCharge"] = 1 - (1 - source.value("wetCharge", 1)) * wetPreview
+            return result
         }
-        previewBrush.parameters["wetCharge"] = 1 - (1 - brush.value("wetCharge", 1)) * wetPreview
+        var previewBrush = previewComponent(brush)
+        previewBrush.secondaryBrushes = brush.secondaryBrushes?.map { previewComponent($0) }
         content.layers[0].strokes = [PaintStroke(brush: previewBrush, tool: .paint,
             color: lightOnDark ? SIMD4(1, 1, 1, 1) : SIMD4(0.08, 0.08, 0.08, 1),
             size: Float(brush.value("previewSize", 0.5)) * 64, opacity: 1, samples: samples, seed: brush.seed, distanceDynamicsVersion: 1, curveVersion: 1, inputScale: 1, stabilizationAmount: Float(UserDefaults.standard.double(forKey: "strokeStabilization")), brushSettingsVersion: 1)]
