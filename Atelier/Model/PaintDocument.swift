@@ -76,6 +76,7 @@ struct DocumentContents: Codable, Equatable, Sendable {
             (layer.adjustments ?? [:]).allSatisfy({ key, value in value.isFinite && abs(value) <= 64 }) && layer.opacity.isFinite && (0...1).contains(layer.opacity) && (0...2).contains(layer.blendMode) &&
             layer.strokes.allSatisfy { stroke in
                 (0...1).contains(stroke.distanceDynamicsVersion ?? 0) && (0...1).contains(stroke.curveVersion ?? 0) &&
+                (0...1).contains(stroke.brushSettingsVersion ?? 0) && (stroke.brushSettingsVersion != 1 || stroke.distanceDynamicsVersion == 1) &&
                 (stroke.inputScale == nil || (stroke.inputScale!.isFinite && stroke.inputScale! > 0 && stroke.inputScale! <= 1_000_000)) &&
                 (stroke.stabilizationAmount == nil || (stroke.stabilizationAmount!.isFinite && (0...1).contains(stroke.stabilizationAmount!))) && !stroke.samples.isEmpty && stroke.samples.count <= 1_000_000 &&
                 stroke.size.isFinite && (0.1...2048).contains(stroke.size) && stroke.opacity.isFinite && (0...1).contains(stroke.opacity) &&

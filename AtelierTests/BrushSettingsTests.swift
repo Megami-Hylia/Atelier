@@ -109,6 +109,12 @@ final class BrushSettingsTests: XCTestCase {
     }
     func testChangedSettingsAlterPixelsAndPreviewAndPreserveExistingStrokeSnapshot() throws {
         let original = stroke()
+        var radii: [Float] = []
+        for size: Float in [4,24,64] {
+            var sized = original; sized.size = size; sized.samples = [PencilSample(x: 64,y: 32)]
+            radii.append(try XCTUnwrap(try StrokePlanner.stamps(for: sized).first).geometry.z)
+        }
+        XCTAssertLessThan(radii[0],radii[1]); XCTAssertLessThan(radii[1],radii[2])
         let baseline = try render([original])
         for (key, value) in [("flow",0.03),("opacity",0.3),("spacing",1.5),("roundness",0.1),
             ("jitterLateral",0.8),("pressureSize",1.0),("pressureOpacity",1.0),("sizeJitter",0.9)] {
