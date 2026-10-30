@@ -132,7 +132,7 @@ enum StrokePlanner {
             rng = SeededGenerator(seed: stroke.seed ^ stroke.brush.seed)
             self.finalDistance = finalDistance
             trajectory = stroke.curveVersion == 1 ? StrokeTrajectory(brush: stroke.brush, stabilization: stroke.stabilizationAmount ?? 0, screenScale: stroke.inputScale ?? 1, corrected: stroke.brushSettingsVersion == 1) : nil
-            initialRotation = settings.randomRotation > 0 ? rng.unit() * .pi * 2 : 0
+            initialRotation = settings.randomRotation > (stroke.brushSettingsVersion == 1 ? 0.5 : 0) ? rng.unit() * .pi * 2 : 0
             strokeHue = rng.signed() * settings.strokeHue * 0.5
             if var brush = stroke.brush.secondaryBrushes?.first {
                 brush.parameters["blendMode"] = Double(stroke.brush.combineMode ?? 0)

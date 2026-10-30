@@ -10,6 +10,7 @@ Il percorso rimane nativo: `BrushStudioView` modifica una copia del preset; `Can
 - Minimum Opacity poteva riattivare un flusso o un’opacità zero. Ora regola il limite di opacità modulata, senza creare pigmento se la sorgente è disattivata. Maximum Size/Opacity zero non lasciano un segno residuo; Smudge Pull zero non sposta colore; Charge zero non introduce nuovo pigmento.
 - Azimuth aggiungeva impropriamente una rotazione derivata dalla direzione del tratto. Ora pesa soltanto l’azimut Pencil; barrel roll rimane separato. Attack umido regola l’intensità del wet mix senza introdurre una risposta alla pressione non assegnata, anche nei pennelli umidi.
 - La stabilizzazione globale mascherava i valori locali più bassi. Per i nuovi tratti si combinano progressivamente, senza nascondere i controlli del pennello salvo saturazione al massimo globale.
+- Grade umido applicava un peso basato sulla luminanza invece del contrasto dichiarato. Nei nuovi tratti regola il contrasto del pigmento prelevato. Randomized usa la stessa soglia dello switch UI; Count usa passi interi anche nel motore.
 - I cursori minimo/massimo potevano produrre una coppia invalida poi rifiutata dal salvataggio. Ora modificare un estremo mantiene coerente l’altro. Gli switch leggono lo stesso default mostrato nel valore numerico.
 - La miniatura non usava la traiettoria cubica della tela e la cache non includeva la stabilizzazione globale. Entrambi sono allineati. Preview Wet Mix non è più uno switch con default incoerente: modula continuamente il wet mix della miniatura, secondo il suo intervallo 0–1. I controlli Preview sono condivisi dall’intero pennello anche quando si modifica il componente secondario; il wet mix della miniatura modula entrambi i componenti.
 
@@ -19,7 +20,7 @@ Le formule di dimensione, spaziatura in diametri, forma, rotazione, dispersione,
 
 `brushSettingsVersion: 1` è memorizzato soltanto nei nuovi tratti. I tratti già archiviati continuano a utilizzare le formule precedenti, inclusi i vecchi default. Preset e relativi valori restano JSON compatibili; annulla/ripristina conserva lo snapshot completo del gesto.
 
-Il nuovo deposito usa due superfici RG16Float (8 byte/pixel complessivi), incluse nel limite raster condiviso di 384 MiB. Una conserva la copertura consolidata, l’altra serve replay e coda provvisoria. Le previsioni non entrano nella copertura persistente; i livelli storici non la sovrascrivono. La memoria non cresce con i punti o con la durata del gesto. Sulle tele molto grandi il budget può impedire superfici aggiuntive: non si aumenta il limite di memoria dell’iPad.
+Il nuovo deposito usa due superfici RG16Float (8 byte/pixel complessivi), incluse nel limite raster condiviso di 384 MiB. Una conserva la copertura consolidata, l’altra serve replay e coda provvisoria. Le previsioni non entrano nella copertura persistente; i livelli storici non la sovrascrivono. La copertura e il colore iniziale vengono letti una volta per pixel del gruppo di impronte; la copertura viene poi scritta una sola volta. La memoria non cresce con i punti o con la durata del gesto. Sulle tele molto grandi il budget può impedire superfici aggiuntive: non si aumenta il limite di memoria dell’iPad.
 
 ## Verifica
 

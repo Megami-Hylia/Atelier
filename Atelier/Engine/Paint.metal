@@ -129,7 +129,9 @@ kernel void paintTile(texture2d<float, access::read> source [[texture(0)]],
         if (pickup.a > 0.00001) {
             float3 pigment = pickup.rgb / pickup.a;
             float luminance = dot(pigment, float3(0.2126, 0.7152, 0.0722));
-            rgb = mix(rgb, pigment, clamp((s.pickup.z + s.pickup.w) * pickup.a * mix(1.0f, luminance, s.rendering.w), 0.0f, 1.0f));
+            if (limited) pigment = clamp((pigment-0.5f)*(1+2*s.rendering.w)+0.5f,0.0f,1.0f);
+            float gradeWeight = limited ? 1.0f : mix(1.0f,luminance,s.rendering.w);
+            rgb = mix(rgb, pigment, clamp((s.pickup.z + s.pickup.w) * pickup.a * gradeWeight, 0.0f, 1.0f));
         }
         float3 baseRGB = color.a > 0.00001 ? color.rgb / color.a : rgb;
         float3 blended = blendRGB(baseRGB, rgb, int(s.rendering.x));

@@ -118,7 +118,7 @@ struct BrushStudioView: View {
 
                                     Spacer()
 
-                                    Text(parameterDraft.value(parameter.id, parameter.defaultValue), format: .number.precision(.fractionLength(2))).monospacedDigit().foregroundStyle(.secondary)
+                                    Text(parameterDraft.value(parameter.id, parameter.defaultValue), format: .number.precision(.fractionLength(parameter.id == "stampCount" ? 0 : 2))).monospacedDigit().foregroundStyle(.secondary)
 
                                 }
 
@@ -138,7 +138,7 @@ struct BrushStudioView: View {
 
                                 } else {
 
-                                    Slider(value: Binding(get: { parameterDraft.value(parameter.id, parameter.defaultValue) }, set: { setParameter(parameter, to: $0) }), in: parameter.range)
+                                    Slider(value: Binding(get: { parameter.id == "stampCount" ? parameterDraft.value(parameter.id, parameter.defaultValue).rounded() : parameterDraft.value(parameter.id, parameter.defaultValue) }, set: { setParameter(parameter, to: $0) }), in: parameter.range, step: parameter.id == "stampCount" ? 1 : 0.001)
 
                                         .accessibilityLabel(parameter.title)
 

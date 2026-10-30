@@ -78,7 +78,8 @@ struct PlannedBrushSettings {
             let number = brush.value(key, definition.defaultValue)
             let finite = number.isFinite ? number : definition.defaultValue
             let upper = key == "blendMode" ? 10.0 : definition.range.upperBound
-            return Float(min(upper, max(definition.range.lowerBound, finite)))
+            let clamped = min(upper, max(definition.range.lowerBound, finite))
+            return Float(key == "stampCount" ? clamped.rounded() : clamped)
         }
         accumulation = value("accumulation", 1)
         alphaThreshold = value("alphaThreshold", 0)

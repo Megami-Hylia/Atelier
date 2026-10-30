@@ -66,6 +66,8 @@ final class BrushSettingsTests: XCTestCase {
         let clamped = PlannedBrushSettings(brush, corrected: true)
         XCTAssertEqual(clamped.flow, 1); XCTAssertEqual(clamped.opacity, 0)
         XCTAssertEqual(clamped.spacing, 0.08, accuracy: 0.00001); XCTAssertEqual(clamped.blendMode, 10)
+        brush.parameters["stampCount"] = 8.5
+        XCTAssertEqual(PlannedBrushSettings(brush,corrected: true).stampCount,9)
     }
     func testPressureOnlyChangesAssignedPropertiesAndAzimuthUsesThePenAngle() throws {
         var low = stroke(["azimuth": 1, "wetAttack": 1, "wetDilution": 0.3, "flow": 0.2])
@@ -190,7 +192,7 @@ final class BrushSettingsTests: XCTestCase {
             }
             let distinct = Set(outputs).count
             records.append(["id":parameter.id,"minimum":parameter.range.lowerBound,
-                "middle":(parameter.range.lowerBound+parameter.range.upperBound)/2,
+                "middle":parameter.id == "stampCount" ? ((parameter.range.lowerBound+parameter.range.upperBound)/2).rounded() : (parameter.range.lowerBound+parameter.range.upperBound)/2,
                 "maximum":parameter.range.upperBound,"distinctPixelResults":distinct])
             XCTAssertGreaterThan(distinct,1,"No pixel effect for \(parameter.id) with dependencies enabled")
         }
