@@ -75,6 +75,9 @@ kernel void paintTile(texture2d<float, access::read> source [[texture(0)]],
     if (pixel.x >= target.get_width() || pixel.y >= target.get_height()) return;
     float2 position = float2(pixel) + 0.5;
     float4 color = source.read(pixel); // Premultiplied linear RGBA throughout compositing.
+    bool limitedStroke = tile.count > 0 && stamps[0].shape.w > 0.5;
+    float deposited = limitedStroke ? coverage.read(pixel).r : 0;
+    float4 strokeBase = limitedStroke ? pickupSource.read(pixel) : float4(0);
     for (uint i = 0; i < tile.count; i++) {
         Stamp s = stamps[i];
         float2 delta = (position - s.geometry.xy) / max(0.05f, s.geometry.z);
@@ -98,7 +101,7 @@ kernel void paintTile(texture2d<float, access::read> source [[texture(0)]],
         float rawCoverage = 0, nextCoverage = 0;
         if (limited) {
             if (s.shape.z <= 0 || alpha <= 0) continue;
-            float previous = coverage.read(pixel).r;
+            float previous = deposited;
             // Both components share the gesture's coverage. Smaller component opacity
             // still limits its contribution when another component already filled it.
             alpha *= min(1.0f, s.shape.z / max(0.00001f, previous));
@@ -107,11 +110,11 @@ kernel void paintTile(texture2d<float, access::read> source [[texture(0)]],
             float single = max(previous, s.shape.z * alpha);
             float accumulating = previous + max(0.0f, s.shape.z-previous)*alpha;
             nextCoverage = max(previous, mix(single, accumulating, s.variation.x));
-            coverage.write(float4(nextCoverage,0,0,0),pixel);
+            deposited = nextCoverage;
         }
         if (tool == 2) {
             color *= 1-alpha;
-            if (limited) color = limitStrokeColor(color,pickupSource.read(pixel),rawCoverage,nextCoverage);
+            if (limited) color = limitStrokeColor(color,strokeBase,rawCoverage,nextCoverage);
             continue;
         }
         int2 pickupPixel = clamp(int2(position - s.pickup.xy), int2(0), int2(source.get_width() - 1, source.get_height() - 1));
@@ -119,7 +122,7 @@ kernel void paintTile(texture2d<float, access::read> source [[texture(0)]],
         if (tool == 1) {
             // shortcut: pickup uses pre-stroke pixels; evaluate per-stamp ping-pong for self-advection parity.
             color = mix(color, pickup, alpha * (limited ? 1.0f : s.pickup.w));
-            if (limited) color = limitStrokeColor(color,pickupSource.read(pixel),rawCoverage,nextCoverage);
+            if (limited) color = limitStrokeColor(color,strokeBase,rawCoverage,nextCoverage);
             continue;
         }
         float3 rgb = s.color.rgb;
@@ -133,8 +136,9 @@ kernel void paintTile(texture2d<float, access::read> source [[texture(0)]],
         // W3C source-over blend formula also covers a transparent destination.
         color.rgb = (1 - alpha) * color.rgb + alpha * ((1 - color.a) * rgb + color.a * blended);
         color.a = alpha + color.a * (1 - alpha);
-        if (limited) color = limitStrokeColor(color,pickupSource.read(pixel),rawCoverage,nextCoverage);
+        if (limited) color = limitStrokeColor(color,strokeBase,rawCoverage,nextCoverage);
     }
+    if (limitedStroke) coverage.write(float4(deposited,0,0,0),pixel);
     target.write(clamp(color, 0.0f, 1.0f), pixel);
 }
 
