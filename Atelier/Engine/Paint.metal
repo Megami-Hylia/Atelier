@@ -48,6 +48,13 @@ float3 blendRGB(float3 base, float3 paint, int mode) {
     return paint;
 }
 
+// Recompose against the immutable pre-stroke layer, allowing pigment to keep
+// changing after coverage reaches its limit without increasing stroke opacity.
+float4 limitStrokeColor(float4 candidate, float4 base, float raw, float limited) {
+    if (raw <= 0.000001) return base;
+    return mix(base,candidate,clamp(limited/raw,0.0f,1.0f));
+}
+
 kernel void clearTexture(texture2d<float, access::write> out [[texture(0)]],
                          constant float4 &color [[buffer(0)]], uint2 p [[thread_position_in_grid]]) {
     if (p.x < out.get_width() && p.y < out.get_height()) out.write(color, p);
@@ -86,24 +93,33 @@ kernel void paintTile(texture2d<float, access::read> source [[texture(0)]],
         mask *= clamp(1 - s.texture.w * (uv.y + 1) * 0.5, 0.0f, 1.0f);
         float alpha = clamp(mask * s.color.w, 0.0f, 1.0f);
         if (alpha < s.rendering.z) continue;
-        if (s.shape.w > 0.5) {
-            float4 deposited = coverage.read(pixel);
-            uint component = s.variation.y > 0.5 ? 1 : 0;
-            float previous = deposited[component];
-            float single = max(previous, s.shape.z * alpha);
-            float accumulating = previous + max(0.0f, s.shape.z-previous) * alpha;
-            float next = max(previous, mix(single, accumulating, s.variation.x));
-            alpha = previous < 1 ? (next-previous)/(1-previous) : 0;
-            deposited[component] = next;
-            coverage.write(deposited, pixel);
-        }
+        bool limited = s.shape.w > 0.5;
         int tool = int(s.rendering.y);
-        if (tool == 2) { color *= 1 - alpha; continue; }
+        float rawCoverage = 0, nextCoverage = 0;
+        if (limited) {
+            if (s.shape.z <= 0 || alpha <= 0) continue;
+            float previous = coverage.read(pixel).r;
+            // Both components share the gesture's coverage. Smaller component opacity
+            // still limits its contribution when another component already filled it.
+            alpha *= min(1.0f, s.shape.z / max(0.00001f, previous));
+            if (tool == 1) alpha *= s.pickup.w;
+            rawCoverage = previous + (1-previous)*alpha;
+            float single = max(previous, s.shape.z * alpha);
+            float accumulating = previous + max(0.0f, s.shape.z-previous)*alpha;
+            nextCoverage = max(previous, mix(single, accumulating, s.variation.x));
+            coverage.write(float4(nextCoverage,0,0,0),pixel);
+        }
+        if (tool == 2) {
+            color *= 1-alpha;
+            if (limited) color = limitStrokeColor(color,pickupSource.read(pixel),rawCoverage,nextCoverage);
+            continue;
+        }
         int2 pickupPixel = clamp(int2(position - s.pickup.xy), int2(0), int2(source.get_width() - 1, source.get_height() - 1));
         float4 pickup = pickupSource.read(uint2(pickupPixel));
         if (tool == 1) {
             // shortcut: pickup uses pre-stroke pixels; evaluate per-stamp ping-pong for self-advection parity.
-            color = mix(color, pickup, alpha * s.pickup.w);
+            color = mix(color, pickup, alpha * (limited ? 1.0f : s.pickup.w));
+            if (limited) color = limitStrokeColor(color,pickupSource.read(pixel),rawCoverage,nextCoverage);
             continue;
         }
         float3 rgb = s.color.rgb;
@@ -117,6 +133,7 @@ kernel void paintTile(texture2d<float, access::read> source [[texture(0)]],
         // W3C source-over blend formula also covers a transparent destination.
         color.rgb = (1 - alpha) * color.rgb + alpha * ((1 - color.a) * rgb + color.a * blended);
         color.a = alpha + color.a * (1 - alpha);
+        if (limited) color = limitStrokeColor(color,pickupSource.read(pixel),rawCoverage,nextCoverage);
     }
     target.write(clamp(color, 0.0f, 1.0f), pixel);
 }

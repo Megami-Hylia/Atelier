@@ -198,4 +198,21 @@ final class BrushSettingsTests: XCTestCase {
         attachment.name = "Brush-control-low-middle-high-pixels"; attachment.lifetime = .keepAlways; add(attachment)
     }
 
+    func testCombinedBrushSharesOpacityLimitAndPigmentStillChangesAtFullCoverage() throws {
+        var combined = stroke(["opacity":0.4,"flow":1])
+        combined.samples = [PencilSample(x: 64,y: 32)]
+        combined.brush.secondaryBrushes = [combined.brush]
+        let image = try render([combined])
+        XCTAssertLessThanOrEqual(image[32*128*4+64*4+3],0.402)
+        var held = stroke(["opacity":0.5,"flow":1,"hueJitter":1])
+        held.samples = [PencilSample(x: 64,y: 32,pressure: 1,time: 0)]
+        let first = try render([held])
+        held.samples += [PencilSample(x: 64,y: 32,pressure: 0.3,time: 0.1),
+            PencilSample(x: 64,y: 32,pressure: 1,time: 0.2)]
+        let varied = try render([held])
+        XCTAssertEqual(varied[32*128*4+64*4+3],first[32*128*4+64*4+3],accuracy: 0.003)
+        XCTAssertNotEqual(Array(varied[(32*128*4+64*4)..<(32*128*4+64*4+3)]),
+            Array(first[(32*128*4+64*4)..<(32*128*4+64*4+3)]))
+    }
+
 }
