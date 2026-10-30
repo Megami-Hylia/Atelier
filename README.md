@@ -1,10 +1,12 @@
 # Atelier per iPad
 
-App nativa SwiftUI/UIKit/Metal in sviluppo. La build corrente e la IPA unsigned sono documentate in [CURRENT_BUILD.md](CURRENT_BUILD.md), con commit, hash e [workflow](https://github.com/Megami-Hylia/Atelier/actions/runs/40973187554). I rapporti macchina correnti si trovano in `docs/verification/`.
+App nativa SwiftUI/UIKit/Metal in sviluppo. La build corrente e la IPA unsigned sono documentate in [CURRENT_BUILD.md](CURRENT_BUILD.md), con commit, hash e [workflow](https://github.com/Megami-Hylia/Atelier/actions/runs/41120843683). I rapporti macchina correnti si trovano in `docs/verification/`.
 
 Il percorso di disegno aggiornato comprende campionamento adattivo allo zoom, curve, stabilizzazione regolabile, rendering incrementale al ritmo dei frame e cache storica limitata. [Architettura e limiti del percorso](DRAWING_PIPELINE.md).
 
-**58 test nativi superati, zero falliti/saltati**, su iPad A16 simulato / iOS 26.2 / x86_64. La build Release arm64 per dispositivo e la struttura della IPA sono state verificate. Firma, installazione e latenza su iPad fisico non sono state provate; la parità complessiva con il riferimento resta incompleta.
+**67 test nativi superati, zero falliti/saltati**, su iPad A16 simulato / iOS 26.2 / x86_64. La build Release arm64 per dispositivo e la struttura della IPA sono state verificate. Firma, installazione e latenza su iPad fisico non sono state provate; la parità complessiva con il riferimento resta incompleta.
+
+I parametri dei pennelli sono stati verificati a minimo, medio e massimo per tutti i 76 controlli. [Correzioni, semantica e limiti](docs/BRUSH_SETTINGS_FIX.md).
 
 Il prodotto è pensato per funzionare offline senza acquisti, abbonamenti, pubblicità o strumenti a pagamento. Il codice dell’incremento e le risorse dei pennelli sono originali. Le categorie e il riferimento 5.4.14 organizzano il confronto richiesto; non implicano identità di pennelli, algoritmi o compatibilità proprietaria.
 

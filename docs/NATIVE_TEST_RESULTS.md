@@ -1,3 +1,11 @@
+# Verifica delle impostazioni dei pennelli
+
+[Run 41120843683](https://github.com/Megami-Hylia/Atelier/actions/runs/41120843683), commit `5d563f0a54171f48f21923c4101313d1d44d256b`: **67 test superati, zero falliti/saltati**. Nove nuovi casi comprendono tre valori per ognuno dei 76 controlli e un confronto effettivo dei pixel Metal con dipendenze attive. I valori ciclici/binari possono dare due risultati distinti su tre campioni. Sono verificati anche persistenza, assegnazioni della pressione, opacità/flusso/accumulo, zeri, preview e suoi componenti, stabilizzazione globale/locale, snapshot e rendering incrementale con previsioni per pennello/gomma/sfumino.
+
+[Matrice esportata dai test](verification/BRUSH_SETTINGS_MATRIX.json), [cause e correzioni](BRUSH_SETTINGS_FIX.md). Esecuzione sintetica su simulatore, non prova hardware o misura di latenza/FPS. La stessa sorgente ha prodotto una IPA Release arm64 per dispositivo, strutturalmente verificata anche su Windows.
+
+---
+
 # Verifica del percorso di disegno aggiornato
 
 [Run 40973187554](https://github.com/Megami-Hylia/Atelier/actions/runs/40973187554), commit `2dbccf6d0ffacdf3e38539280a6dbdfe15669523`: **58 test superati, zero falliti/saltati**. Rapporto effettivo `test-summary.json` e `TEST SUCCEEDED` acquisiti dall'artefatto CI. Esecuzione su iPad A16 simulato, iOS 26.2, x86_64, Xcode 26.2. Build device Release arm64 distinta e IPA verificata anche su Windows.

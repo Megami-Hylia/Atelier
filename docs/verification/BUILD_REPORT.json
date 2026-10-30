@@ -1,12 +1,12 @@
 {
   "status": "BUILT_AND_STRUCTURALLY_VERIFIED",
-  "commit": "2dbccf6d0ffacdf3e38539280a6dbdfe15669523",
-  "utc": "2026-10-29T23:31:45.991647+00:00",
+  "commit": "5d563f0a54171f48f21923c4101313d1d44d256b",
+  "utc": "2026-10-30T20:17:35.831519+00:00",
   "runner": "macOS",
   "runner_arch": "X64",
   "runner_image": "macos15",
   "runner_image_version": "20260824.0482.1",
-  "workflow_run_url": "https://github.com/Megami-Hylia/Atelier/actions/runs/40973187554",
+  "workflow_run_url": "https://github.com/Megami-Hylia/Atelier/actions/runs/41120843683",
   "xcode": "Xcode 26.2\nBuild version 17C52",
   "sdk": "26.2",
   "macos": "ProductName:\t\tmacOS\nProductVersion:\t\t15.7.9\nBuildVersion:\t\t24G830",
@@ -15,8 +15,8 @@
   "ipa": {
     "result": "passed",
     "ipa": "Atelier-unsigned.ipa",
-    "sha256": "e4da5f1be4dec3d02486febaad19d24319295fafe23fe34c3bd06efb5ae5e2eb",
-    "bytes": 1100796,
+    "sha256": "aacc31f25b4db5d91ab8cc33fe7315b478e385bdedaaa36cfe5b61b4acfd1b4d",
+    "bytes": 1106618,
     "bundle_identifier": "org.atelier.ipad",
     "executable": "Atelier",
     "device_family": [

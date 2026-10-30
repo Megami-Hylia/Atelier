@@ -1,0 +1,542 @@
+{
+  "compiled_commit": "5d563f0a54171f48f21923c4101313d1d44d256b",
+  "workflow": "https://github.com/Megami-Hylia/Atelier/actions/runs/41120843683",
+  "controls": 76,
+  "values": "minimum, middle, maximum",
+  "result": "passed",
+  "scope": "Synthetic Metal pixels and persistence; no physical iPad measurements",
+  "records": [
+    {
+      "distinctPixelResults": 3,
+      "id": "spacing",
+      "maximum": 2,
+      "middle": 1.005,
+      "minimum": 0.01
+    },
+    {
+      "distinctPixelResults": 3,
+      "id": "spacingJitter",
+      "maximum": 1,
+      "middle": 0.5,
+      "minimum": 0
+    },
+    {
+      "distinctPixelResults": 3,
+      "id": "jitterLateral",
+      "maximum": 1,
+      "middle": 0.5,
+      "minimum": 0
+    },
+    {
+      "distinctPixelResults": 3,
+      "id": "jitterLinear",
+      "maximum": 1,
+      "middle": 0.5,
+      "minimum": 0
+    },
+    {
+      "distinctPixelResults": 3,
+      "id": "fallOff",
+      "maximum": 1,
+      "middle": 0.5,
+      "minimum": 0
+    },
+    {
+      "distinctPixelResults": 3,
+      "id": "streamline",
+      "maximum": 1,
+      "middle": 0.5,
+      "minimum": 0
+    },
+    {
+      "distinctPixelResults": 3,
+      "id": "pressureSmoothing",
+      "maximum": 1,
+      "middle": 0.5,
+      "minimum": 0
+    },
+    {
+      "distinctPixelResults": 3,
+      "id": "stabilization",
+      "maximum": 1,
+      "middle": 0.5,
+      "minimum": 0
+    },
+    {
+      "distinctPixelResults": 3,
+      "id": "motionFiltering",
+      "maximum": 1,
+      "middle": 0.5,
+      "minimum": 0
+    },
+    {
+      "distinctPixelResults": 3,
+      "id": "motionExpression",
+      "maximum": 1,
+      "middle": 0.5,
+      "minimum": 0
+    },
+    {
+      "distinctPixelResults": 3,
+      "id": "taperStart",
+      "maximum": 1,
+      "middle": 0.5,
+      "minimum": 0
+    },
+    {
+      "distinctPixelResults": 3,
+      "id": "taperEnd",
+      "maximum": 1,
+      "middle": 0.5,
+      "minimum": 0
+    },
+    {
+      "distinctPixelResults": 3,
+      "id": "taperSize",
+      "maximum": 1,
+      "middle": 0.5,
+      "minimum": 0
+    },
+    {
+      "distinctPixelResults": 3,
+      "id": "taperOpacity",
+      "maximum": 1,
+      "middle": 0.5,
+      "minimum": 0
+    },
+    {
+      "distinctPixelResults": 3,
+      "id": "scatter",
+      "maximum": 1,
+      "middle": 0.5,
+      "minimum": 0
+    },
+    {
+      "distinctPixelResults": 3,
+      "id": "rotation",
+      "maximum": 1,
+      "middle": 0,
+      "minimum": -1
+    },
+    {
+      "distinctPixelResults": 3,
+      "id": "roundness",
+      "maximum": 1,
+      "middle": 0.525,
+      "minimum": 0.05
+    },
+    {
+      "distinctPixelResults": 3,
+      "id": "pressureRoundness",
+      "maximum": 1,
+      "middle": 0.5,
+      "minimum": 0
+    },
+    {
+      "distinctPixelResults": 3,
+      "id": "tiltRoundness",
+      "maximum": 1,
+      "middle": 0.5,
+      "minimum": 0
+    },
+    {
+      "distinctPixelResults": 3,
+      "id": "roundnessJitterY",
+      "maximum": 1,
+      "middle": 0.5,
+      "minimum": 0
+    },
+    {
+      "distinctPixelResults": 3,
+      "id": "roundnessJitterX",
+      "maximum": 1,
+      "middle": 0.5,
+      "minimum": 0
+    },
+    {
+      "distinctPixelResults": 3,
+      "id": "stampCount",
+      "maximum": 16,
+      "middle": 9,
+      "minimum": 1
+    },
+    {
+      "distinctPixelResults": 3,
+      "id": "countJitter",
+      "maximum": 1,
+      "middle": 0.5,
+      "minimum": 0
+    },
+    {
+      "distinctPixelResults": 2,
+      "id": "randomRotation",
+      "maximum": 1,
+      "middle": 0.5,
+      "minimum": 0
+    },
+    {
+      "distinctPixelResults": 2,
+      "id": "flipX",
+      "maximum": 1,
+      "middle": 0.5,
+      "minimum": 0
+    },
+    {
+      "distinctPixelResults": 2,
+      "id": "flipY",
+      "maximum": 1,
+      "middle": 0.5,
+      "minimum": 0
+    },
+    {
+      "distinctPixelResults": 3,
+      "id": "grainScale",
+      "maximum": 8,
+      "middle": 4.05,
+      "minimum": 0.1
+    },
+    {
+      "distinctPixelResults": 3,
+      "id": "grainDepth",
+      "maximum": 1,
+      "middle": 0.5,
+      "minimum": 0
+    },
+    {
+      "distinctPixelResults": 3,
+      "id": "grainMovement",
+      "maximum": 1,
+      "middle": 0.5,
+      "minimum": 0
+    },
+    {
+      "distinctPixelResults": 3,
+      "id": "grainRotation",
+      "maximum": 1,
+      "middle": 0,
+      "minimum": -1
+    },
+    {
+      "distinctPixelResults": 3,
+      "id": "grainContrast",
+      "maximum": 2,
+      "middle": 1,
+      "minimum": 0
+    },
+    {
+      "distinctPixelResults": 3,
+      "id": "grainBrightness",
+      "maximum": 1,
+      "middle": 0,
+      "minimum": -1
+    },
+    {
+      "distinctPixelResults": 3,
+      "id": "grainZoom",
+      "maximum": 1,
+      "middle": 0.5,
+      "minimum": 0
+    },
+    {
+      "distinctPixelResults": 3,
+      "id": "flow",
+      "maximum": 1,
+      "middle": 0.5,
+      "minimum": 0
+    },
+    {
+      "distinctPixelResults": 3,
+      "id": "opacity",
+      "maximum": 1,
+      "middle": 0.5,
+      "minimum": 0
+    },
+    {
+      "distinctPixelResults": 3,
+      "id": "accumulation",
+      "maximum": 1,
+      "middle": 0.5,
+      "minimum": 0
+    },
+    {
+      "distinctPixelResults": 2,
+      "id": "alphaThreshold",
+      "maximum": 1,
+      "middle": 0.5,
+      "minimum": 0
+    },
+    {
+      "distinctPixelResults": 3,
+      "id": "blendMode",
+      "maximum": 2,
+      "middle": 1,
+      "minimum": 0
+    },
+    {
+      "distinctPixelResults": 2,
+      "id": "dualEnabled",
+      "maximum": 1,
+      "middle": 0.5,
+      "minimum": 0
+    },
+    {
+      "distinctPixelResults": 3,
+      "id": "dualScale",
+      "maximum": 2,
+      "middle": 1.05,
+      "minimum": 0.1
+    },
+    {
+      "distinctPixelResults": 3,
+      "id": "dualRotation",
+      "maximum": 1,
+      "middle": 0,
+      "minimum": -1
+    },
+    {
+      "distinctPixelResults": 3,
+      "id": "dualOpacity",
+      "maximum": 1,
+      "middle": 0.5,
+      "minimum": 0
+    },
+    {
+      "distinctPixelResults": 3,
+      "id": "wetDilution",
+      "maximum": 1,
+      "middle": 0.5,
+      "minimum": 0
+    },
+    {
+      "distinctPixelResults": 3,
+      "id": "wetCharge",
+      "maximum": 1,
+      "middle": 0.5,
+      "minimum": 0
+    },
+    {
+      "distinctPixelResults": 3,
+      "id": "wetAttack",
+      "maximum": 1,
+      "middle": 0.5,
+      "minimum": 0
+    },
+    {
+      "distinctPixelResults": 3,
+      "id": "wetPull",
+      "maximum": 1,
+      "middle": 0.5,
+      "minimum": 0
+    },
+    {
+      "distinctPixelResults": 3,
+      "id": "wetGrade",
+      "maximum": 1,
+      "middle": 0.5,
+      "minimum": 0
+    },
+    {
+      "distinctPixelResults": 3,
+      "id": "hueJitter",
+      "maximum": 1,
+      "middle": 0.5,
+      "minimum": 0
+    },
+    {
+      "distinctPixelResults": 3,
+      "id": "saturationJitter",
+      "maximum": 1,
+      "middle": 0.5,
+      "minimum": 0
+    },
+    {
+      "distinctPixelResults": 3,
+      "id": "brightnessJitter",
+      "maximum": 1,
+      "middle": 0.5,
+      "minimum": 0
+    },
+    {
+      "distinctPixelResults": 3,
+      "id": "strokeHue",
+      "maximum": 1,
+      "middle": 0.5,
+      "minimum": 0
+    },
+    {
+      "distinctPixelResults": 3,
+      "id": "stampHue",
+      "maximum": 1,
+      "middle": 0.5,
+      "minimum": 0
+    },
+    {
+      "distinctPixelResults": 3,
+      "id": "speedSize",
+      "maximum": 1,
+      "middle": 0,
+      "minimum": -1
+    },
+    {
+      "distinctPixelResults": 3,
+      "id": "speedOpacity",
+      "maximum": 1,
+      "middle": 0,
+      "minimum": -1
+    },
+    {
+      "distinctPixelResults": 3,
+      "id": "speedSpacing",
+      "maximum": 2,
+      "middle": 1,
+      "minimum": 0
+    },
+    {
+      "distinctPixelResults": 3,
+      "id": "sizeJitter",
+      "maximum": 1,
+      "middle": 0.5,
+      "minimum": 0
+    },
+    {
+      "distinctPixelResults": 3,
+      "id": "opacityJitter",
+      "maximum": 1,
+      "middle": 0.5,
+      "minimum": 0
+    },
+    {
+      "distinctPixelResults": 3,
+      "id": "pressureSize",
+      "maximum": 1,
+      "middle": 0.5,
+      "minimum": 0
+    },
+    {
+      "distinctPixelResults": 3,
+      "id": "pressureOpacity",
+      "maximum": 1,
+      "middle": 0.5,
+      "minimum": 0
+    },
+    {
+      "distinctPixelResults": 3,
+      "id": "pressureFlow",
+      "maximum": 1,
+      "middle": 0.5,
+      "minimum": 0
+    },
+    {
+      "distinctPixelResults": 3,
+      "id": "pressureBleed",
+      "maximum": 1,
+      "middle": 0.5,
+      "minimum": 0
+    },
+    {
+      "distinctPixelResults": 3,
+      "id": "pressureCurve",
+      "maximum": 3,
+      "middle": 1.6,
+      "minimum": 0.2
+    },
+    {
+      "distinctPixelResults": 3,
+      "id": "tiltSize",
+      "maximum": 1,
+      "middle": 0.5,
+      "minimum": 0
+    },
+    {
+      "distinctPixelResults": 3,
+      "id": "tiltOpacity",
+      "maximum": 1,
+      "middle": 0.5,
+      "minimum": 0
+    },
+    {
+      "distinctPixelResults": 3,
+      "id": "tiltGradation",
+      "maximum": 1,
+      "middle": 0.5,
+      "minimum": 0
+    },
+    {
+      "distinctPixelResults": 3,
+      "id": "azimuth",
+      "maximum": 1,
+      "middle": 0.5,
+      "minimum": 0
+    },
+    {
+      "distinctPixelResults": 3,
+      "id": "barrelRoll",
+      "maximum": 1,
+      "middle": 0.5,
+      "minimum": 0
+    },
+    {
+      "distinctPixelResults": 3,
+      "id": "minSize",
+      "maximum": 1,
+      "middle": 0.5,
+      "minimum": 0
+    },
+    {
+      "distinctPixelResults": 3,
+      "id": "maxSize",
+      "maximum": 1,
+      "middle": 0.5,
+      "minimum": 0
+    },
+    {
+      "distinctPixelResults": 2,
+      "id": "minOpacity",
+      "maximum": 1,
+      "middle": 0.5,
+      "minimum": 0
+    },
+    {
+      "distinctPixelResults": 3,
+      "id": "maxOpacity",
+      "maximum": 1,
+      "middle": 0.5,
+      "minimum": 0
+    },
+    {
+      "distinctPixelResults": 3,
+      "id": "smudge",
+      "maximum": 1,
+      "middle": 0.5,
+      "minimum": 0
+    },
+    {
+      "distinctPixelResults": 3,
+      "id": "previewSize",
+      "maximum": 1,
+      "middle": 0.55,
+      "minimum": 0.1
+    },
+    {
+      "distinctPixelResults": 3,
+      "id": "previewPressure",
+      "maximum": 1,
+      "middle": 0.5,
+      "minimum": 0
+    },
+    {
+      "distinctPixelResults": 3,
+      "id": "previewWetMix",
+      "maximum": 1,
+      "middle": 0.5,
+      "minimum": 0
+    },
+    {
+      "distinctPixelResults": 3,
+      "id": "previewLength",
+      "maximum": 1,
+      "middle": 0.6,
+      "minimum": 0.2
+    }
+  ]
+}

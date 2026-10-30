@@ -1,8 +1,8 @@
 {
   "result": "passed",
   "ipa": "Atelier-unsigned.ipa",
-  "sha256": "e4da5f1be4dec3d02486febaad19d24319295fafe23fe34c3bd06efb5ae5e2eb",
-  "bytes": 1100796,
+  "sha256": "aacc31f25b4db5d91ab8cc33fe7315b478e385bdedaaa36cfe5b61b4acfd1b4d",
+  "bytes": 1106618,
   "bundle_identifier": "org.atelier.ipad",
   "executable": "Atelier",
   "device_family": [
