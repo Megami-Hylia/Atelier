@@ -5,6 +5,7 @@ import Metal
 @MainActor
 final class BrushSettingsTests: XCTestCase {
     private let centerAlpha = 16643
+    private var renderingPainter: MetalPainter?
     private func stroke(_ parameters: [String: Double] = [:]) -> PaintStroke {
         var brush = BrushPreset.fallback
         brush.parameters = ["pressureSize": 0, "spacing": 0.15, "wetAttack": 0]
@@ -22,7 +23,9 @@ final class BrushSettingsTests: XCTestCase {
     private func render(_ strokes: [PaintStroke]) throws -> [Float] {
         var document = DocumentContents(width: 128, height: 64); document.background = .zero
         document.layers[0].strokes = strokes
-        return pixels(try MetalPainter().render(document))
+        if renderingPainter == nil { renderingPainter = try MetalPainter() }
+        let painter = try XCTUnwrap(renderingPainter)
+        return pixels(try painter.render(document))
     }
     func testEveryControlAtMinimumMiddleMaximumProducesFiniteStampsAndPersists() throws {
         let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
