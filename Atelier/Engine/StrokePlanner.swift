@@ -255,7 +255,7 @@ enum StrokePlanner {
                 alpha *= (1 - settings.pressureFlow + settings.pressureFlow * pressure)
                 alpha *= max(0, 1 + settings.speedOpacity * speed) * (1 - settings.opacityJitter * rng.unit())
                 alpha *= (1 - settings.tiltOpacity * tilt) * (1 - settings.taperOpacity + settings.taperOpacity * taper)
-                alpha *= exp(-settings.fallOff * normalizedDistance * 10) * (0.15 + settings.accumulation * 0.85)
+                alpha *= exp(-settings.fallOff * normalizedDistance * 10) * (context.brushSettingsVersion == 1 ? 1 : (0.15 + settings.accumulation * 0.85))
                 let charge = settings.wetCharge
                 alpha *= max(0.01, 1 - settings.wetDilution * 0.9) * (context.brushSettingsVersion == 1 ? charge : (0.05 + 0.95 * charge)) * max(0.01, 1 - (1 - charge) * normalizedDistance * 0.95)
                 if context.brushSettingsVersion != 1 || settings.wetDilution > 0 || settings.wetPull > 0 || charge < 1 {

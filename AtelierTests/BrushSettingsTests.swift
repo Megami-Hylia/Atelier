@@ -151,4 +151,45 @@ final class BrushSettingsTests: XCTestCase {
             XCTAssertLessThanOrEqual(painter.lastPlannedSampleCount,4)
         }
     }
+    func testEveryControlHasAnObservableEffectAtLowMiddleHighWithItsDependenciesEnabled() throws {
+        var underpaint = stroke()
+        underpaint.color = SIMD4(0.8,0.2,0.1,1)
+        underpaint.samples = [PencilSample(x: 10,y: 32,time: 0),PencilSample(x: 118,y: 32,time: 1)]
+        underpaint.size = 22
+        var base = stroke(["flow":0.18,"opacity":0.7,"pressureSize":0.5,"pressureOpacity":0.3,
+            "pressureFlow":0.2,"spacing":0.3,"stampCount":3,"countJitter":0.2,
+            "jitterLateral":0.12,"roundness":0.7,"grainDepth":0.4,"rotation":0.3,
+            "wetDilution":0.25,"wetPull":0.4,"wetCharge":0.8,"wetAttack":0.3,
+            "taperStart":0.3,"taperEnd":0.5,"taperSize":0.5,"taperOpacity":0.3,
+            "dualEnabled":1,"dualScale":0.7,"dualOpacity":0.5,"motionFiltering":0.7])
+        base.brush.shape = "fleck"; base.brush.grain = "charcoal"
+        for i in base.samples.indices {
+            base.samples[i].y += i.isMultiple(of: 2) ? 1 : -1
+        }
+        var records: [[String: Any]] = []
+        for parameter in BrushParameter.all {
+            var outputs: [Data] = []
+            for fraction in [0.0,0.5,1.0] {
+                var changed = base
+                let value = parameter.range.lowerBound+(parameter.range.upperBound-parameter.range.lowerBound)*fraction
+                changed.brush.parameters[parameter.id] = parameter.id == "stampCount" ? value.rounded() : value
+                if parameter.id == "smudge" { changed.tool = .smudge }
+                if parameter.category == "Preview" {
+                    outputs.append(try XCTUnwrap(try BrushPreviewRenderer.shared.image(changed.brush,lightOnDark: false).pngData()))
+                } else {
+                    let result = try render([underpaint,changed])
+                    outputs.append(result.withUnsafeBytes { Data($0) })
+                }
+            }
+            let distinct = Set(outputs).count
+            records.append(["id":parameter.id,"minimum":parameter.range.lowerBound,
+                "middle":(parameter.range.lowerBound+parameter.range.upperBound)/2,
+                "maximum":parameter.range.upperBound,"distinctPixelResults":distinct])
+            XCTAssertGreaterThan(distinct,1,"No pixel effect for \(parameter.id) with dependencies enabled")
+        }
+        let data = try JSONSerialization.data(withJSONObject: records,options: [.prettyPrinted,.sortedKeys])
+        let attachment = XCTAttachment(data: data,uniformTypeIdentifier: "public.json")
+        attachment.name = "Brush-control-low-middle-high-pixels"; attachment.lifetime = .keepAlways; add(attachment)
+    }
+
 }
