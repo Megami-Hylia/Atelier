@@ -1,31 +1,11 @@
-# Rallentamento progressivo durante il disegno
+# Sistema di disegno: stato corrente
 
-## Cause individuate nel codice
+L'acquisizione conservava quasi tutti i tocchi coalescenti, inclusi punti senza nuovo dettaglio visibile. Il collegamento era lineare e il filtraggio dipendeva dalla densità degli eventi. I livelli non selezionati potevano essere riprodotti di nuovo durante il disegno.
 
-Il tratto attivo veniva ripianificato e ridisegnato dall’inizio a ogni frame. Il costo di planner, assegnazione ai tile e shader cresceva con tutti i punti già raccolti. Copie dell’array dei campioni venivano fatte durante append e previsione. Sorgenti forma/grana importate erano decodificate di nuovo e il salvataggio serializzava il documento sul main actor.
+Il nuovo percorso mantiene un `PaintStroke` per gesto. Il campionamento adattivo lavora in punti schermo, le cubiche conservano angoli e variazioni della penna, la stabilizzazione è regolabile. I nuovi campioni entrano nel cursore incrementale una sola volta; previsioni e stime pendenti restano provvisorie. Il rendering segue i frame e si ferma quando non serve. La semplificazione finale verifica forma e attributi di ogni componente in streaming. La cache storica è limitata a quattro livelli/32 MiB entro il budget raster condiviso di 384 MiB.
 
-## Correzioni nei sorgenti
+Documentazione del percorso: [DRAWING_PIPELINE.md](DRAWING_PIPELINE.md). Build e test: [CURRENT_BUILD.md](CURRENT_BUILD.md), [run 40973187554](https://github.com/Megami-Hylia/Atelier/actions/runs/40973187554), sorgenti `2dbccf6d0ffacdf3e38539280a6dbdfe15669523`.
 
-- Cursore di pianificazione incrementale a stato costante: conserva filtro, distanza e generatore casuale senza conservare l’array crescente.
-- Superficie Metal persistente per il tratto attivo. Si aggiungono le nuove impronte, usando sempre lo sfondo precedente al tratto per il pickup di gomma/sfumino/impasto.
-- Al massimo 32 nuovi campioni consolidati per frame; i frame successivi drenano gli arretrati senza eliminare punti. Solo la coda con stime Pencil ancora in attesa (al massimo 32 campioni) è riprodotta provvisoriamente; senza stime pendenti tutti i campioni nuovi vengono consolidati subito. Previsioni e coda provvisoria non entrano nella superficie permanente.
-- Correzioni a campioni già consolidati invalidano il cursore per correttezza; la ricostruzione viene comunque suddivisa in frame.
-- Append dei campioni in posizione, senza copiare l’intero tratto per aggiungere le previsioni.
-- Il livello selezionato usa la revisione del documento durante il disegno e, quando viene aggiunto un tratto, riusa lo storico già renderizzato.
-- Dispatch GPU limitato al rettangolo interessato dalle impronte in ciascun tile, anziché sempre 256×256 pixel.
-- Cache delle sorgenti importate e incluse: fino a 64 texture / 32 MiB.
-- Autosave su coda seriale separata, accorpato dopo 350 ms; il salvataggio esplicito attende le scritture precedenti e non può essere sovrascritto da un autosave obsoleto.
+Sono passati 58 test nativi, inclusi 22 nuovi casi, più sei test del validatore IPA. La prova da 8192 campioni verifica lavoro lineare del cursore; quella con 200 tratti verifica che lo storico conservato non rientri nella pianificazione a ogni frame. I confronti Metal verificano previsioni scartate, correzioni tardive, gomma/sfumino e replay. Questi sono controlli sintetici, non benchmark di Apple Pencil o iPad 9.
 
-I nuovi tratti sono marcati `distanceDynamicsVersion: 1`: taper iniziale, attenuazione e carica dipendono da una distanza stabile rispetto alla dimensione del pennello. Questo permette di non modificare retroattivamente l’inizio del tratto mentre la linea si allunga. Gli archivi precedenti, senza questo campo, mantengono integralmente il vecchio planner; il corpo della funzione legacy è stato confrontato automaticamente con quello di 42bdbbb.
-
-## Verifica e limiti
-
-Il controllo sintattico dei 24 file Swift e il confronto del planner legacy sono passati. Sono presenti otto nuovi test nativi per confronto batch/incrementale dei 192 preset, tratti lunghi, burst di input, correzioni Pencil, gomma/sfumino, previsioni, append dello storico e ordinamento dei salvataggi. Non sono stati eseguiti: GitHub non ha avviato il runner per un problema di pagamento o limite di spesa dell’account (run 40884039887, zero step).
-
-Non sono disponibili nuova compilazione, IPA con queste correzioni, tempi GPU o misure su iPad. I precedenti test 22/22 non attestano queste modifiche. L’IPA presente nella cartella resta quella di 9360611 e non contiene il nuovo motore.
-
-La superficie aggiuntiva viene usata solo entro il budget di lavoro di 384 MiB. Per documenti molto grandi (quando sei superfici RGBA16 superano il budget) resta il replay tradizionale. I livelli non selezionati e le regolazioni possono ancora comportare replay e filtri completi. Il numero di campioni per frame non garantisce un tempo GPU fisso: dimensioni, distanza tra punti, conteggio, densità e impasto del pennello incidono ancora sul costo. Nessuna promessa di FPS o eliminazione totale del lag senza prova sull’hardware.
-
-## Nuova compilazione disponibile
-
-Dopo il passaggio del repository a pubblico, il run 40886601251 ha compilato con successo i sorgenti c5e5d96. La nuova IPA contiene le correzioni sopra descritte e ha superato la verifica strutturale su Windows. I paragrafi precedenti sul blocco di compilazione descrivono il tentativo storico; non si applicano più alla consegna corrente. Test del simulatore ancora in corso, nessuna prova hardware.
+Restano limiti espliciti: il budget di 32 campioni per frame non equivale a un limite di tempo GPU. Distanze molto grandi, impronte grandi/dense e regolazioni costose possono richiedere più lavoro. Il pen-up valida e riproduce il tratto definitivo. Per tele che non consentono la sesta superficie entro il budget rimane il replay tradizionale. Latenza, FPS e consumo di memoria dell'intero processo su iPad fisico non sono stati misurati.

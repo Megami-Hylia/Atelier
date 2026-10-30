@@ -3,8 +3,8 @@
     {
       "device" : {
         "architecture" : "x86_64",
-        "deviceId" : "D8DF5C1E-79A7-4CAB-80A1-80BE6D2AECBA",
-        "deviceName" : "AtelierCI-40763569979-a3e44053",
+        "deviceId" : "A041BBA8-E70A-4051-AA6C-041B525725B0",
+        "deviceName" : "AtelierCI-40973187554-f7d24399",
         "modelName" : "iPad (A16)",
         "osBuildNumber" : "23C54",
         "osVersion" : "26.2",
@@ -12,7 +12,7 @@
       },
       "expectedFailures" : 0,
       "failedTests" : 0,
-      "passedTests" : 15,
+      "passedTests" : 58,
       "skippedTests" : 0,
       "testPlanConfiguration" : {
         "configurationId" : "1",
@@ -20,14 +20,14 @@
       }
     }
   ],
-  "environmentDescription" : "Atelier · Built with macOS 26.6.1",
+  "environmentDescription" : "Atelier · Built with macOS 15.7.9",
   "expectedFailures" : 0,
   "failedTests" : 0,
-  "finishTime" : 1793220344.425,
-  "passedTests" : 15,
+  "finishTime" : 1793317558.094,
+  "passedTests" : 58,
   "result" : "Passed",
   "skippedTests" : 0,
-  "startTime" : 1793220017.912,
+  "startTime" : 1793317064.573,
   "statistics" : [
 
   ],
@@ -38,9 +38,9 @@
   "topInsights" : [
     {
       "category" : "Longest Test Runs",
-      "impact" : "73% of duration",
-      "text" : "1 longest test run with outlier durations exceeding 20.87s (three standard deviations)"
+      "impact" : "36% of duration",
+      "text" : "1 longest test run with outlier durations exceeding 23.15s (three standard deviations)"
     }
   ],
-  "totalTestCount" : 15
+  "totalTestCount" : 58
 }

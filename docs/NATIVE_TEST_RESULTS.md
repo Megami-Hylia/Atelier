@@ -1,3 +1,13 @@
+# Verifica del percorso di disegno aggiornato
+
+[Run 40973187554](https://github.com/Megami-Hylia/Atelier/actions/runs/40973187554), commit `2dbccf6d0ffacdf3e38539280a6dbdfe15669523`: **58 test superati, zero falliti/saltati**. Rapporto effettivo `test-summary.json` e `TEST SUCCEEDED` acquisiti dall'artefatto CI. Esecuzione su iPad A16 simulato, iOS 26.2, x86_64, Xcode 26.2. Build device Release arm64 distinta e IPA verificata anche su Windows.
+
+I nuovi test comprendono 15 `StrokeGeometryTests`, tre `CurvedStrokeIntegrationTests` e quattro `HistoryCacheTests`. Verificano densità a zoom diversi; duplicati e campioni ravvicinati; pressione/inclinazione e angoli; tocchi singoli, tratti brevi/rapidi; stabilizzazione, espressione del movimento e dettagli; equivalenza fra pacchetti e replay anche con pennelli combinati; confronto dei pixel Metal per pennello/gomma/sfumino, previsioni e stime tardive; salvataggio e undo/redo; 8192 campioni elaborati una sola volta; cache con 200 tratti e budget condiviso.
+
+Nessun test hardware né misura di latenza/FPS. Dettagli e limiti: [DRAWING_PIPELINE.md](../DRAWING_PIPELINE.md) e [PERFORMANCE_STATUS.md](../PERFORMANCE_STATUS.md).
+
+---
+
 # Risultati dei test nativi
 
 Rapporto aggiornato il **29 ottobre 2026** dopo il download delle prove. Esecuzione CI del **28 ottobre 2026**, [run #6](https://github.com/Megami-Hylia/Atelier/actions/runs/40763569979), commit `5871e5dfe7a1da879806fd86e737598ec242bb3a`.
