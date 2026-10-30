@@ -44,7 +44,7 @@ private struct TileInfo {
     var cachedHistoryLayerCount: Int { historyRasters.count }
     var workingRasterBytes: Int {
         textures.reduce(0) { $0 + $1.width * $1.height * 8 } +
-        (liveTexture.map { $0.width * $0.height * 8 } ?? 0) + cachedHistoryBytes
+        (liveTexture.map { $0.width * $0.height * 8 } ?? 0) + coverage.reduce(0) { $0 + $1.width * $1.height * 4 } + cachedHistoryBytes
     }
     private static let historyCacheLimit = 32 * 1024 * 1024
     private var planCache: [UUID: (PaintStroke, [GPUStamp])] = [:]
@@ -55,6 +55,7 @@ private struct TileInfo {
     private var assetOrder: [AssetKey] = []
     private var assetBytes = 0
     private var liveTexture: MTLTexture?
+    private var coverage: [MTLTexture] = []
     private var liveStream: StrokePlanner.Stream?
     private var cachedLiveRevision: UInt64?
     private var cachedDocumentRevision: UInt64?
@@ -96,12 +97,12 @@ private struct TileInfo {
             allocated.append(texture)
         }
         textures = allocated
-        invalidateCache(); liveTexture = nil
+        invalidateCache(); liveTexture = nil; coverage = []
     }
 
     private func prepareHistoryCache(_ document: DocumentContents, liveStroke: PaintStroke?) {
         let bytes = document.width * document.height * 8
-        let baseBytes = bytes * textures.count
+        let baseBytes = bytes * textures.count + coverage.count * bytes / 2
         let wantsLive = liveStroke?.distanceDynamicsVersion == 1 && (liveStroke?.samples.count ?? 0) >= 2
         let reservedLive = liveTexture != nil || (wantsLive && baseBytes + bytes <= Self.workingMemoryLimit) ? bytes : 0
         let available = max(0, min(Self.historyCacheLimit, Self.workingMemoryLimit - baseBytes - reservedLive))
@@ -178,7 +179,10 @@ private struct TileInfo {
 
     // The CPU bins stamps into 256-pixel tiles; pixels remain in global canvas coordinates.
     // No texture coordinate restarts at tile borders, including pickup and grain.
-    private func encode(_ stroke: PaintStroke, finished: Bool, source: MTLTexture, target: MTLTexture, pickup: MTLTexture? = nil, initialScratch: MTLTexture? = nil, supplied: [GPUStamp]? = nil, command: MTLCommandBuffer) throws {
+    private func encode(_ stroke: PaintStroke, finished: Bool, source: MTLTexture, target: MTLTexture, pickup: MTLTexture? = nil, initialScratch: MTLTexture? = nil, supplied: [GPUStamp]? = nil, coverageIndex: Int = 1, command: MTLCommandBuffer) throws {
+        if stroke.brushSettingsVersion == 1, supplied == nil {
+            try clear(coverage[coverageIndex], color: .zero, command: command)
+        }
         if supplied == nil, stroke.distanceDynamicsVersion == 1, let initialScratch {
             var cursor = StrokePlanner.replayStream(for: stroke, finished: finished)
             lastPlannedSampleCount += stroke.samples.count
@@ -250,6 +254,7 @@ private struct TileInfo {
             encoder.setTexture(source, index: 0); encoder.setTexture(target, index: 1)
             encoder.setTexture(shape, index: 2); encoder.setTexture(grain, index: 3); encoder.setTexture(pickup ?? source, index: 4)
             encoder.setTexture(secondaryShape, index: 5); encoder.setTexture(secondaryGrain, index: 6)
+            encoder.setTexture(coverage.isEmpty ? target : coverage[coverageIndex], index: 7)
             encoder.setBuffer(buffer, offset: 0, index: 0); encoder.setBytes(&tile, length: MemoryLayout<TileInfo>.stride, index: 1)
             dispatch(encoder, pipeline: paintPipeline, width: Int(tile.size.x), height: Int(tile.size.y))
             encoder.endEncoding()
@@ -269,7 +274,7 @@ private struct TileInfo {
         // An extra accumulation surface is optional; oversized existing documents retain replay support.
         if liveTexture == nil {
             let bytes = layer.width * layer.height * 8
-            guard bytes * 6 + cachedHistoryBytes <= Self.workingMemoryLimit else { return false }
+            guard workingRasterBytes + bytes <= Self.workingMemoryLimit else { return false }
             let descriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: .rgba16Float, width: layer.width, height: layer.height, mipmapped: false)
             descriptor.usage = [.shaderRead, .shaderWrite]; descriptor.storageMode = .shared
             liveTexture = device.makeTexture(descriptor: descriptor)
@@ -283,6 +288,7 @@ private struct TileInfo {
         } else { reusable = false }
         if !reusable {
             liveStream = StrokePlanner.Stream(stroke)
+            if stroke.brushSettingsVersion == 1 { try clear(coverage[0], color: .zero, command: command) }
             try copy(textures[4], to: liveTexture, command: command)
         }
         guard var stream = liveStream else { return false }
@@ -294,7 +300,7 @@ private struct TileInfo {
         hasPendingLiveSamples = end < stableCount
         // The immutable pre-stroke layer supplies wet pickup, while new stamps accumulate on previous ink.
         try copy(liveTexture, to: layer, command: command)
-        try encode(stroke, finished: false, source: layer, target: liveTexture, pickup: textures[4], supplied: stamps, command: command)
+        try encode(stroke, finished: false, source: layer, target: liveTexture, pickup: textures[4], supplied: stamps, coverageIndex: 0, command: command)
         try copy(liveTexture, to: layer, command: command)
         liveStream = stream; cachedLiveRevision = revision
         if !hasPendingLiveSamples {
@@ -305,13 +311,28 @@ private struct TileInfo {
             stamps += try provisional.append(predictions[...])
             stamps += try provisional.flushEnd()
             // Neither the recent tail nor predictions enter retained ink/random-generator state.
-            try encode(stroke, finished: false, source: liveTexture, target: layer, pickup: textures[4], supplied: stamps, command: command)
+            if stroke.brushSettingsVersion == 1 { try copy(coverage[0], to: coverage[1], command: command) }
+            try encode(stroke, finished: false, source: liveTexture, target: layer, pickup: textures[4], supplied: stamps, coverageIndex: 1, command: command)
         }
         return true
     }
 
     func render(_ document: DocumentContents, liveStroke: PaintStroke? = nil, finished: Bool = true, waitForCompletion: Bool = true, documentRevision: UInt64? = nil, liveSampleRevision: UInt64? = nil, liveStableSampleCount: Int? = nil, predictedSamples: [PencilSample] = []) throws -> MTLTexture {
         try allocate(width: document.width, height: document.height)
+        let needsCoverage = liveStroke?.brushSettingsVersion == 1 || document.layers.contains { $0.strokes.contains { $0.brushSettingsVersion == 1 } }
+        if needsCoverage, coverage.isEmpty {
+            let bytes = document.width * document.height * 8
+            historyRasters.removeAll(); cachedHistoryBytes = 0
+            guard workingRasterBytes + bytes <= Self.workingMemoryLimit else { throw DocumentError.memoryBudget }
+            let descriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: .rg16Float, width: document.width, height: document.height, mipmapped: false)
+            descriptor.usage = [.shaderRead, .shaderWrite]; descriptor.storageMode = .shared
+            var allocated: [MTLTexture] = []
+            for _ in 0..<2 {
+                guard let texture = device.makeTexture(descriptor: descriptor) else { throw DocumentError.memoryBudget }
+                allocated.append(texture)
+            }
+            coverage = allocated
+        }
         prepareHistoryCache(document, liveStroke: liveStroke)
         var submitted = false
         defer { if !submitted { invalidateCache() } }

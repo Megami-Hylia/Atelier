@@ -38,6 +38,7 @@ struct PaintStroke: Codable, Identifiable, Equatable, Sendable {
     var curveVersion: Int? = nil
     var inputScale: Float? = nil
     var stabilizationAmount: Float? = nil
+    var brushSettingsVersion: Int? = nil
 }
 
 struct PaintLayer: Codable, Identifiable, Equatable, Sendable {

@@ -1,0 +1,154 @@
+import XCTest
+import Metal
+@testable import Atelier
+
+@MainActor
+final class BrushSettingsTests: XCTestCase {
+    private func stroke(_ parameters: [String: Double] = [:]) -> PaintStroke {
+        var brush = BrushPreset.fallback
+        brush.parameters = ["pressureSize": 0, "spacing": 0.15, "wetAttack": 0]
+        brush.parameters.merge(parameters) { _, new in new }
+        return PaintStroke(brush: brush, tool: .paint, color: SIMD4(0.2,0.5,0.8,1), size: 24, opacity: 1,
+            samples: PencilSample.demo(width: 128, height: 64, count: 24), seed: 17,
+            distanceDynamicsVersion: 1, curveVersion: 1, inputScale: 1, brushSettingsVersion: 1)
+    }
+    private func pixels(_ texture: MTLTexture) -> [Float] {
+        var bits = [UInt16](repeating: 0, count: texture.width * texture.height * 4)
+        bits.withUnsafeMutableBytes { texture.getBytes($0.baseAddress!, bytesPerRow: texture.width * 8,
+            from: MTLRegionMake2D(0,0,texture.width,texture.height), mipmapLevel: 0) }
+        return bits.map { Float(Float16(bitPattern: $0)) }
+    }
+    private func render(_ strokes: [PaintStroke]) throws -> [Float] {
+        var document = DocumentContents(width: 128, height: 64); document.background = .zero
+        document.layers[0].strokes = strokes
+        return pixels(try MetalPainter().render(document))
+    }
+    func testEveryControlAtMinimumMiddleMaximumProducesFiniteStampsAndPersists() throws {
+        let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: folder) }
+        let original = BrushPreset.fallback
+        let archive = BrushArchive(libraries: [BrushLibrary(id: "library", name: "Test")],
+            sets: [BrushSet(id: original.setID, libraryID: "library", name: "Test")], brushes: [original], selectedID: original.id)
+        let url = folder.appendingPathComponent("brushes.json")
+        let store = BrushStore(storageURL: url, catalog: archive)
+        for fraction in [0.0, 0.5, 1.0] {
+            var saved = original
+            for parameter in BrushParameter.all {
+                let value = parameter.range.lowerBound + (parameter.range.upperBound-parameter.range.lowerBound)*fraction
+                saved.parameters[parameter.id] = parameter.id == "stampCount" ? value.rounded() : value
+                var sample = stroke([parameter.id: value])
+                let stamps = try StrokePlanner.stamps(for: sample)
+                XCTAssertFalse(stamps.isEmpty, parameter.id)
+                for stamp in stamps {
+                    for vector in [stamp.geometry,stamp.color,stamp.shape,stamp.grain,stamp.texture,stamp.pickup,stamp.rendering,stamp.variation] {
+                        XCTAssertTrue((0..<4).allSatisfy { vector[$0].isFinite }, parameter.id)
+                    }
+                }
+                sample.brushSettingsVersion = nil
+                XCTAssertNoThrow(try StrokePlanner.stamps(for: sample), parameter.id)
+            }
+            store.save(saved)
+            XCTAssertNil(store.errorMessage)
+            let reopened = BrushStore(storageURL: url, catalog: archive)
+            XCTAssertEqual(reopened.selectedBrush.parameters, saved.parameters)
+        }
+    }
+    func testDefaultsRangesAndCombinedModesUseTheSameContractAsStudio() {
+        var brush = BrushPreset.fallback; brush.parameters = [:]
+        let settings = PlannedBrushSettings(brush, corrected: true)
+        XCTAssertEqual(settings.pressureSize, 0.6, accuracy: 0.00001)
+        XCTAssertEqual(settings.taperSize, 1)
+        XCTAssertEqual(settings.grainZoom, 0)
+        XCTAssertEqual(settings.dualScale, 1)
+        XCTAssertEqual(settings.smudge, 0.5)
+        brush.parameters = ["flow": 100, "opacity": -100, "spacing": .nan, "blendMode": 10]
+        let clamped = PlannedBrushSettings(brush, corrected: true)
+        XCTAssertEqual(clamped.flow, 1); XCTAssertEqual(clamped.opacity, 0)
+        XCTAssertEqual(clamped.spacing, 0.08, accuracy: 0.00001); XCTAssertEqual(clamped.blendMode, 10)
+    }
+    func testPressureOnlyChangesAssignedPropertiesAndAzimuthUsesThePenAngle() throws {
+        var low = stroke(["azimuth": 1, "wetAttack": 1])
+        low.samples = [PencilSample(x: 20,y: 20,pressure: 0.1,azimuth: 0.7,time: 0)]
+        var high = low; high.samples[0].pressure = 1
+        let a = try XCTUnwrap(try StrokePlanner.stamps(for: low).first)
+        let b = try XCTUnwrap(try StrokePlanner.stamps(for: high).first)
+        XCTAssertEqual(a.geometry.z,b.geometry.z); XCTAssertEqual(a.color.w,b.color.w)
+        XCTAssertEqual(a.shape.z,b.shape.z); XCTAssertEqual(a.geometry.w,0.7,accuracy: 0.00001)
+        for key in ["pressureSize", "pressureFlow", "pressureOpacity"] {
+            low.brush.parameters[key] = 1; high.brush.parameters[key] = 1
+            let x = try XCTUnwrap(try StrokePlanner.stamps(for: low).first)
+            let y = try XCTUnwrap(try StrokePlanner.stamps(for: high).first)
+            if key == "pressureSize" { XCTAssertLessThan(x.geometry.z,y.geometry.z) }
+            if key == "pressureFlow" { XCTAssertLessThan(x.color.w,y.color.w) }
+            if key == "pressureOpacity" { XCTAssertLessThan(x.shape.z,y.shape.z) }
+            low.brush.parameters[key] = 0; high.brush.parameters[key] = 0
+        }
+    }
+    func testOpacityCapsEachGestureButFlowAccumulatesAndZeroRemainsZero() throws {
+        var line = stroke(["opacity": 0.35, "flow": 0.6, "spacing": 0.02])
+        line.samples = (0..<36).map { PencilSample(x: Float(24+($0%2)*80),y: 32,time: Double($0)*0.1) }
+        let image = try render([line])
+        let alpha = stride(from: 3, to: image.count, by: 4).map { image[$0] }
+        XCTAssertLessThanOrEqual(alpha.max() ?? 1, 0.352)
+        XCTAssertGreaterThan(alpha.max() ?? 0, 0.34)
+        var second = line; second.id = UUID()
+        let twice = try render([line,second])
+        XCTAssertGreaterThan(twice[32*128*4+64*4+3],0.5)
+        var dot = stroke(["flow": 0.1]); dot.samples = [PencilSample(x: 64,y: 32)]
+        let thin = try render([dot]); dot.brush.parameters["flow"] = 0.6
+        let dense = try render([dot]); XCTAssertLessThan(thin[32*128*4+64*4+3],dense[32*128*4+64*4+3])
+        for key in ["flow", "opacity", "maxOpacity", "maxSize"] {
+            var disabled = line; disabled.brush.parameters[key] = 0; disabled.brush.parameters["minOpacity"] = 0.8
+            let empty = try render([disabled])
+            XCTAssertEqual(empty.max(),0,key)
+        }
+        var nonAccumulating = line; nonAccumulating.brush.parameters["accumulation"] = 0
+        let once = try render([nonAccumulating])
+        XCTAssertGreaterThan(once[32*128*4+64*4+3],0)
+        XCTAssertLessThan(once[32*128*4+64*4+3],image[32*128*4+64*4+3])
+    }
+    func testChangedSettingsAlterPixelsAndPreviewAndPreserveExistingStrokeSnapshot() throws {
+        let original = stroke()
+        let baseline = try render([original])
+        for (key, value) in [("flow",0.03),("opacity",0.3),("spacing",1.5),("roundness",0.1),
+            ("jitterLateral",0.8),("pressureSize",1.0),("pressureOpacity",1.0),("sizeJitter",0.9)] {
+            var changed = original; changed.brush.parameters[key] = value
+            XCTAssertNotEqual(baseline,try render([changed]),key)
+        }
+        var textured = original; textured.brush.grain = "charcoal"; textured.brush.parameters["grainDepth"] = 1
+        let texture = try render([textured]); XCTAssertNotEqual(baseline,texture)
+        for (key,value) in [("grainScale",4.0),("grainRotation",0.3),("grainContrast",0.2),("grainMovement",1.0)] {
+            var changed = textured; changed.brush.parameters[key] = value
+            XCTAssertNotEqual(texture,try render([changed]),key)
+        }
+        var brush = original.brush
+        let preview = try BrushPreviewRenderer.shared.image(brush, lightOnDark: false).pngData()
+        brush.parameters["opacity"] = 0.1
+        XCTAssertNotEqual(preview,try BrushPreviewRenderer.shared.image(brush, lightOnDark: false).pngData())
+        XCTAssertEqual(baseline,try render([original]))
+        let document = PaintDocument(width: 128,height: 64); document.commit(original)
+        let data = try JSONEncoder().encode(document.contents)
+        let decoded = try JSONDecoder().decode(DocumentContents.self,from: data)
+        XCTAssertEqual(decoded.layers[0].strokes[0],original)
+    }
+    func testIncrementalCoverageMatchesReplayAcrossPredictionsAndHistoryLayers() throws {
+        for tool in PaintTool.allCases {
+            let painter = try MetalPainter()
+            var document = DocumentContents(width: 128,height: 64)
+            document.selectedLayerID = document.layers[0].id; document.background = .zero
+            document.layers[0].strokes = [stroke()]
+            document.layers.append(PaintLayer(name: "Other", strokes: [stroke(["opacity":0.2])]))
+            var live = stroke(["opacity":0.4,"flow":0.3]); live.tool = tool
+            let all = live.samples; live.samples = []
+            for start in stride(from: 0,to: all.count,by: 4) {
+                live.samples += all[start..<min(start+4,all.count)]
+                _ = try painter.render(document,liveStroke: live,finished: false,documentRevision: 0,liveSampleRevision: 0,
+                    predictedSamples: [PencilSample(x: 120,y: 10,time: 5)])
+            }
+            let accumulated = pixels(try painter.render(document,liveStroke: live,finished: false,documentRevision: 0,liveSampleRevision: 0))
+            let replay = pixels(try MetalPainter().render(document,liveStroke: live,finished: false))
+            for (a,b) in zip(accumulated,replay) { XCTAssertEqual(a,b,accuracy: 0.006) }
+            XCTAssertLessThanOrEqual(painter.lastPlannedSampleCount,4)
+        }
+    }
+}

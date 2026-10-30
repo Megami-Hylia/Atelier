@@ -19,6 +19,16 @@ struct BrushStudioView: View {
         get { editingSecondary ? draft.secondaryBrushes?.first ?? draft : draft }
         nonmutating set { if editingSecondary { draft.secondaryBrushes = [newValue] } else { draft = newValue } }
     }
+    private func setParameter(_ parameter: BrushParameter, to value: Double) {
+        var brush = componentDraft
+        let value = min(parameter.range.upperBound, max(parameter.range.lowerBound, value))
+        brush.parameters[parameter.id] = parameter.id == "stampCount" ? value.rounded() : value
+        for (minimum, maximum) in [("minSize", "maxSize"), ("minOpacity", "maxOpacity")] {
+            if parameter.id == minimum { brush.parameters[maximum] = max(value, brush.value(maximum, 1)) }
+            if parameter.id == maximum { brush.parameters[minimum] = min(value, brush.value(minimum)) }
+        }
+        componentDraft = brush
+    }
     @State private var category = "Stroke Path"
 
     @State private var importSource: AssetSource = .shape
@@ -108,9 +118,9 @@ struct BrushStudioView: View {
 
                                 }
 
-                                if ["flipX", "flipY", "randomRotation", "dualEnabled", "previewWetMix"].contains(parameter.id) {
+                                if ["flipX", "flipY", "randomRotation", "dualEnabled"].contains(parameter.id) {
 
-                                    Toggle("Attivo", isOn: Binding(get: { componentDraft.value(parameter.id) > 0.5 }, set: { componentDraft.parameters[parameter.id] = $0 ? 1 : 0 }))
+                                    Toggle("Attivo", isOn: Binding(get: { componentDraft.value(parameter.id, parameter.defaultValue) > 0.5 }, set: { componentDraft.parameters[parameter.id] = $0 ? 1 : 0 }))
 
                                         .accessibilityLabel(parameter.title)
 
@@ -124,7 +134,7 @@ struct BrushStudioView: View {
 
                                 } else {
 
-                                    Slider(value: Binding(get: { componentDraft.value(parameter.id, parameter.defaultValue) }, set: { componentDraft.parameters[parameter.id] = parameter.id == "stampCount" ? $0.rounded() : $0 }), in: parameter.range)
+                                    Slider(value: Binding(get: { componentDraft.value(parameter.id, parameter.defaultValue) }, set: { setParameter(parameter, to: $0) }), in: parameter.range)
 
                                         .accessibilityLabel(parameter.title)
 

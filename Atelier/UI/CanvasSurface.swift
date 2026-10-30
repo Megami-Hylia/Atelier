@@ -209,7 +209,7 @@ struct CanvasSurface: UIViewRepresentable {
         activeTouch = touch; predictions = []; activeSampleRevision = 0; pendingSamples = []; sampler = StrokeInputSampler(); maximumInputScale = effectiveInputScale
         active = PaintStroke(brush: brush, tool: tool, color: paintColor, size: brushSize, opacity: paintOpacity,
                              samples: [], seed: brush.seed ^ UInt64(document.selectedLayer.strokes.count + 1), distanceDynamicsVersion: 1, curveVersion: 1, inputScale: effectiveInputScale,
-                             stabilizationAmount: Float(UserDefaults.standard.double(forKey: "strokeStabilization")))
+                             stabilizationAmount: Float(UserDefaults.standard.double(forKey: "strokeStabilization")), brushSettingsVersion: 1)
         append(event?.coalescedTouches(for: touch) ?? [touch]); requestFrame()
     }
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -289,6 +289,7 @@ struct CanvasSurface: UIViewRepresentable {
 struct BrushPreview: View {
     let brush: BrushPreset
     var lightOnDark = false
+    @AppStorage("strokeStabilization") private var stabilization = 0.0
     @State private var preview: UIImage?
     @State private var error: String?
     var body: some View {
@@ -299,6 +300,7 @@ struct BrushPreview: View {
         }
         .onChange(of: brush, initial: true) { _, _ in render() }
         .onChange(of: lightOnDark) { _, _ in render() }
+        .onChange(of: stabilization) { _, _ in render() }
         .accessibilityLabel("Anteprima di \(brush.name)")
     }
     private func render() {
@@ -308,7 +310,7 @@ struct BrushPreview: View {
 }
 
 @MainActor
-private final class BrushPreviewRenderer {
+final class BrushPreviewRenderer {
     static let shared = BrushPreviewRenderer()
     private let cache = NSCache<NSString, UIImage>()
     private var painter: MetalPainter?
@@ -316,7 +318,7 @@ private final class BrushPreviewRenderer {
 
     func image(_ brush: BrushPreset, lightOnDark: Bool) throws -> UIImage {
         let encoder = JSONEncoder(); encoder.outputFormatting = [.sortedKeys]
-        let key = (SHA256.hash(data: try encoder.encode(brush)).map { String(format: "%02x", $0) }.joined() + (lightOnDark ? ":dark" : ":light")) as NSString
+        let key = (SHA256.hash(data: try encoder.encode(brush)).map { String(format: "%02x", $0) }.joined() + (lightOnDark ? ":dark" : ":light") + ":\(UserDefaults.standard.double(forKey: "strokeStabilization"))") as NSString
         if let image = cache.object(forKey: key) { return image }
         if painter == nil { painter = try MetalPainter() }
         guard let painter else { throw RenderError.unavailable }
@@ -327,12 +329,15 @@ private final class BrushPreviewRenderer {
         let pressure = Float(brush.value("previewPressure", 1))
         for i in samples.indices { samples[i].pressure = min(1, samples[i].pressure * pressure) }
         var previewBrush = brush
-        if brush.value("previewWetMix", 1) < 0.5 {
-            previewBrush.parameters["wetDilution"] = 0; previewBrush.parameters["wetPull"] = 0; previewBrush.parameters["wetCharge"] = 1
+        let wetPreview = brush.value("previewWetMix", 1)
+        for key in ["wetDilution", "wetPull", "wetAttack", "wetGrade"] {
+            let definition = BrushParameter.all.first { $0.id == key }
+            previewBrush.parameters[key] = brush.value(key, definition?.defaultValue ?? 0) * wetPreview
         }
+        previewBrush.parameters["wetCharge"] = 1 - (1 - brush.value("wetCharge", 1)) * wetPreview
         content.layers[0].strokes = [PaintStroke(brush: previewBrush, tool: .paint,
             color: lightOnDark ? SIMD4(1, 1, 1, 1) : SIMD4(0.08, 0.08, 0.08, 1),
-            size: Float(brush.value("previewSize", 0.5)) * 64, opacity: 1, samples: samples, seed: brush.seed, distanceDynamicsVersion: 1)]
+            size: Float(brush.value("previewSize", 0.5)) * 64, opacity: 1, samples: samples, seed: brush.seed, distanceDynamicsVersion: 1, curveVersion: 1, inputScale: 1, stabilizationAmount: Float(UserDefaults.standard.double(forKey: "strokeStabilization")), brushSettingsVersion: 1)]
         let image = try painter.image(content)
         cache.setObject(image, forKey: key, cost: 320 * 90 * 4 + key.length * 2)
         return image

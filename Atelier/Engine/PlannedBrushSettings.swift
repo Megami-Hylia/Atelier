@@ -69,10 +69,16 @@ struct PlannedBrushSettings {
     let wetDilution: Float
     let wetGrade: Float
     let wetPull: Float
-    init(_ brush: BrushPreset) {
+    init(_ brush: BrushPreset, corrected: Bool = false) {
         func value(_ key: String, _ fallback: Double) -> Float {
-            let number = brush.value(key, fallback)
-            return number.isFinite ? Float(max(-16, min(16, number))) : Float(fallback)
+            guard corrected, let definition = BrushParameter.all.first(where: { $0.id == key }) else {
+                let number = brush.value(key, fallback)
+                return number.isFinite ? Float(max(-16, min(16, number))) : Float(fallback)
+            }
+            let number = brush.value(key, definition.defaultValue)
+            let finite = number.isFinite ? number : definition.defaultValue
+            let upper = key == "blendMode" ? 10.0 : definition.range.upperBound
+            return Float(min(upper, max(definition.range.lowerBound, finite)))
         }
         accumulation = value("accumulation", 1)
         alphaThreshold = value("alphaThreshold", 0)

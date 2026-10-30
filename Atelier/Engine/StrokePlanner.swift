@@ -126,7 +126,7 @@ enum StrokePlanner {
         private(set) var lastRawSample: PencilSample?
 
         init(_ stroke: PaintStroke, finalDistance: Float? = nil) {
-            settings = PlannedBrushSettings(stroke.brush)
+            settings = PlannedBrushSettings(stroke.brush, corrected: stroke.brushSettingsVersion == 1)
             hsv = StrokePlanner.rgbToHSV(SIMD3(stroke.color.x, stroke.color.y, stroke.color.z))
             context = stroke; context.samples = []
             rng = SeededGenerator(seed: stroke.seed ^ stroke.brush.seed)
@@ -145,7 +145,7 @@ enum StrokePlanner {
 
         func matches(_ stroke: PaintStroke) -> Bool {
             context.id == stroke.id && context.brush == stroke.brush && context.tool == stroke.tool &&
-            context.color == stroke.color && context.size == stroke.size && context.opacity == stroke.opacity && context.seed == stroke.seed && context.distanceDynamicsVersion == stroke.distanceDynamicsVersion && context.curveVersion == stroke.curveVersion && context.inputScale == stroke.inputScale && context.stabilizationAmount == stroke.stabilizationAmount
+            context.color == stroke.color && context.size == stroke.size && context.opacity == stroke.opacity && context.seed == stroke.seed && context.distanceDynamicsVersion == stroke.distanceDynamicsVersion && context.curveVersion == stroke.curveVersion && context.inputScale == stroke.inputScale && context.stabilizationAmount == stroke.stabilizationAmount && context.brushSettingsVersion == stroke.brushSettingsVersion
         }
 
         mutating func append(_ samples: ArraySlice<PencilSample>) throws -> [GPUStamp] {
@@ -237,13 +237,13 @@ enum StrokePlanner {
             let speedSize = max(0.02, 1 + settings.speedSize * speed)
             let diameter = max(0.1, min(2048, context.size * sizePressure * speedSize * (1 + tilt * settings.tiltSize * 3) *
                                    (1 - settings.sizeJitter * rng.unit()) * (1 - settings.taperSize + settings.taperSize * taper)))
-            let radius = max(0.05, min(context.size * max(0.01, settings.maxSize), max(context.size * settings.minSize, diameter)) / 2)
+            let radius = max(0.05, min(context.size * max(0.01, settings.maxSize), max(context.size * min(settings.minSize, settings.maxSize), diameter)) / 2)
             let previousPoint = context.curveVersion == 1 ? lastStampPoint ?? point : SIMD2<Float>(a.x,a.y)
             let count = max(1, min(16, Int(settings.stampCount * (1 - settings.countJitter * rng.unit()))))
             for _ in 0..<count {
                 let offset = across * (rng.signed() * settings.jitterLateral * radius * 2) + along * (rng.signed() * settings.jitterLinear * radius * 2)
                 var angle = direction * settings.rotation + initialRotation + rng.signed() * settings.scatter * .pi
-                angle += direction * settings.azimuth * 0.25
+                if context.brushSettingsVersion != 1 { angle += direction * settings.azimuth * 0.25 }
                 if a.isPencil {
                     angle += (a.azimuth + (context.curveVersion == 1 ? StrokeGeometry.angleDelta(a.azimuth,b.azimuth) : b.azimuth-a.azimuth) * t) * settings.azimuth
                     angle += (a.roll + (context.curveVersion == 1 ? StrokeGeometry.angleDelta(a.roll,b.roll) : b.roll-a.roll) * t) * settings.barrelRoll
@@ -257,24 +257,37 @@ enum StrokePlanner {
                 alpha *= (1 - settings.tiltOpacity * tilt) * (1 - settings.taperOpacity + settings.taperOpacity * taper)
                 alpha *= exp(-settings.fallOff * normalizedDistance * 10) * (0.15 + settings.accumulation * 0.85)
                 let charge = settings.wetCharge
-                alpha *= max(0.01, 1 - settings.wetDilution * 0.9) * (0.05 + 0.95 * charge) * max(0.01, 1 - (1 - charge) * normalizedDistance * 0.95)
-                alpha *= 1 + settings.wetAttack * pressure
-                alpha = min(settings.maxOpacity, max(settings.minOpacity, alpha))
+                alpha *= max(0.01, 1 - settings.wetDilution * 0.9) * (context.brushSettingsVersion == 1 ? charge : (0.05 + 0.95 * charge)) * max(0.01, 1 - (1 - charge) * normalizedDistance * 0.95)
+                if context.brushSettingsVersion != 1 || settings.wetDilution > 0 || settings.wetPull > 0 || charge < 1 {
+                    alpha *= 1 + settings.wetAttack * pressure
+                }
+                let maximum = settings.maxOpacity
+                let pressureOpacity = 1 - settings.pressureOpacity + settings.pressureOpacity * pressure
+                let response = settings.opacity * pressureOpacity
+                let opacityLimit = context.brushSettingsVersion == 1 ? context.opacity * context.color.w *
+                    (response > 0 ? min(maximum, max(min(settings.minOpacity, maximum), response)) : 0) : 0
+                if context.brushSettingsVersion == 1 {
+                    // Flow deposits pigment; opacity limits the coverage of the whole gesture.
+                    let base = context.opacity * context.color.w * response
+                    alpha = base > 0 ? alpha / base : 0
+                    if settings.maxSize == 0 { alpha = 0 }
+                } else { alpha = min(maximum, max(settings.minOpacity, alpha)) }
                 let hue = hsv.x + rng.signed() * (settings.hueJitter + settings.stampHue) * 0.5 + strokeHue
                 let rgb = StrokePlanner.hsvToRGB(SIMD3<Float>(hue, min(1, max(0, hsv.y + rng.signed() * settings.saturationJitter)),
                                                min(1, max(0, hsv.z + rng.signed() * settings.brightnessJitter))))
                 var stamp = GPUStamp(
                     geometry: SIMD4(point.x + offset.x, point.y + offset.y, radius, angle),
                     color: SIMD4(rgb.x, rgb.y, rgb.z, max(0, min(1, alpha))),
-                    shape: SIMD4(rx * (settings.flipX > 0.5 ? -1 : 1), ry * (settings.flipY > 0.5 ? -1 : 1), 0, 0),
+                    shape: SIMD4(rx * (settings.flipX > 0.5 ? -1 : 1), ry * (settings.flipY > 0.5 ? -1 : 1), opacityLimit, context.brushSettingsVersion == 1 ? 1 : 0),
                     grain: SIMD4(max(0.1, settings.grainScale), min(1, settings.grainDepth), settings.grainContrast, settings.grainBrightness),
                     texture: SIMD4(settings.grainMovement, settings.grainZoom, settings.grainRotation * .pi, settings.tiltGradation * tilt),
                     pickup: SIMD4(point.x - previousPoint.x, point.y - previousPoint.y,
                                   min(1, settings.wetDilution + settings.pressureBleed * (1 - pressure)),
-                                  context.tool == .smudge ? max(0.02, settings.smudge) : settings.wetPull),
+                                  context.tool == .smudge ? (context.brushSettingsVersion == 1 ? settings.smudge : max(0.02, settings.smudge)) : settings.wetPull),
                     rendering: SIMD4(settings.blendMode, context.tool == .paint ? 0 : context.tool == .smudge ? 1 : 2, settings.alphaThreshold, settings.wetGrade),
                     variation: SIMD4(rng.unit(), 0, nextDistance,
                                      context.curveVersion == 1 ? Float((a.time-(firstInputTime ?? a.time))+(b.time-a.time)*Double(t)) : 0))
+                if context.brushSettingsVersion == 1 { stamp.variation.x = settings.accumulation }
                 stamps.append(stamp)
                 if settings.dualEnabled > 0.5 {
                     stamp.geometry.z *= max(0.1, settings.dualScale)

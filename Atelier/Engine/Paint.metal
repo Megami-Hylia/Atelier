@@ -60,6 +60,7 @@ kernel void paintTile(texture2d<float, access::read> source [[texture(0)]],
                       texture2d<float, access::read> pickupSource [[texture(4)]],
                       texture2d<float, access::sample> secondaryShape [[texture(5)]],
                       texture2d<float, access::sample> secondaryGrain [[texture(6)]],
+                      texture2d<float, access::read_write> coverage [[texture(7)]],
                       constant Stamp *stamps [[buffer(0)]], constant TileInfo &tile [[buffer(1)]],
                       uint2 local [[thread_position_in_grid]]) {
     if (any(local >= tile.size)) return;
@@ -85,6 +86,17 @@ kernel void paintTile(texture2d<float, access::read> source [[texture(0)]],
         mask *= clamp(1 - s.texture.w * (uv.y + 1) * 0.5, 0.0f, 1.0f);
         float alpha = clamp(mask * s.color.w, 0.0f, 1.0f);
         if (alpha < s.rendering.z) continue;
+        if (s.shape.w > 0.5) {
+            float4 deposited = coverage.read(pixel);
+            uint component = s.variation.y > 0.5 ? 1 : 0;
+            float previous = deposited[component];
+            float single = max(previous, s.shape.z * alpha);
+            float accumulating = previous + max(0.0f, s.shape.z-previous) * alpha;
+            float next = max(previous, mix(single, accumulating, s.variation.x));
+            alpha = previous < 1 ? (next-previous)/(1-previous) : 0;
+            deposited[component] = next;
+            coverage.write(deposited, pixel);
+        }
         int tool = int(s.rendering.y);
         if (tool == 2) { color *= 1 - alpha; continue; }
         int2 pickupPixel = clamp(int2(position - s.pickup.xy), int2(0), int2(source.get_width() - 1, source.get_height() - 1));
