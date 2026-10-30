@@ -24,6 +24,7 @@ xcrun --sdk iphoneos --show-sdk-version | tee "$OUT/sdk-version.txt"
 grep -qx '26.2' "$OUT/sdk-version.txt"
 sw_vers > "$OUT/macos-version.txt"
 xcrun swift --version > "$OUT/swift-version.txt"
+python3 scripts/source_identity.py --output "$OUT/source-identity.json"
 if ! xcrun --sdk iphoneos metal -v > "$OUT/metal-version.txt" 2>&1; then
   cat "$OUT/metal-version.txt"
   echo 'Installing the official Metal Toolchain component for the selected Xcode.'
@@ -80,8 +81,12 @@ python3 - "$OUT" <<'PY'
 import datetime, json, os, pathlib, subprocess, sys
 out = pathlib.Path(sys.argv[1])
 def read(name): return (out / name).read_text().strip()
-commit = os.environ.get('GITHUB_SHA') or subprocess.check_output(['git','rev-parse','HEAD'], text=True).strip()
+commit = os.environ.get('GITHUB_SHA')
+if not commit:
+    git = subprocess.run(['git','rev-parse','HEAD'], capture_output=True, text=True)
+    commit = git.stdout.strip() if git.returncode == 0 else None
 report = {'status':'BUILT_AND_STRUCTURALLY_VERIFIED', 'commit':commit,
+ 'source_identity':json.loads(read('source-identity.json')),
  'utc':datetime.datetime.now(datetime.timezone.utc).isoformat(),
  'runner':os.environ.get('RUNNER_OS'), 'runner_arch':os.environ.get('RUNNER_ARCH'),
  'runner_image':os.environ.get('ImageOS'), 'runner_image_version':os.environ.get('ImageVersion'),

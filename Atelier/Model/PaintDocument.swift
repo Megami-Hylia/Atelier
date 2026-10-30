@@ -136,13 +136,16 @@ enum DocumentError: LocalizedError {
         autosave()
     }
 
-    func commit(_ stroke: PaintStroke) {
+    func commit(_ stroke: PaintStroke, to layerID: UUID? = nil) {
         guard !stroke.samples.isEmpty else { return }
-        guard !selectedLayer.locked else { errorMessage = DocumentError.lockedLayer.localizedDescription; return }
+        let id = layerID ?? selectedLayer.id
+        guard let layer = contents.layers.first(where: { $0.id == id }) else {
+            errorMessage = "Il livello del tratto non esiste più."; return
+        }
+        guard !layer.locked else { errorMessage = DocumentError.lockedLayer.localizedDescription; return }
         do {
             try StrokePlanner.validateForRendering(stroke, width: contents.width, height: contents.height)
         } catch { errorMessage = error.localizedDescription; return }
-        let id = selectedLayer.id
         change { value in
             guard let index = value.layers.firstIndex(where: { $0.id == id }) else { return }
             value.layers[index].strokes.append(stroke)
@@ -174,6 +177,7 @@ enum DocumentError: LocalizedError {
         guard contents.layers.count < 32, let source = contents.layers.first(where: { $0.id == id }) else { return }
         change { c in
             var copy = source; copy.id = UUID(); copy.name += " copia"
+            for index in copy.strokes.indices { copy.strokes[index].id = UUID() }
             c.layers.append(copy); c.selectedLayerID = copy.id
         }
     }

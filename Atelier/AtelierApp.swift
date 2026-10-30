@@ -144,6 +144,7 @@ struct PaintingWorkspace: View {
     @State private var selecting = false
     @State private var selectionMode = false
     @State private var selectedStrokes = Set<UUID>()
+    private let toolPreferences = ToolBrushPreferences()
 
     var body: some View {
         VStack(spacing: 0) {
@@ -163,6 +164,15 @@ struct PaintingWorkspace: View {
             }.clipped()
         }
         .background(Color(white: 0.09))
+        .onAppear { restoreToolPreferences() }
+        .onChange(of: tool) { _, _ in restoreToolPreferences() }
+        .onChange(of: brushes.selectedID) { _, _ in restoreToolPreferences() }
+        .onChange(of: document.selectedLayer.id) { _, _ in
+            selectedStrokes = []; selectionMode = false; selecting = false
+        }
+        .onChange(of: document.contents.id) { _, _ in
+            selectedStrokes = []; selectionMode = false; selecting = false
+        }
         .overlay(alignment: .bottom) {
             if panel == "clipboard" || panel == "quick" {
                 GestureCommandPanel(document: document, quick: panel == "quick") { panel = nil }
@@ -212,8 +222,16 @@ struct PaintingWorkspace: View {
             .popover(isPresented: presented("brush-\(item.rawValue)"), arrowEdge: .top) { BrushLibraryView(store: brushes).frame(width: 420, height: 650) }
     }
     private func presented(_ value: String) -> Binding<Bool> { Binding(get: { panel == value }, set: { if !$0 && panel == value { panel = nil } }) }
+    private func restoreToolPreferences() {
+        let value = toolPreferences.values(tool: tool, brushID: brushes.selectedID)
+        size = value.size; opacity = value.opacity
+    }
+    private func saveToolPreferences() {
+        toolPreferences.save(.init(size: size, opacity: opacity), tool: tool, brushID: brushes.selectedID)
+    }
     private var sideControls: some View {
-        BrushSideBar(size: $size, opacity: $opacity, onRight: leftHanded,
+        BrushSideBar(size: Binding(get: { size }, set: { size = $0; saveToolPreferences() }),
+                     opacity: Binding(get: { opacity }, set: { opacity = $0; saveToolPreferences() }), onRight: leftHanded,
                      canUndo: document.canUndo, canRedo: document.canRedo,
                      undo: { document.undo() }, redo: { document.redo() }, colors: { panel = "color" })
     }

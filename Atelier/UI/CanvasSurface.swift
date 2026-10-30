@@ -31,7 +31,18 @@ struct CanvasSurface: UIViewRepresentable {
 }
 
 @MainActor final class PencilCanvas: MTKView, MTKViewDelegate, UIPencilInteractionDelegate, UIGestureRecognizerDelegate {
-    var document: PaintDocument?
+    var document: PaintDocument? {
+        didSet {
+            if oldValue !== document {
+                cancelActiveStroke()
+                estimates.removeAll()
+                transform = .identity
+                painter?.invalidateCache()
+            } else if let activeLayerID, (activeLayerID != document?.selectedLayer.id || document?.selectedLayer.locked == true) {
+                cancelActiveStroke()
+            }
+        }
+    }
     var brush = BrushPreset.fallback
     var tool = PaintTool.paint
     var paintColor = SIMD4<Float>(0.05, 0.05, 0.05, 1)
@@ -46,6 +57,7 @@ struct CanvasSurface: UIViewRepresentable {
     private var frameRequested = false
     private var painter: MetalPainter?
     private var active: PaintStroke?
+    private var activeLayerID: UUID?
     private weak var activeTouch: UITouch?
     private var predictions: [PencilSample] = []
     private struct PendingSample {
@@ -89,12 +101,17 @@ struct CanvasSurface: UIViewRepresentable {
         quickSwipe.direction = .down; quickSwipe.numberOfTouchesRequired = 4
         clipboardSwipe.require(toFail: quickSwipe)
         for swipe in [clipboardSwipe, quickSwipe] {
+            swipe.delegate = self
             swipe.allowedTouchTypes = [NSNumber(value: UITouch.TouchType.direct.rawValue)]
             addGestureRecognizer(swipe)
             pinch.require(toFail: swipe); rotation.require(toFail: swipe)
         }
         let undo = UITapGestureRecognizer(target: self, action: #selector(undoTap)); undo.numberOfTouchesRequired = 2
         let redo = UITapGestureRecognizer(target: self, action: #selector(redoTap)); redo.numberOfTouchesRequired = 3
+        for tap in [undo, redo] {
+            tap.allowedTouchTypes = [NSNumber(value: UITouch.TouchType.direct.rawValue)]
+            tap.delegate = self
+        }
         undo.require(toFail: redo); addGestureRecognizer(undo); addGestureRecognizer(redo)
         let hover = UIHoverGestureRecognizer(target: self, action: #selector(hover(_:)))
         hover.allowedTouchTypes = [NSNumber(value: UITouch.TouchType.pencil.rawValue)]; addGestureRecognizer(hover)
@@ -204,8 +221,11 @@ struct CanvasSurface: UIViewRepresentable {
         active = stroke
     }
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        let directCount = event?.allTouches?.filter { $0.type == .direct && $0.phase != .ended && $0.phase != .cancelled }.count ?? touches.count
+        if activeTouch?.type == .direct && directCount > 1 { cancelActiveStroke() }
         guard active == nil, let document, !document.selectedLayer.locked,
-              let touch = touches.first(where: { $0.type == .pencil || (fingerPainting && touches.count == 1) }) else { return }
+              let touch = touches.first(where: { $0.type == .pencil || ($0.type == .direct && fingerPainting && directCount == 1) }) else { return }
+        activeLayerID = document.selectedLayer.id
         activeTouch = touch; predictions = []; activeSampleRevision = 0; pendingSamples = []; sampler = StrokeInputSampler(); maximumInputScale = effectiveInputScale
         active = PaintStroke(brush: brush, tool: tool, color: paintColor, size: brushSize, opacity: paintOpacity,
                              samples: [], seed: brush.seed ^ UInt64(document.selectedLayer.strokes.count + 1), distanceDynamicsVersion: 1, curveVersion: 1, inputScale: effectiveInputScale,
@@ -222,13 +242,17 @@ struct CanvasSurface: UIViewRepresentable {
         guard let touch = activeTouch, touches.contains(touch) else { return }
         append(event?.coalescedTouches(for: touch) ?? [touch], finishing: true); predictions = []
         finishSamples()
-        if let active { document?.commit(active) }
-        active = nil; activeTouch = nil; pendingSamples = []; requestFrame()
+        if let active, let activeLayerID { document?.commit(active, to: activeLayerID) }
+        active = nil; activeLayerID = nil; activeTouch = nil; pendingSamples = []; requestFrame()
     }
     override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard let touch = activeTouch, touches.contains(touch) else { return }
+        cancelActiveStroke()
+    }
+    private func cancelActiveStroke() {
         if let id = active?.id { estimates = estimates.filter { $0.value.0 != id } }
-        active = nil; activeTouch = nil; predictions = []; pendingSamples = []; requestFrame()
+        active = nil; activeLayerID = nil; activeTouch = nil; predictions = []; pendingSamples = []
+        painter?.invalidateCache(); requestFrame()
     }
     override func touchesEstimatedPropertiesUpdated(_ touches: Set<UITouch>) {
         inputEventRevision &+= 1
@@ -264,12 +288,18 @@ struct CanvasSurface: UIViewRepresentable {
     @objc private func zoom(_ gesture: UIPinchGestureRecognizer) {
         let scale = hypot(transform.a, transform.b)
         let factor = min(8, max(0.25, scale * gesture.scale)) / max(0.001, scale)
-        transform = transform.scaledBy(x: factor, y: factor); gesture.scale = 1
+        transform = CanvasNavigation.applying(CGAffineTransform(scaleX: factor, y: factor), to: transform,
+                                             anchor: gesture.location(in: self), bounds: bounds)
+        gesture.scale = 1
     }
     @objc private func pan(_ gesture: UIPanGestureRecognizer) {
         let p = gesture.translation(in: superview); transform.tx += p.x; transform.ty += p.y; gesture.setTranslation(.zero, in: superview)
     }
-    @objc private func rotate(_ gesture: UIRotationGestureRecognizer) { transform = transform.rotated(by: gesture.rotation); gesture.rotation = 0 }
+    @objc private func rotate(_ gesture: UIRotationGestureRecognizer) {
+        transform = CanvasNavigation.applying(CGAffineTransform(rotationAngle: gesture.rotation), to: transform,
+                                             anchor: gesture.location(in: self), bounds: bounds)
+        gesture.rotation = 0
+    }
     @objc private func showClipboard() { onClipboard?() }
     @objc private func showQuickMenu() { onQuickMenu?() }
     @objc private func undoTap() { document?.undo() }
@@ -283,6 +313,10 @@ struct CanvasSurface: UIViewRepresentable {
     @objc private func memoryWarning() { failedRevision = nil; painter = nil; do { painter = try MetalPainter() } catch { document?.errorMessage = error.localizedDescription } }
     func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
         !(gestureRecognizer is UITapGestureRecognizer) && !(otherGestureRecognizer is UITapGestureRecognizer)
+    }
+    func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+        // Navigation and history gestures must never cancel a live Pencil stroke.
+        activeTouch?.type != .pencil
     }
 }
 
